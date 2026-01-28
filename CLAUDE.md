@@ -48,6 +48,7 @@ Use the following tech stack:
 ## File Structure
 
 ```
+public/               # Static assets to be served
 src/
 |-- app/              # Next.js app router
 |-- components/       # Reusable UI components
