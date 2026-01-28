@@ -1,0 +1,112 @@
+interface ExchangeRates {
+  base: string;
+  rates: { [currency: string]: number };
+  timestamp: number;
+}
+
+let cachedRates: ExchangeRates | null = null;
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+export const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'BTC'] as const;
+export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
+
+export async function getExchangeRates(): Promise<ExchangeRates> {
+  if (cachedRates && Date.now() - cachedRates.timestamp < CACHE_TTL) {
+    return cachedRates;
+  }
+
+  try {
+    // Fetch USD-based rates from exchangerate-api (free tier)
+    const response = await fetch(
+      'https://api.exchangerate-api.com/v4/latest/USD',
+      { next: { revalidate: 3600 } }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Exchange rate API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Get BTC price to add BTC as a currency option
+    const btcResponse = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+      { next: { revalidate: 300 } }
+    );
+
+    let btcRate = 0;
+    if (btcResponse.ok) {
+      const btcData = await btcResponse.json();
+      const btcPriceInUsd = btcData.bitcoin?.usd || 0;
+      if (btcPriceInUsd > 0) {
+        btcRate = 1 / btcPriceInUsd; // How many BTC per 1 USD
+      }
+    }
+
+    cachedRates = {
+      base: 'USD',
+      rates: {
+        USD: 1,
+        EUR: data.rates.EUR || 0.92,
+        BTC: btcRate,
+      },
+      timestamp: Date.now(),
+    };
+
+    return cachedRates;
+  } catch (error) {
+    console.error('Error fetching exchange rates:', error);
+    // Return fallback rates
+    return {
+      base: 'USD',
+      rates: {
+        USD: 1,
+        EUR: 0.92,
+        BTC: 0.000024, // Approximate fallback
+      },
+      timestamp: Date.now(),
+    };
+  }
+}
+
+export async function convertCurrency(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string
+): Promise<number> {
+  if (fromCurrency === toCurrency) return amount;
+
+  const rates = await getExchangeRates();
+
+  // Convert to USD first, then to target currency
+  let amountInUsd = amount;
+  if (fromCurrency !== 'USD') {
+    const fromRate = rates.rates[fromCurrency];
+    if (fromRate && fromRate > 0) {
+      amountInUsd = amount / fromRate;
+    }
+  }
+
+  const toRate = rates.rates[toCurrency];
+  if (toRate && toRate > 0) {
+    return amountInUsd * toRate;
+  }
+
+  return amountInUsd;
+}
+
+export function formatCurrency(
+  amount: number,
+  currency: SupportedCurrency
+): string {
+  if (currency === 'BTC') {
+    return `₿${amount.toFixed(8)}`;
+  }
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
