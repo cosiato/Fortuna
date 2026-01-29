@@ -24,8 +24,6 @@ Use the following tech stack:
 
 ### 2. Code Style
 
-- No emojis in code, comments, or documentation
-- Immutability always - never mutate objects or arrays
 - No console.log in production code
 - Proper error handling with try/catch
 - Input validation with Zod or similar
@@ -48,13 +46,43 @@ Use the following tech stack:
 ## File Structure
 
 ```
-public/               # Static assets to be served
+public/                           # Static assets to be served
 src/
-|-- app/              # Next.js app router
-|-- components/       # Reusable UI components
-|-- hooks/            # Custom React hooks
-|-- lib/              # Utility libraries
-|-- types/            # TypeScript definitions
+|-- app/                          # Next.js app router
+|   |-- fonts/                    # Custom fonts (Geist)
+|   |-- api/                      # API routes
+|   |   |-- assets/               # Asset CRUD endpoints
+|   |   |   |-- route.ts          # GET/POST /api/assets
+|   |   |   |-- [id]/route.ts     # PUT/DELETE /api/assets/:id
+|   |   |-- exchange-rates/       # Currency exchange rates
+|   |   |-- prices/               # Asset price fetching
+|   |   |-- snapshots/            # Portfolio snapshots
+|   |-- assets/                   # Assets management page
+|   |-- page.tsx                  # Dashboard home page
+|   |-- layout.tsx                # Root layout
+|   |-- globals.css               # Global styles
+|-- components/                   # Reusable UI components
+|   |-- ui/                       # Shadcn UI primitives
+|   |   |-- badge.tsx
+|   |   |-- button.tsx
+|   |   |-- card.tsx
+|   |   |-- dialog.tsx
+|   |   |-- input.tsx
+|   |   |-- label.tsx
+|   |   |-- select.tsx
+|   |   |-- table.tsx
+|   |-- AssetForm.tsx             # Form for adding/editing assets
+|   |-- AssetList.tsx             # Table of user assets
+|   |-- CurrencySelector.tsx      # Currency picker dropdown
+|   |-- NetWorthChart.tsx         # Net worth over time chart
+|   |-- PortfolioBreakdown.tsx    # Portfolio allocation view
+|-- hooks/                        # Custom React hooks
+|-- lib/                          # Utility libraries
+|   |-- currency.ts               # Currency formatting utilities
+|   |-- db.ts                     # Database connection (SQLite)
+|   |-- prices.ts                 # Price fetching logic
+|   |-- utils.ts                  # General utilities (cn helper)
+|-- types/                        # TypeScript definitions
 ```
 
 ## Key Patterns
@@ -92,9 +120,23 @@ API_KEY=
 DEBUG=false
 ```
 
-## Git Workflow
+## Design System
 
-- Conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`
-- Never commit to main directly
-- PRs require review
-- All tests must pass before merge
+Theme: Elegant, Roman-inspired, modern fintech
+
+Colors (use Tailwind classes, not raw hex):
+
+- primary: deep night blue
+- accent: antique gold (use sparingly)
+- background: off-white marble
+- success/destructive: for gains/losses
+
+Typography:
+
+- Headings: Playfair Display (serif)
+- Body/UI: Inter
+
+Style:
+
+- Border radius: 8px cards, 6px buttons
+- Soft shadows, minimal gold accents
