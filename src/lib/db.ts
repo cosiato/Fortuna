@@ -1,180 +1,141 @@
-import Database from 'better-sqlite3';
+import { PrismaClient, Asset, Snapshot } from '@/generated/prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
 const dbPath = path.join(process.cwd(), 'data', 'fortuna.db');
 
-let db: Database.Database | null = null;
-
-export function getDb(): Database.Database {
-  if (!db) {
-    const dataDir = path.dirname(dbPath);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
-    initTables(db);
+function createPrismaClient(): PrismaClient {
+  const dataDir = path.dirname(dbPath);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
   }
-  return db;
+
+  const adapter = new PrismaBetterSqlite3({ url: dbPath });
+  return new PrismaClient({ adapter });
 }
 
-function initTables(db: Database.Database) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS assets (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL CHECK (type IN ('stock', 'crypto', 'real_estate', 'cash', 'other')),
-      symbol TEXT,
-      quantity REAL NOT NULL DEFAULT 0,
-      manual_price REAL,
-      currency TEXT NOT NULL DEFAULT 'USD',
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-    CREATE TABLE IF NOT EXISTS snapshots (
-      id TEXT PRIMARY KEY,
-      total_value REAL NOT NULL,
-      currency TEXT NOT NULL DEFAULT 'USD',
-      recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-    CREATE INDEX IF NOT EXISTS idx_assets_type ON assets(type);
-    CREATE INDEX IF NOT EXISTS idx_snapshots_recorded_at ON snapshots(recorded_at);
-  `);
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
-export interface Asset {
-  id: string;
+export type { Asset, Snapshot };
+
+export type AssetType = 'stock' | 'crypto' | 'real_estate' | 'cash' | 'other';
+
+export interface CreateAssetInput {
   name: string;
-  type: 'stock' | 'crypto' | 'real_estate' | 'cash' | 'other';
-  symbol: string | null;
-  quantity: number;
-  manual_price: number | null;
-  currency: string;
-  created_at: string;
-  updated_at: string;
+  type: AssetType;
+  symbol?: string | null;
+  quantity?: number;
+  manualPrice?: number | null;
+  currency?: string;
 }
 
-export interface Snapshot {
-  id: string;
-  total_value: number;
-  currency: string;
-  recorded_at: string;
+export interface UpdateAssetInput {
+  name?: string;
+  type?: AssetType;
+  symbol?: string | null;
+  quantity?: number;
+  manualPrice?: number | null;
+  currency?: string;
 }
 
-export function getAllAssets(): Asset[] {
-  const db = getDb();
-  return db.prepare('SELECT * FROM assets ORDER BY created_at DESC').all() as Asset[];
+export async function getAllAssets(): Promise<Asset[]> {
+  return prisma.asset.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
 }
 
-export function getAssetById(id: string): Asset | undefined {
-  const db = getDb();
-  return db.prepare('SELECT * FROM assets WHERE id = ?').get(id) as Asset | undefined;
+export async function getAssetById(id: string): Promise<Asset | null> {
+  return prisma.asset.findUnique({
+    where: { id },
+  });
 }
 
-export function createAsset(asset: Omit<Asset, 'created_at' | 'updated_at'>): Asset {
-  const db = getDb();
-  const now = new Date().toISOString();
-  const stmt = db.prepare(`
-    INSERT INTO assets (id, name, type, symbol, quantity, manual_price, currency, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  stmt.run(
-    asset.id,
-    asset.name,
-    asset.type,
-    asset.symbol,
-    asset.quantity,
-    asset.manual_price,
-    asset.currency,
-    now,
-    now
-  );
-  return getAssetById(asset.id)!;
+export async function createAsset(input: CreateAssetInput): Promise<Asset> {
+  return prisma.asset.create({
+    data: {
+      name: input.name,
+      type: input.type,
+      symbol: input.symbol ?? null,
+      quantity: input.quantity ?? 0,
+      manualPrice: input.manualPrice ?? null,
+      currency: input.currency ?? 'USD',
+    },
+  });
 }
 
-export function updateAsset(id: string, updates: Partial<Omit<Asset, 'id' | 'created_at'>>): Asset | undefined {
-  const db = getDb();
-  const existing = getAssetById(id);
-  if (!existing) return undefined;
-
-  const fields: string[] = [];
-  const values: (string | number | null)[] = [];
-
-  if (updates.name !== undefined) {
-    fields.push('name = ?');
-    values.push(updates.name);
-  }
-  if (updates.type !== undefined) {
-    fields.push('type = ?');
-    values.push(updates.type);
-  }
-  if (updates.symbol !== undefined) {
-    fields.push('symbol = ?');
-    values.push(updates.symbol);
-  }
-  if (updates.quantity !== undefined) {
-    fields.push('quantity = ?');
-    values.push(updates.quantity);
-  }
-  if (updates.manual_price !== undefined) {
-    fields.push('manual_price = ?');
-    values.push(updates.manual_price);
-  }
-  if (updates.currency !== undefined) {
-    fields.push('currency = ?');
-    values.push(updates.currency);
+export async function updateAsset(
+  id: string,
+  updates: UpdateAssetInput
+): Promise<Asset | null> {
+  const existing = await getAssetById(id);
+  if (!existing) {
+    return null;
   }
 
-  if (fields.length === 0) return existing;
-
-  fields.push('updated_at = ?');
-  values.push(new Date().toISOString());
-  values.push(id);
-
-  const stmt = db.prepare(`UPDATE assets SET ${fields.join(', ')} WHERE id = ?`);
-  stmt.run(...values);
-
-  return getAssetById(id);
+  return prisma.asset.update({
+    where: { id },
+    data: updates,
+  });
 }
 
-export function deleteAsset(id: string): boolean {
-  const db = getDb();
-  const result = db.prepare('DELETE FROM assets WHERE id = ?').run(id);
-  return result.changes > 0;
+export async function deleteAsset(id: string): Promise<boolean> {
+  try {
+    await prisma.asset.delete({
+      where: { id },
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-export function getAllSnapshots(): Snapshot[] {
-  const db = getDb();
-  return db.prepare('SELECT * FROM snapshots ORDER BY recorded_at ASC').all() as Snapshot[];
+export async function getAllSnapshots(): Promise<Snapshot[]> {
+  return prisma.snapshot.findMany({
+    orderBy: { recordedAt: 'asc' },
+  });
 }
 
-export function createSnapshot(snapshot: Omit<Snapshot, 'recorded_at'>): Snapshot {
-  const db = getDb();
-  const now = new Date().toISOString();
-  const stmt = db.prepare(`
-    INSERT INTO snapshots (id, total_value, currency, recorded_at)
-    VALUES (?, ?, ?, ?)
-  `);
-  stmt.run(snapshot.id, snapshot.total_value, snapshot.currency, now);
-  return db.prepare('SELECT * FROM snapshots WHERE id = ?').get(snapshot.id) as Snapshot;
+export async function createSnapshot(input: {
+  totalValue: number;
+  currency?: string;
+}): Promise<Snapshot> {
+  return prisma.snapshot.create({
+    data: {
+      totalValue: input.totalValue,
+      currency: input.currency ?? 'USD',
+    },
+  });
 }
 
-export function getLatestSnapshot(): Snapshot | undefined {
-  const db = getDb();
-  return db.prepare('SELECT * FROM snapshots ORDER BY recorded_at DESC LIMIT 1').get() as Snapshot | undefined;
+export async function getLatestSnapshot(): Promise<Snapshot | null> {
+  return prisma.snapshot.findFirst({
+    orderBy: { recordedAt: 'desc' },
+  });
 }
 
-export function getTodaySnapshot(): Snapshot | undefined {
-  const db = getDb();
-  const today = new Date().toISOString().split('T')[0];
-  return db.prepare(`
-    SELECT * FROM snapshots
-    WHERE date(recorded_at) = date(?)
-    ORDER BY recorded_at DESC
-    LIMIT 1
-  `).get(today) as Snapshot | undefined;
+export async function getTodaySnapshot(): Promise<Snapshot | null> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  return prisma.snapshot.findFirst({
+    where: {
+      recordedAt: {
+        gte: today,
+        lt: tomorrow,
+      },
+    },
+    orderBy: { recordedAt: 'desc' },
+  });
 }
