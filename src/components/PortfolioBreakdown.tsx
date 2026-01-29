@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { Asset } from '@/lib/db';
 import { PriceResult } from '@/lib/prices';
 import { SupportedCurrency, formatCurrency } from '@/lib/currency';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface PortfolioBreakdownProps {
   assets: Asset[];
@@ -25,8 +26,8 @@ function getAssetValue(
   asset: Asset,
   prices: { [symbol: string]: PriceResult }
 ): { value: number; currency: string } {
-  if (asset.manual_price !== null) {
-    return { value: asset.manual_price * asset.quantity, currency: asset.currency };
+  if (asset.manualPrice !== null) {
+    return { value: asset.manualPrice * asset.quantity, currency: asset.currency };
   }
 
   const priceKey = asset.symbol?.toLowerCase() || '';
@@ -92,42 +93,46 @@ export default function PortfolioBreakdown({
 
   if (data.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-xl p-8 text-center h-64 flex items-center justify-center">
-        <p className="text-gray-400">Add assets to see your portfolio breakdown.</p>
-      </div>
+      <Card className="h-64">
+        <CardContent className="h-full flex items-center justify-center p-8">
+          <p className="text-muted-foreground">Add assets to see your portfolio breakdown.</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={50}
-            outerRadius={80}
-            paddingAngle={2}
-            dataKey="value"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
-              borderRadius: '8px',
-            }}
-            formatter={(value) => formatCurrency(value as number, displayCurrency)}
-          />
-          <Legend
-            formatter={(value) => <span className="text-gray-300">{value}</span>}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="h-64">
+      <CardContent className="h-full p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={50}
+              outerRadius={80}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1F2937',
+                border: '1px solid #374151',
+                borderRadius: '8px',
+              }}
+              formatter={(value) => formatCurrency(value as number, displayCurrency)}
+            />
+            <Legend
+              formatter={(value) => <span className="text-gray-300">{value}</span>}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 }

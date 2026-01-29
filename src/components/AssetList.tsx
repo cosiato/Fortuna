@@ -3,6 +3,17 @@
 import { Asset } from '@/lib/db';
 import { PriceResult } from '@/lib/prices';
 import { SupportedCurrency, formatCurrency } from '@/lib/currency';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface AssetListProps {
   assets: Asset[];
@@ -17,8 +28,8 @@ function getAssetValue(
   asset: Asset,
   prices: { [symbol: string]: PriceResult }
 ): { value: number; currency: string } {
-  if (asset.manual_price !== null) {
-    return { value: asset.manual_price * asset.quantity, currency: asset.currency };
+  if (asset.manualPrice !== null) {
+    return { value: asset.manualPrice * asset.quantity, currency: asset.currency };
   }
 
   const priceKey = asset.symbol?.toLowerCase() || '';
@@ -64,11 +75,11 @@ const TYPE_LABELS: { [key: string]: string } = {
 };
 
 const TYPE_COLORS: { [key: string]: string } = {
-  stock: 'bg-blue-500',
-  crypto: 'bg-orange-500',
-  real_estate: 'bg-green-500',
-  cash: 'bg-yellow-500',
-  other: 'bg-gray-500',
+  stock: 'bg-blue-500 hover:bg-blue-500',
+  crypto: 'bg-orange-500 hover:bg-orange-500',
+  real_estate: 'bg-green-500 hover:bg-green-500',
+  cash: 'bg-yellow-500 hover:bg-yellow-500',
+  other: 'bg-gray-500 hover:bg-gray-500',
 };
 
 export default function AssetList({
@@ -81,78 +92,82 @@ export default function AssetList({
 }: AssetListProps) {
   if (assets.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-xl p-8 text-center">
-        <p className="text-gray-400">No assets yet. Add your first asset to get started!</p>
-      </div>
+      <Card>
+        <CardContent className="p-8 text-center">
+          <p className="text-muted-foreground">No assets yet. Add your first asset to get started!</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-gray-800">
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Asset</th>
-            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Type</th>
-            <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">Quantity</th>
-            <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">Price</th>
-            <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">Value</th>
-            <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+    <Card>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Asset</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead className="text-right">Quantity</TableHead>
+            <TableHead className="text-right">Price</TableHead>
+            <TableHead className="text-right">Value</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {assets.map((asset) => {
             const { value, currency } = getAssetValue(asset, prices);
             const displayValue = convertValue(value, currency, displayCurrency, exchangeRates);
             const priceKey = asset.symbol?.toLowerCase() || asset.symbol?.toUpperCase() || '';
             const priceData = prices[priceKey] || prices[asset.symbol?.toUpperCase() || ''];
-            const unitPrice = asset.manual_price || priceData?.price || 0;
+            const unitPrice = asset.manualPrice || priceData?.price || 0;
 
             return (
-              <tr key={asset.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                <td className="px-4 py-3">
+              <TableRow key={asset.id}>
+                <TableCell>
                   <div>
-                    <p className="font-medium text-white">{asset.name}</p>
+                    <p className="font-medium">{asset.name}</p>
                     {asset.symbol && (
-                      <p className="text-sm text-gray-400">{asset.symbol.toUpperCase()}</p>
+                      <p className="text-sm text-muted-foreground">{asset.symbol.toUpperCase()}</p>
                     )}
                   </div>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block px-2 py-1 rounded text-xs font-medium text-white ${TYPE_COLORS[asset.type]}`}
-                  >
+                </TableCell>
+                <TableCell>
+                  <Badge className={`${TYPE_COLORS[asset.type]} text-white border-0`}>
                     {TYPE_LABELS[asset.type]}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-white">
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
                   {asset.quantity.toLocaleString()}
-                </td>
-                <td className="px-4 py-3 text-right text-white">
+                </TableCell>
+                <TableCell className="text-right">
                   {unitPrice > 0 ? formatCurrency(unitPrice, 'USD') : '-'}
-                </td>
-                <td className="px-4 py-3 text-right font-medium text-white">
+                </TableCell>
+                <TableCell className="text-right font-medium">
                   {displayValue > 0 ? formatCurrency(displayValue, displayCurrency) : '-'}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => onEdit(asset)}
-                    className="text-blue-400 hover:text-blue-300 mr-3"
+                    className="text-blue-400 hover:text-blue-300"
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => onDelete(asset.id)}
                     className="text-red-400 hover:text-red-300"
                   >
                     Delete
-                  </button>
-                </td>
-              </tr>
+                  </Button>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </Card>
   );
 }

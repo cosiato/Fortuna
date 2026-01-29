@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
 import { getAllSnapshots, createSnapshot, getTodaySnapshot } from '@/lib/db';
 
 export async function GET() {
   try {
-    const snapshots = getAllSnapshots();
+    const snapshots = await getAllSnapshots();
     return NextResponse.json(snapshots);
   } catch (error) {
     console.error('Error fetching snapshots:', error);
@@ -18,17 +17,16 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { total_value, currency } = body;
+    const { totalValue, currency } = body;
 
-    if (total_value === undefined || total_value === null) {
+    if (totalValue === undefined || totalValue === null) {
       return NextResponse.json(
-        { error: 'total_value is required' },
+        { error: 'totalValue is required' },
         { status: 400 }
       );
     }
 
-    // Check if we already have a snapshot for today
-    const todaySnapshot = getTodaySnapshot();
+    const todaySnapshot = await getTodaySnapshot();
     if (todaySnapshot) {
       return NextResponse.json(
         { message: 'Snapshot already exists for today', snapshot: todaySnapshot },
@@ -36,9 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const snapshot = createSnapshot({
-      id: uuidv4(),
-      total_value,
+    const snapshot = await createSnapshot({
+      totalValue,
       currency: currency || 'USD',
     });
 

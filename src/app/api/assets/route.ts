@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-import { getAllAssets, createAsset } from '@/lib/db';
+import { getAllAssets, createAsset, AssetType } from '@/lib/db';
 
 export async function GET() {
   try {
-    const assets = getAllAssets();
+    const assets = await getAllAssets();
     return NextResponse.json(assets);
   } catch (error) {
     console.error('Error fetching assets:', error);
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name, type, symbol, quantity, manual_price, currency } = body;
+    const { name, type, symbol, quantity, manualPrice, currency } = body;
 
     if (!name || !type) {
       return NextResponse.json(
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validTypes = ['stock', 'crypto', 'real_estate', 'cash', 'other'];
+    const validTypes: AssetType[] = ['stock', 'crypto', 'real_estate', 'cash', 'other'];
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: 'Invalid asset type' },
@@ -36,13 +35,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const asset = createAsset({
-      id: uuidv4(),
+    const asset = await createAsset({
       name,
       type,
       symbol: symbol || null,
       quantity: quantity || 0,
-      manual_price: manual_price ?? null,
+      manualPrice: manualPrice ?? null,
       currency: currency || 'USD',
     });
 

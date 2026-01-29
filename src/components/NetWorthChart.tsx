@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { Snapshot } from '@/lib/db';
 import { SupportedCurrency, formatCurrency } from '@/lib/currency';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface NetWorthChartProps {
   snapshots: Snapshot[];
@@ -48,62 +49,66 @@ export default function NetWorthChart({
   exchangeRates,
 }: NetWorthChartProps) {
   const data = snapshots.map((snapshot) => ({
-    date: new Date(snapshot.recorded_at).toLocaleDateString('en-US', {
+    date: new Date(snapshot.recordedAt).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
     }),
-    value: convertValue(snapshot.total_value, snapshot.currency, displayCurrency, exchangeRates),
+    value: convertValue(snapshot.totalValue, snapshot.currency, displayCurrency, exchangeRates),
   }));
 
   if (data.length === 0) {
     return (
-      <div className="bg-gray-900 rounded-xl p-8 text-center h-64 flex items-center justify-center">
-        <p className="text-gray-400">No historical data yet. Snapshots are recorded daily.</p>
-      </div>
+      <Card className="h-64">
+        <CardContent className="h-full flex items-center justify-center p-8">
+          <p className="text-muted-foreground">No historical data yet. Snapshots are recorded daily.</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-          <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
-          <YAxis
-            stroke="#9CA3AF"
-            fontSize={12}
-            tickFormatter={(value) =>
-              displayCurrency === 'BTC'
-                ? `₿${value.toFixed(4)}`
-                : new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: displayCurrency,
-                    notation: 'compact',
-                  }).format(value)
-            }
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
-              borderRadius: '8px',
-            }}
-            labelStyle={{ color: '#9CA3AF' }}
-            formatter={(value) => [
-              formatCurrency(value as number, displayCurrency),
-              'Net Worth',
-            ]}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#3B82F6"
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 4, fill: '#3B82F6' }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="h-64">
+      <CardContent className="h-full p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
+            <YAxis
+              stroke="#9CA3AF"
+              fontSize={12}
+              tickFormatter={(value) =>
+                displayCurrency === 'BTC'
+                  ? `B${value.toFixed(4)}`
+                  : new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: displayCurrency,
+                      notation: 'compact',
+                    }).format(value)
+              }
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1F2937',
+                border: '1px solid #374151',
+                borderRadius: '8px',
+              }}
+              labelStyle={{ color: '#9CA3AF' }}
+              formatter={(value) => [
+                formatCurrency(value as number, displayCurrency),
+                'Net Worth',
+              ]}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, fill: '#3B82F6' }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 }

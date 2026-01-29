@@ -8,6 +8,7 @@ import AssetForm from '@/components/AssetForm';
 import { Asset } from '@/lib/db';
 import { PriceResult } from '@/lib/prices';
 import { SupportedCurrency } from '@/lib/currency';
+import { Button } from '@/components/ui/button';
 
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -47,7 +48,6 @@ export default function AssetsPage() {
       setAssets(assetsData);
       setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, BTC: 0.000024 });
 
-      // Fetch prices for tradeable assets
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === 'stock' || a.type === 'crypto') && a.symbol
       );
@@ -153,29 +153,26 @@ export default function AssetsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 px-6 py-4">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-gray-400 hover:text-white transition-colors">
-              ← Back
+            <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+              Back
             </Link>
-            <h1 className="text-2xl font-bold text-white">Assets</h1>
+            <h1 className="text-2xl font-bold">Assets</h1>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors"
-            >
+            <Button onClick={() => setShowForm(true)}>
               Add Asset
-            </button>
+            </Button>
             <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
           </div>
         </div>
@@ -192,20 +189,18 @@ export default function AssetsPage() {
         />
       </main>
 
-      {showForm && (
-        <AssetForm
-          onSubmit={handleAddAsset}
-          onClose={() => setShowForm(false)}
-        />
-      )}
+      <AssetForm
+        open={showForm}
+        onOpenChange={setShowForm}
+        onSubmit={handleAddAsset}
+      />
 
-      {editingAsset && (
-        <AssetForm
-          asset={editingAsset}
-          onSubmit={handleEditAsset}
-          onClose={() => setEditingAsset(null)}
-        />
-      )}
+      <AssetForm
+        asset={editingAsset}
+        open={!!editingAsset}
+        onOpenChange={(open) => !open && setEditingAsset(null)}
+        onSubmit={handleEditAsset}
+      />
     </div>
   );
 }

@@ -8,6 +8,8 @@ import PortfolioBreakdown from '@/components/PortfolioBreakdown';
 import { Asset, Snapshot } from '@/lib/db';
 import { PriceResult } from '@/lib/prices';
 import { SupportedCurrency, formatCurrency } from '@/lib/currency';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -49,7 +51,6 @@ export default function Dashboard() {
       setSnapshots(snapshotsData);
       setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, BTC: 0.000024 });
 
-      // Fetch prices for tradeable assets
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === 'stock' || a.type === 'crypto') && a.symbol
       );
@@ -101,7 +102,6 @@ export default function Dashboard() {
     fetchData();
   }, [fetchData]);
 
-  // Calculate total net worth
   const calculateNetWorth = () => {
     let totalInUsd = 0;
 
@@ -109,8 +109,8 @@ export default function Dashboard() {
       let value = 0;
       let currency = asset.currency;
 
-      if (asset.manual_price !== null) {
-        value = asset.manual_price * asset.quantity;
+      if (asset.manualPrice !== null) {
+        value = asset.manualPrice * asset.quantity;
       } else if (asset.symbol) {
         const priceKey = asset.symbol.toLowerCase();
         const priceData = prices[priceKey] || prices[asset.symbol.toUpperCase()];
@@ -120,7 +120,6 @@ export default function Dashboard() {
         }
       }
 
-      // Convert to USD
       if (currency !== 'USD' && exchangeRates[currency]) {
         value = value / exchangeRates[currency];
       }
@@ -128,7 +127,6 @@ export default function Dashboard() {
       totalInUsd += value;
     }
 
-    // Convert to display currency
     if (displayCurrency !== 'USD' && exchangeRates[displayCurrency]) {
       return totalInUsd * exchangeRates[displayCurrency];
     }
@@ -138,7 +136,6 @@ export default function Dashboard() {
 
   const netWorth = calculateNetWorth();
 
-  // Record daily snapshot
   useEffect(() => {
     if (!loading && assets.length > 0) {
       const recordSnapshot = async () => {
@@ -147,7 +144,7 @@ export default function Dashboard() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              total_value: netWorth,
+              totalValue: netWorth,
               currency: 'USD',
             }),
           });
@@ -162,21 +159,21 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="border-b border-gray-800 px-6 py-4">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">Fortuna</h1>
+          <h1 className="text-2xl font-bold">Fortuna</h1>
           <div className="flex items-center gap-4">
             <Link
               href="/assets"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Manage Assets
             </Link>
@@ -186,21 +183,21 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Net Worth Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 mb-8">
-          <p className="text-blue-100 text-sm font-medium mb-1">Total Net Worth</p>
-          <p className="text-4xl font-bold text-white">
-            {formatCurrency(netWorth, displayCurrency)}
-          </p>
-          <p className="text-blue-100 text-sm mt-2">
-            {assets.length} asset{assets.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+        <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 mb-8">
+          <CardContent className="p-6">
+            <p className="text-blue-100 text-sm font-medium mb-1">Total Net Worth</p>
+            <p className="text-4xl font-bold text-white">
+              {formatCurrency(netWorth, displayCurrency)}
+            </p>
+            <p className="text-blue-100 text-sm mt-2">
+              {assets.length} asset{assets.length !== 1 ? 's' : ''}
+            </p>
+          </CardContent>
+        </Card>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div>
-            <h2 className="text-lg font-semibold text-white mb-4">Net Worth Over Time</h2>
+            <h2 className="text-lg font-semibold mb-4">Net Worth Over Time</h2>
             <NetWorthChart
               snapshots={snapshots}
               displayCurrency={displayCurrency}
@@ -208,7 +205,7 @@ export default function Dashboard() {
             />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-white mb-4">Portfolio Breakdown</h2>
+            <h2 className="text-lg font-semibold mb-4">Portfolio Breakdown</h2>
             <PortfolioBreakdown
               assets={assets}
               prices={prices}
@@ -218,16 +215,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex gap-4">
-          <Link
-            href="/assets"
-            className="flex-1 bg-gray-900 hover:bg-gray-800 text-white rounded-xl p-4 text-center transition-colors"
-          >
-            <p className="font-medium">View All Assets</p>
-            <p className="text-sm text-gray-400 mt-1">Manage your portfolio</p>
+        <Button asChild variant="secondary" className="w-full">
+          <Link href="/assets">
+            <div className="text-center py-2">
+              <p className="font-medium">View All Assets</p>
+              <p className="text-sm text-muted-foreground mt-1">Manage your portfolio</p>
+            </div>
           </Link>
-        </div>
+        </Button>
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAssetById, updateAsset, deleteAsset } from '@/lib/db';
+import { getAssetById, updateAsset, deleteAsset, AssetType } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const asset = getAssetById(id);
+    const asset = await getAssetById(id);
 
     if (!asset) {
       return NextResponse.json(
@@ -34,10 +34,10 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const { name, type, symbol, quantity, manual_price, currency } = body;
+    const { name, type, symbol, quantity, manualPrice, currency } = body;
 
     if (type) {
-      const validTypes = ['stock', 'crypto', 'real_estate', 'cash', 'other'];
+      const validTypes: AssetType[] = ['stock', 'crypto', 'real_estate', 'cash', 'other'];
       if (!validTypes.includes(type)) {
         return NextResponse.json(
           { error: 'Invalid asset type' },
@@ -46,12 +46,12 @@ export async function PUT(
       }
     }
 
-    const updated = updateAsset(id, {
+    const updated = await updateAsset(id, {
       name,
       type,
       symbol,
       quantity,
-      manual_price,
+      manualPrice,
       currency,
     });
 
@@ -78,7 +78,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const deleted = deleteAsset(id);
+    const deleted = await deleteAsset(id);
 
     if (!deleted) {
       return NextResponse.json(
