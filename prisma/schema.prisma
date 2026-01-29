@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Asset {
+  id          String   @id @default(uuid())
+  name        String
+  type        String   // stock, crypto, real_estate, cash, other
+  symbol      String?
+  quantity    Float    @default(0)
+  manualPrice Float?   @map("manual_price")
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([type])
+  @@map("assets")
+}
+
+model Snapshot {
+  id         String   @id @default(uuid())
+  totalValue Float    @map("total_value")
+  currency   String   @default("USD")
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  @@index([recordedAt])
+  @@map("snapshots")
+}
