@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["var(--font-playfair)", "Playfair Display", "serif"],
+        serif: ["var(--font-cinzel)", "Cinzel", "serif"],
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
       },
       colors: {
@@ -40,6 +40,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        "accent-secondary": {
+          DEFAULT: "hsl(var(--accent-secondary))",
+          foreground: "hsl(var(--accent-secondary-foreground))",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -60,13 +64,16 @@ const config: Config = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "12px",
+        md: "8px",
+        sm: "4px",
       },
       boxShadow: {
         soft: "0 2px 8px rgba(26, 31, 61, 0.08)",
-        card: "0 4px 12px rgba(26, 31, 61, 0.06)",
+        card: "0 4px 12px rgba(15, 15, 26, 0.3)",
+        "glow-gold": "0 0 20px rgba(255, 215, 0, 0.3)",
+        "glow-purple": "0 0 20px rgba(168, 85, 247, 0.3)",
+        "glow-success": "0 0 15px rgba(34, 197, 94, 0.3)",
       },
       keyframes: {
         "accordion-down": {
@@ -77,10 +84,16 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        glow: {
+          "0%": { boxShadow: "0 0 5px rgba(255, 215, 0, 0.2)" },
+          "100%": { boxShadow: "0 0 20px rgba(255, 215, 0, 0.4)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        glow: "glow 2s ease-in-out infinite alternate",
       },
     },
   },

@@ -71,7 +71,7 @@ export default function NetWorthChart({
       <CardContent className="h-full p-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2D2D3D" />
             <XAxis dataKey="date" stroke="#6B7280" fontSize={12} />
             <YAxis
               stroke="#6B7280"
@@ -88,10 +88,10 @@ export default function NetWorthChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E5E7EB',
+                backgroundColor: '#1E1E2E',
+                border: '1px solid #2D2D3D',
                 borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(26, 31, 61, 0.06)',
+                boxShadow: '0 4px 12px rgba(15, 15, 26, 0.3)',
               }}
               labelStyle={{ color: '#6B7280' }}
               formatter={(value) => [
@@ -102,10 +102,10 @@ export default function NetWorthChart({
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#C9A227"
+              stroke="#FFD700"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: '#C9A227' }}
+              activeDot={{ r: 4, fill: '#FFD700' }}
             />
           </LineChart>
         </ResponsiveContainer>

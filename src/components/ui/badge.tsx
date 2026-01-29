@@ -18,7 +18,15 @@ const badgeVariants = cva(
           "border-transparent bg-success text-success-foreground hover:bg-success/80",
         accent:
           "border-transparent bg-accent text-accent-foreground hover:bg-accent/80",
+        "accent-secondary":
+          "border-transparent bg-accent-secondary text-accent-secondary-foreground hover:bg-accent-secondary/80",
         outline: "text-foreground",
+        legendary:
+          "border-transparent bg-accent text-accent-foreground hover:bg-accent/80 shadow-glow-gold/50",
+        epic:
+          "border-transparent bg-accent-secondary text-accent-secondary-foreground hover:bg-accent-secondary/80 shadow-glow-purple/50",
+        rare:
+          "border-transparent bg-success text-success-foreground hover:bg-success/80 shadow-glow-success/50",
       },
     },
     defaultVariants: {

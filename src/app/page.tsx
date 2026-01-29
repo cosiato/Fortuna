@@ -166,14 +166,15 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4">
+    <div className="min-h-screen bg-background relative">
+      <div className="absolute inset-0 bg-vignette pointer-events-none" />
+      <header className="border-b border-border px-6 py-4 relative">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Fortuna</h1>
+          <h1 className="text-2xl font-bold text-accent">Fortuna</h1>
           <div className="flex items-center gap-4">
             <Link
               href="/assets"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-accent transition-colors"
             >
               Manage Assets
             </Link>
@@ -182,22 +183,22 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <Card className="bg-primary border-0 mb-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 relative">
+        <Card className="gradient-border bg-primary mb-8 hover:shadow-glow-gold/30">
           <CardContent className="p-6">
-            <p className="text-primary-foreground/70 text-sm font-medium mb-1">Total Net Worth</p>
-            <p className="text-4xl font-bold text-accent font-serif">
+            <p className="text-muted-foreground text-sm font-medium mb-1">Power Level</p>
+            <p className="text-4xl font-bold text-accent font-serif animate-pulse-slow">
               {formatCurrency(netWorth, displayCurrency)}
             </p>
-            <p className="text-primary-foreground/70 text-sm mt-2">
-              {assets.length} asset{assets.length !== 1 ? 's' : ''}
+            <p className="text-muted-foreground text-sm mt-2">
+              {assets.length} asset{assets.length !== 1 ? 's' : ''} in inventory
             </p>
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div>
-            <h2 className="text-lg font-semibold mb-4">Net Worth Over Time</h2>
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Net Worth Over Time</h2>
             <NetWorthChart
               snapshots={snapshots}
               displayCurrency={displayCurrency}
@@ -205,7 +206,7 @@ export default function Dashboard() {
             />
           </div>
           <div>
-            <h2 className="text-lg font-semibold mb-4">Portfolio Breakdown</h2>
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Portfolio Breakdown</h2>
             <PortfolioBreakdown
               assets={assets}
               prices={prices}
@@ -215,11 +216,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <Button asChild variant="secondary" className="w-full">
+        <Button asChild variant="secondary" className="w-full hover:border-accent">
           <Link href="/assets">
             <div className="text-center py-2">
-              <p className="font-medium">View All Assets</p>
-              <p className="text-sm text-muted-foreground mt-1">Manage your portfolio</p>
+              <p className="font-medium">View Inventory</p>
+              <p className="text-sm text-muted-foreground mt-1">Manage your assets</p>
             </div>
           </Link>
         </Button>

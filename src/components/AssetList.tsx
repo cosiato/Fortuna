@@ -75,8 +75,8 @@ const TYPE_LABELS: { [key: string]: string } = {
 };
 
 const TYPE_COLORS: { [key: string]: string } = {
-  stock: 'bg-primary hover:bg-primary/90',
-  crypto: 'bg-accent hover:bg-accent/90',
+  stock: 'bg-accent hover:bg-accent/90',
+  crypto: 'bg-accent-secondary hover:bg-accent-secondary/90',
   real_estate: 'bg-success hover:bg-success/90',
   cash: 'bg-muted hover:bg-muted/90',
   other: 'bg-secondary hover:bg-secondary/90',

@@ -1,6 +1,7 @@
 ## Project Overview
 
-We are building an offline weath management tracker.
+We are building Fortuna, an offline personal wealth management app with a gamified, RPG-inspired visual identity. Think "Hades meets fintech" — dark, atmospheric, with progression systems.
+
 Use the following tech stack:
 
 - Next.js 16
@@ -120,23 +121,32 @@ API_KEY=
 DEBUG=false
 ```
 
-## Design System
+## General Style
 
-Theme: Elegant, Roman-inspired, modern fintech
+- Dark theme by default
+- Border radius: 12px for cards, 8px for buttons (slightly rounder, more game-like)
+- Cards should have subtle gradient borders or glow effects on hover
+- Use gold sparingly but impactfully: progress bars, key metrics, CTAs
+- Progress bars should look chunky and segmented (like XP bars)
+- Add subtle animations: pulse on positive numbers, glow on achievements
+- Consider adding a slight vignette or gradient overlay on the main background
 
-Colors (use Tailwind classes, not raw hex):
+## Gamification Concepts to Keep in Mind
 
-- primary: deep night blue
-- accent: antique gold (use sparingly)
-- background: off-white marble
-- success/destructive: for gains/losses
+- Net worth = Power Level
+- Assets = Inventory
+- Savings goals = Quests
+- Milestones = Achievements
+- The UI should feel rewarding and progression-oriented
 
-Typography:
+## Gamification Mapping
 
-- Headings: Playfair Display (serif)
-- Body/UI: Inter
-
-Style:
-
-- Border radius: 8px cards, 6px buttons
-- Soft shadows, minimal gold accents
+| Finance Concept      | Game Equivalent        |
+| -------------------- | ---------------------- |
+| Net worth            | Power Level / Total XP |
+| Assets               | Inventory items        |
+| Savings goals        | Quests                 |
+| Monthly budget       | Daily challenges       |
+| Reaching a milestone | Achievement unlocked   |
+| Portfolio diversity  | Skill tree             |
+| Income streams       | Passive buffs          |

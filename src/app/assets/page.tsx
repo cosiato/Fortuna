@@ -160,14 +160,15 @@ export default function AssetsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4">
+    <div className="min-h-screen bg-background relative">
+      <div className="absolute inset-0 bg-vignette pointer-events-none" />
+      <header className="border-b border-border px-6 py-4 relative">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/" className="text-muted-foreground hover:text-accent transition-colors">
               Back
             </Link>
-            <h1 className="text-2xl font-bold">Assets</h1>
+            <h1 className="text-2xl font-bold text-accent">Inventory</h1>
           </div>
           <div className="flex items-center gap-4">
             <Button onClick={() => setShowForm(true)}>
@@ -178,7 +179,7 @@ export default function AssetsPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 relative">
         <AssetList
           assets={assets}
           prices={prices}
