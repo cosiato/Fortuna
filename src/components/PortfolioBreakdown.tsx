@@ -13,7 +13,7 @@ interface PortfolioBreakdownProps {
   displayCurrency: SupportedCurrency;
 }
 
-const COLORS = ['#3B82F6', '#F97316', '#22C55E', '#EAB308', '#6B7280'];
+const COLORS = ['#1A1F3D', '#C9A227', '#2D6A4F', '#8B2635', '#6B7280'];
 const TYPE_LABELS: { [key: string]: string } = {
   stock: 'Stocks',
   crypto: 'Crypto',
@@ -121,14 +121,15 @@ export default function PortfolioBreakdown({
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E5E7EB',
                 borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(26, 31, 61, 0.06)',
               }}
               formatter={(value) => formatCurrency(value as number, displayCurrency)}
             />
             <Legend
-              formatter={(value) => <span className="text-gray-300">{value}</span>}
+              formatter={(value) => <span className="text-foreground">{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

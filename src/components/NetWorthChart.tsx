@@ -71,10 +71,10 @@ export default function NetWorthChart({
       <CardContent className="h-full p-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <XAxis dataKey="date" stroke="#6B7280" fontSize={12} />
             <YAxis
-              stroke="#9CA3AF"
+              stroke="#6B7280"
               fontSize={12}
               tickFormatter={(value) =>
                 displayCurrency === 'BTC'
@@ -88,11 +88,12 @@ export default function NetWorthChart({
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E5E7EB',
                 borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(26, 31, 61, 0.06)',
               }}
-              labelStyle={{ color: '#9CA3AF' }}
+              labelStyle={{ color: '#6B7280' }}
               formatter={(value) => [
                 formatCurrency(value as number, displayCurrency),
                 'Net Worth',
@@ -101,10 +102,10 @@ export default function NetWorthChart({
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#3B82F6"
+              stroke="#C9A227"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: '#3B82F6' }}
+              activeDot={{ r: 4, fill: '#C9A227' }}
             />
           </LineChart>
         </ResponsiveContainer>

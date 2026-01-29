@@ -183,13 +183,13 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 mb-8">
+        <Card className="bg-primary border-0 mb-8">
           <CardContent className="p-6">
-            <p className="text-blue-100 text-sm font-medium mb-1">Total Net Worth</p>
-            <p className="text-4xl font-bold text-white">
+            <p className="text-primary-foreground/70 text-sm font-medium mb-1">Total Net Worth</p>
+            <p className="text-4xl font-bold text-accent font-serif">
               {formatCurrency(netWorth, displayCurrency)}
             </p>
-            <p className="text-blue-100 text-sm mt-2">
+            <p className="text-primary-foreground/70 text-sm mt-2">
               {assets.length} asset{assets.length !== 1 ? 's' : ''}
             </p>
           </CardContent>

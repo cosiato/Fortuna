@@ -75,11 +75,11 @@ const TYPE_LABELS: { [key: string]: string } = {
 };
 
 const TYPE_COLORS: { [key: string]: string } = {
-  stock: 'bg-blue-500 hover:bg-blue-500',
-  crypto: 'bg-orange-500 hover:bg-orange-500',
-  real_estate: 'bg-green-500 hover:bg-green-500',
-  cash: 'bg-yellow-500 hover:bg-yellow-500',
-  other: 'bg-gray-500 hover:bg-gray-500',
+  stock: 'bg-primary hover:bg-primary/90',
+  crypto: 'bg-accent hover:bg-accent/90',
+  real_estate: 'bg-success hover:bg-success/90',
+  cash: 'bg-muted hover:bg-muted/90',
+  other: 'bg-secondary hover:bg-secondary/90',
 };
 
 export default function AssetList({
@@ -132,7 +132,7 @@ export default function AssetList({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={`${TYPE_COLORS[asset.type]} text-white border-0`}>
+                  <Badge className={`${TYPE_COLORS[asset.type]} text-primary-foreground border-0`}>
                     {TYPE_LABELS[asset.type]}
                   </Badge>
                 </TableCell>
@@ -150,7 +150,7 @@ export default function AssetList({
                     variant="ghost"
                     size="sm"
                     onClick={() => onEdit(asset)}
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-accent hover:text-accent/80"
                   >
                     Edit
                   </Button>
@@ -158,7 +158,7 @@ export default function AssetList({
                     variant="ghost"
                     size="sm"
                     onClick={() => onDelete(asset.id)}
-                    className="text-red-400 hover:text-red-300"
+                    className="text-destructive hover:text-destructive/80"
                   >
                     Delete
                   </Button>
