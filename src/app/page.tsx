@@ -289,10 +289,18 @@ export default function Dashboard() {
                     {Object.entries(assetsByType).map(([type, typeAssets]) => (
                       <AccordionItem key={type} value={type} className="border-border">
                         <AccordionTrigger className="hover:no-underline hover:text-accent">
-                          <span className="flex items-center gap-2">
-                            {ASSET_TYPE_LABELS[type] || type}
-                            <span className="text-xs text-muted-foreground">
-                              ({typeAssets.length})
+                          <span className="flex items-center justify-between w-full pr-2">
+                            <span className="flex items-center gap-2">
+                              {ASSET_TYPE_LABELS[type] || type}
+                              <span className="text-xs text-muted-foreground">
+                                ({typeAssets.length})
+                              </span>
+                            </span>
+                            <span className="text-sm font-medium text-accent">
+                              {formatCurrency(
+                                typeAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0),
+                                displayCurrency
+                              )}
                             </span>
                           </span>
                         </AccordionTrigger>
