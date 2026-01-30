@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { Icon } from "@iconify/react"
 import { Asset } from "@/lib/db"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
@@ -86,20 +87,7 @@ export default function AssetTile({
                   onClick={() => onEdit(asset)}
                   className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                    <path d="m15 5 4 4" />
-                  </svg>
+                  <Icon icon="solar:pen-bold" width={10} height={10} />
                 </Button>
               )}
               {onDelete && (
@@ -109,21 +97,7 @@ export default function AssetTile({
                   onClick={handleDeleteClick}
                   className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
+                  <Icon icon="solar:trash-bin-trash-bold" width={10} height={10} />
                 </Button>
               )}
             </div>
