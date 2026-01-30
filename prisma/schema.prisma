@@ -34,3 +34,17 @@ model Snapshot {
   @@index([recordedAt])
   @@map("snapshots")
 }
+
+model Account {
+  id          String   @id @default(uuid())
+  name        String
+  accountType String   @map("account_type") // 'personal' | 'business'
+  balance     Float    @default(0)
+  currency    String   @default("USD")
+  countryCode String   @map("country_code") // ISO 3166-1 alpha-2
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([accountType])
+  @@map("accounts")
+}
