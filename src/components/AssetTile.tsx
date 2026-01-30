@@ -142,7 +142,7 @@ export default function AssetTile({
                   Qty
                 </span>
                 <div className="flex items-center">
-                  {onQuantityChange && (
+                  {onQuantityChange && asset.type !== "crypto" && (
                     <div className="w-0 group-hover:w-5 overflow-hidden transition-all duration-200">
                       <Button
                         variant="ghost"
@@ -156,9 +156,11 @@ export default function AssetTile({
                     </div>
                   )}
                   <span className="text-sm font-medium text-foreground">
-                    {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    {asset.quantity.toLocaleString(undefined, {
+                      maximumFractionDigits: asset.type === "crypto" ? 4 : 2,
+                    })}
                   </span>
-                  {onQuantityChange && (
+                  {onQuantityChange && asset.type !== "crypto" && (
                     <div className="w-0 group-hover:w-5 overflow-hidden transition-all duration-200">
                       <Button
                         variant="ghost"
