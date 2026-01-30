@@ -423,15 +423,6 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 relative">
-        <EntitySelector
-          entities={entities}
-          selectedEntityId={selectedEntityId}
-          onSelect={setSelectedEntityId}
-          onAddCompany={() => setEntityFormOpen(true)}
-          entityTotals={entityTotals}
-          displayCurrency={displayCurrency}
-        />
-
         <Card className="gradient-border bg-primary mb-8 hover:shadow-glow-gold/30">
           <CardContent className="p-6 lg:grid lg:grid-cols-2 gap-8">
             <div>
@@ -452,6 +443,15 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <EntitySelector
+          entities={entities}
+          selectedEntityId={selectedEntityId}
+          onSelect={setSelectedEntityId}
+          onAddCompany={() => setEntityFormOpen(true)}
+          entityTotals={entityTotals}
+          displayCurrency={displayCurrency}
+        />
 
         <div className="space-y-6 mb-8">
           <div className="rounded-xl bg-slate-800/40 border border-slate-800/50 p-5">
@@ -501,7 +501,12 @@ export default function Dashboard() {
                         )}
                         <div className="relative flex items-center gap-1.5">
                           <span className="text-current">{category.icon}</span>
-                          <span className="font-medium text-xs">{category.label}</span>
+                          <span className="font-medium text-xs">
+                            {category.label}
+                            {hasAssets && (
+                              <span className="ml-1 text-muted-foreground">({categoryAssets.length})</span>
+                            )}
+                          </span>
                         </div>
                         {hasAssets && (
                           <span className="relative text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
