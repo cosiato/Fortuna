@@ -1,18 +1,18 @@
-'use client';
+"use client"
 
-import { Icon } from '@iconify/react';
-import { Entity } from '@/lib/db';
-import { SupportedCurrency, formatCurrency } from '@/lib/currency';
-import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { Icon } from "@iconify/react"
+import { Entity } from "@/lib/db"
+import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 
 interface EntitySelectorProps {
-  entities: Entity[];
-  selectedEntityId: number;
-  onSelect: (entityId: number) => void;
-  onAddCompany: () => void;
-  entityTotals: Record<number, number>;
-  displayCurrency: SupportedCurrency;
+  entities: Entity[]
+  selectedEntityId: number
+  onSelect: (entityId: number) => void
+  onAddCompany: () => void
+  entityTotals: Record<number, number>
+  displayCurrency: SupportedCurrency
 }
 
 export default function EntitySelector({
@@ -26,8 +26,8 @@ export default function EntitySelector({
   return (
     <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
       {entities.map((entity) => {
-        const isSelected = entity.id === selectedEntityId;
-        const total = entityTotals[entity.id] ?? 0;
+        const isSelected = entity.id === selectedEntityId
+        const total = entityTotals[entity.id] ?? 0
 
         return (
           <button
@@ -36,18 +36,19 @@ export default function EntitySelector({
             className={`
               relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
               transition-colors duration-200 ease-out min-w-[120px]
-              ${isSelected
-                ? 'text-accent'
-                : 'text-muted-foreground hover:text-foreground hover:bg-slate-700/20'
+              ${
+                isSelected
+                  ? "text-accent"
+                  : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
               }
             `}
           >
             {isSelected && (
               <motion.div
                 layoutId="activeEntityBackground"
-                className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/30"
+                className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
                 transition={{
-                  type: 'spring',
+                  type: "spring",
                   stiffness: 400,
                   damping: 30,
                 }}
@@ -55,17 +56,19 @@ export default function EntitySelector({
             )}
             <div className="relative flex items-center gap-2">
               <Icon
-                icon={entity.type === 'individual' ? 'solar:user-linear' : 'solar:buildings-linear'}
+                icon={entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"}
                 width={16}
                 height={16}
               />
               <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
             </div>
-            <span className={`relative text-xs ${isSelected ? 'text-accent/80' : 'text-muted-foreground'}`}>
+            <span
+              className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+            >
               {formatCurrency(total, displayCurrency)}
             </span>
           </button>
-        );
+        )
       })}
 
       <Button
@@ -78,5 +81,5 @@ export default function EntitySelector({
         <span className="text-xs">Add Company</span>
       </Button>
     </div>
-  );
+  )
 }
