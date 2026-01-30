@@ -1,0 +1,102 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Entity } from '@/lib/db';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+interface EntityFormProps {
+  entity?: Entity | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: { name: string }) => void;
+  onDelete?: (id: number) => void;
+}
+
+export default function EntityForm({
+  entity,
+  open,
+  onOpenChange,
+  onSubmit,
+  onDelete,
+}: EntityFormProps) {
+  const [name, setName] = useState(entity?.name ?? '');
+
+  useEffect(() => {
+    if (entity) {
+      setName(entity.name ?? '');
+    } else {
+      setName('');
+    }
+  }, [entity, open]);
+
+  const isEditing = !!entity;
+  const isIndividual = entity?.type === 'individual';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({ name: name.trim() });
+  };
+
+  const handleDelete = () => {
+    if (entity && onDelete && !isIndividual) {
+      onDelete(entity.id);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isEditing ? 'Edit Entity' : 'Add New Company'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={isEditing ? '' : 'e.g., Acme Corp, My LLC'}
+              required
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            {isEditing && !isIndividual && onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                className="flex-1"
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1">
+              {isEditing ? 'Update' : 'Add Company'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

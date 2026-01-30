@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAccountById, updateAccount, deleteAccount, AccountType } from '@/lib/db';
+import { getAccountById, updateAccount, deleteAccount } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
@@ -34,17 +34,7 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    const { name, accountType, balance, currency, countryCode } = body;
-
-    if (accountType) {
-      const validTypes: AccountType[] = ['personal', 'business'];
-      if (!validTypes.includes(accountType)) {
-        return NextResponse.json(
-          { error: 'Invalid account type. Must be "personal" or "business"' },
-          { status: 400 }
-        );
-      }
-    }
+    const { name, balance, currency, countryCode } = body;
 
     if (countryCode !== undefined) {
       if (typeof countryCode !== 'string' || countryCode.length !== 2) {
@@ -57,7 +47,6 @@ export async function PUT(
 
     const updated = await updateAccount(id, {
       name,
-      accountType,
       balance,
       currency,
       countryCode: countryCode?.toUpperCase(),

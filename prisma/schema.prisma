@@ -8,7 +8,18 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:../data/fortuna.db"
+}
+
+model Entity {
+  id        Int       @id @default(autoincrement())
+  name      String
+  type      String    // 'individual' | 'company'
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  accounts  Account[]
+  assets    Asset[]
+
+  @@map("entities")
 }
 
 model Asset {
@@ -19,10 +30,13 @@ model Asset {
   quantity    Float    @default(0)
   manualPrice Float?   @map("manual_price")
   currency    String   @default("USD")
+  entityId    Int      @default(0) @map("entity_id")
+  entity      Entity   @relation(fields: [entityId], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([type])
+  @@index([entityId])
   @@map("assets")
 }
 
@@ -39,13 +53,14 @@ model Snapshot {
 model Account {
   id          String   @id @default(uuid())
   name        String
-  accountType String   @map("account_type") // 'personal' | 'business'
   balance     Float    @default(0)
   currency    String   @default("USD")
   countryCode String   @map("country_code") // ISO 3166-1 alpha-2
+  entityId    Int      @default(0) @map("entity_id")
+  entity      Entity   @relation(fields: [entityId], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@index([accountType])
+  @@index([entityId])
   @@map("accounts")
 }

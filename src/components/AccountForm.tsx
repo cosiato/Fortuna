@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Account, AccountType } from '@/lib/db';
+import { Account } from '@/lib/db';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,6 @@ interface AccountFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: Partial<Account>) => void;
-  defaultType: AccountType;
 }
 
 export default function AccountForm({
@@ -34,7 +33,6 @@ export default function AccountForm({
   open,
   onOpenChange,
   onSubmit,
-  defaultType,
 }: AccountFormProps) {
   const [name, setName] = useState(account?.name ?? '');
   const [balance, setBalance] = useState(account?.balance?.toString() ?? '');
@@ -56,13 +54,11 @@ export default function AccountForm({
   }, [account, open]);
 
   const isEditing = !!account;
-  const typeLabel = defaultType === 'personal' ? 'Vault' : 'Factory';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
       name,
-      accountType: defaultType,
       balance: parseFloat(balance) || 0,
       currency,
       countryCode,
@@ -74,7 +70,7 @@ export default function AccountForm({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? `Edit ${typeLabel}` : `Add New ${typeLabel}`}
+            {isEditing ? 'Edit Vault' : 'Add New Vault'}
           </DialogTitle>
         </DialogHeader>
 
@@ -85,7 +81,7 @@ export default function AccountForm({
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={`e.g., ${defaultType === 'personal' ? 'Main Savings, Emergency Fund' : 'Company Treasury, Revenue Account'}`}
+              placeholder="e.g., Main Savings, Emergency Fund"
               required
             />
           </div>
@@ -143,7 +139,7 @@ export default function AccountForm({
               Cancel
             </Button>
             <Button type="submit" className="flex-1" disabled={!countryCode}>
-              {isEditing ? 'Update' : `Add ${typeLabel}`}
+              {isEditing ? 'Update' : 'Add Vault'}
             </Button>
           </div>
         </form>

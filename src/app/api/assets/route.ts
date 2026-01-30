@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllAssets, createAsset, AssetType } from '@/lib/db';
+import { getAllAssets, createAsset, AssetType, prisma } from '@/lib/db';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const entityIdParam = searchParams.get('entityId');
+
+    if (entityIdParam !== null) {
+      const entityId = parseInt(entityIdParam, 10);
+      if (isNaN(entityId)) {
+        return NextResponse.json(
+          { error: 'Invalid entityId parameter' },
+          { status: 400 }
+        );
+      }
+      const assets = await prisma.asset.findMany({
+        where: { entityId },
+        orderBy: { createdAt: 'desc' },
+      });
+      return NextResponse.json(assets);
+    }
+
     const assets = await getAllAssets();
     return NextResponse.json(assets);
   } catch (error) {
@@ -18,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name, type, symbol, quantity, manualPrice, currency } = body;
+    const { name, type, symbol, quantity, manualPrice, currency, entityId } = body;
 
     if (!name || !type) {
       return NextResponse.json(
@@ -42,6 +60,7 @@ export async function POST(request: NextRequest) {
       quantity: quantity || 0,
       manualPrice: manualPrice ?? null,
       currency: currency || 'USD',
+      entityId: entityId ?? 0,
     });
 
     return NextResponse.json(asset, { status: 201 });

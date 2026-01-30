@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllAccounts, createAccount, AccountType } from '@/lib/db';
+import { getAllAccounts, createAccount, prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') as AccountType | null;
+    const entityIdParam = searchParams.get('entityId');
 
-    const validTypes: AccountType[] = ['personal', 'business'];
-    const accountType = type && validTypes.includes(type) ? type : undefined;
+    if (entityIdParam !== null) {
+      const entityId = parseInt(entityIdParam, 10);
+      if (isNaN(entityId)) {
+        return NextResponse.json(
+          { error: 'Invalid entityId parameter' },
+          { status: 400 }
+        );
+      }
+      const accounts = await prisma.account.findMany({
+        where: { entityId },
+        orderBy: { createdAt: 'desc' },
+      });
+      return NextResponse.json(accounts);
+    }
 
-    const accounts = await getAllAccounts(accountType);
+    const accounts = await getAllAccounts();
     return NextResponse.json(accounts);
   } catch (error) {
     console.error('Error fetching accounts:', error);
@@ -24,19 +36,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { name, accountType, balance, currency, countryCode } = body;
+    const { name, balance, currency, countryCode, entityId } = body;
 
-    if (!name || !accountType || !countryCode) {
+    if (!name || !countryCode) {
       return NextResponse.json(
-        { error: 'Name, accountType, and countryCode are required' },
-        { status: 400 }
-      );
-    }
-
-    const validTypes: AccountType[] = ['personal', 'business'];
-    if (!validTypes.includes(accountType)) {
-      return NextResponse.json(
-        { error: 'Invalid account type. Must be "personal" or "business"' },
+        { error: 'Name and countryCode are required' },
         { status: 400 }
       );
     }
@@ -50,10 +54,10 @@ export async function POST(request: NextRequest) {
 
     const account = await createAccount({
       name,
-      accountType,
       balance: balance ?? 0,
       currency: currency || 'USD',
       countryCode: countryCode.toUpperCase(),
+      entityId: entityId ?? 0,
     });
 
     return NextResponse.json(account, { status: 201 });

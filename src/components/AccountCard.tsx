@@ -12,8 +12,6 @@ interface AccountCardProps {
 }
 
 export default function AccountCard({ account, displayCurrency, exchangeRates }: AccountCardProps) {
-  const isVault = account.accountType === "personal"
-
   const getDisplayValue = (): number => {
     let valueInUsd = account.balance
 
@@ -43,7 +41,7 @@ export default function AccountCard({ account, displayCurrency, exchangeRates }:
               <p className="text-xs text-muted-foreground">{countryName}</p>
             </div>
           </div>
-          <p className={`text-sm font-semibold ${isVault ? "text-accent" : "text-purple-400"}`}>
+          <p className="text-sm font-semibold text-accent">
             {formatCurrency(displayValue, displayCurrency)}
           </p>
         </div>

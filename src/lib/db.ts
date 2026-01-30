@@ -1,4 +1,4 @@
-import { PrismaClient, Asset, Snapshot, Account } from '@/generated/prisma/client';
+import { PrismaClient, Asset, Snapshot, Account, Entity } from '@/generated/prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import path from 'path';
 import fs from 'fs';
@@ -25,7 +25,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-export type { Asset, Snapshot, Account };
+export type { Asset, Snapshot, Account, Entity };
 
 export type AssetType = 'stock' | 'crypto' | 'real_estate' | 'cash' | 'other';
 
@@ -36,6 +36,7 @@ export interface CreateAssetInput {
   quantity?: number;
   manualPrice?: number | null;
   currency?: string;
+  entityId?: number;
 }
 
 export interface UpdateAssetInput {
@@ -45,6 +46,7 @@ export interface UpdateAssetInput {
   quantity?: number;
   manualPrice?: number | null;
   currency?: string;
+  entityId?: number;
 }
 
 export async function getAllAssets(): Promise<Asset[]> {
@@ -68,6 +70,7 @@ export async function createAsset(input: CreateAssetInput): Promise<Asset> {
       quantity: input.quantity ?? 0,
       manualPrice: input.manualPrice ?? null,
       currency: input.currency ?? 'USD',
+      entityId: input.entityId ?? 0,
     },
   });
 }
@@ -140,28 +143,24 @@ export async function getTodaySnapshot(): Promise<Snapshot | null> {
   });
 }
 
-export type AccountType = 'personal' | 'business';
-
 export interface CreateAccountInput {
   name: string;
-  accountType: AccountType;
   balance?: number;
   currency?: string;
   countryCode: string;
+  entityId?: number;
 }
 
 export interface UpdateAccountInput {
   name?: string;
-  accountType?: AccountType;
   balance?: number;
   currency?: string;
   countryCode?: string;
+  entityId?: number;
 }
 
-export async function getAllAccounts(type?: AccountType): Promise<Account[]> {
-  const where = type ? { accountType: type } : {};
+export async function getAllAccounts(): Promise<Account[]> {
   return prisma.account.findMany({
-    where,
     orderBy: { createdAt: 'desc' },
   });
 }
@@ -176,10 +175,10 @@ export async function createAccount(input: CreateAccountInput): Promise<Account>
   return prisma.account.create({
     data: {
       name: input.name,
-      accountType: input.accountType,
       balance: input.balance ?? 0,
       currency: input.currency ?? 'USD',
       countryCode: input.countryCode,
+      entityId: input.entityId ?? 0,
     },
   });
 }
@@ -208,4 +207,87 @@ export async function deleteAccount(id: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export type EntityType = 'individual' | 'company';
+
+export interface CreateEntityInput {
+  name: string;
+  type: EntityType;
+}
+
+export interface UpdateEntityInput {
+  name?: string;
+  type?: EntityType;
+}
+
+export async function getAllEntities(): Promise<Entity[]> {
+  return prisma.entity.findMany({
+    orderBy: { id: 'asc' },
+  });
+}
+
+export async function getEntityById(id: number): Promise<Entity | null> {
+  return prisma.entity.findUnique({
+    where: { id },
+  });
+}
+
+export async function createEntity(input: CreateEntityInput): Promise<Entity> {
+  return prisma.entity.create({
+    data: {
+      name: input.name,
+      type: input.type,
+    },
+  });
+}
+
+export async function updateEntity(
+  id: number,
+  updates: UpdateEntityInput
+): Promise<Entity | null> {
+  const existing = await getEntityById(id);
+  if (!existing) {
+    return null;
+  }
+
+  if (id === 0 && updates.type && updates.type !== 'individual') {
+    throw new Error('Cannot change type of individual entity');
+  }
+
+  return prisma.entity.update({
+    where: { id },
+    data: updates,
+  });
+}
+
+export async function deleteEntity(id: number): Promise<boolean> {
+  if (id === 0) {
+    throw new Error('Cannot delete individual entity');
+  }
+
+  try {
+    await prisma.entity.delete({
+      where: { id },
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function ensureIndividualEntity(): Promise<Entity> {
+  const existing = await prisma.entity.findFirst({
+    where: { id: 0 },
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  await prisma.$executeRawUnsafe(
+    `INSERT OR REPLACE INTO entities (id, name, type, created_at, updated_at) VALUES (0, 'Individual', 'individual', datetime('now'), datetime('now'))`
+  );
+
+  return prisma.entity.findUniqueOrThrow({ where: { id: 0 } });
 }

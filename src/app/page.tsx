@@ -7,19 +7,23 @@ import NetWorthChart from "@/components/NetWorthChart"
 import AssetForm from "@/components/AssetForm"
 import AccountForm from "@/components/AccountForm"
 import AccountCard from "@/components/AccountCard"
-import { Asset, Snapshot, Account } from "@/lib/db"
+import { Asset, Snapshot, Account, Entity } from "@/lib/db"
 import { PriceResult } from "@/lib/prices"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
+import EntitySelector from "@/components/EntitySelector"
+import EntityForm from "@/components/EntityForm"
 import { motion } from "framer-motion"
 
 export default function Dashboard() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+  const [entities, setEntities] = useState<Entity[]>([])
+  const [selectedEntityId, setSelectedEntityId] = useState<number>(0)
   const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({})
   const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>({
     USD: 1,
@@ -36,8 +40,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [assetFormOpen, setAssetFormOpen] = useState(false)
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
-  const [personalFormOpen, setPersonalFormOpen] = useState(false)
-  const [businessFormOpen, setBusinessFormOpen] = useState(false)
+  const [accountFormOpen, setAccountFormOpen] = useState(false)
+  const [entityFormOpen, setEntityFormOpen] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
@@ -56,7 +60,7 @@ export default function Dashboard() {
       const response = await fetch("/api/assets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, entityId: selectedEntityId }),
       })
       if (response.ok) {
         setAssetFormOpen(false)
@@ -132,11 +136,10 @@ export default function Dashboard() {
       const response = await fetch("/api/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, entityId: selectedEntityId }),
       })
       if (response.ok) {
-        setPersonalFormOpen(false)
-        setBusinessFormOpen(false)
+        setAccountFormOpen(false)
         fetchData()
       }
     } catch (error) {
@@ -144,23 +147,42 @@ export default function Dashboard() {
     }
   }
 
+  const handleAddCompany = async (data: { name: string }) => {
+    try {
+      const response = await fetch("/api/entities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (response.ok) {
+        setEntityFormOpen(false)
+        fetchData()
+      }
+    } catch (error) {
+      console.error("Error creating entity:", error)
+    }
+  }
+
   const fetchData = useCallback(async () => {
     try {
-      const [assetsRes, snapshotsRes, ratesRes, accountsRes] = await Promise.all([
+      const [assetsRes, snapshotsRes, ratesRes, accountsRes, entitiesRes] = await Promise.all([
         fetch("/api/assets"),
         fetch("/api/snapshots"),
         fetch("/api/exchange-rates"),
         fetch("/api/accounts"),
+        fetch("/api/entities"),
       ])
 
       const assetsData = await assetsRes.json()
       const snapshotsData = await snapshotsRes.json()
       const ratesData = await ratesRes.json()
       const accountsData = await accountsRes.json()
+      const entitiesData = await entitiesRes.json()
 
       setAssets(Array.isArray(assetsData) ? assetsData : [])
       setSnapshots(Array.isArray(snapshotsData) ? snapshotsData : [])
       setAccounts(Array.isArray(accountsData) ? accountsData : [])
+      setEntities(Array.isArray(entitiesData) ? entitiesData : [])
       setExchangeRates(
         ratesData.rates || {
           USD: 1,
@@ -287,8 +309,11 @@ export default function Dashboard() {
     },
   ]
 
+  const filteredAssets = assets.filter((asset) => asset.entityId === selectedEntityId)
+  const filteredAccounts = accounts.filter((account) => account.entityId === selectedEntityId)
+
   const assetsByType = ASSET_CATEGORIES.reduce<Record<string, Asset[]>>((acc, category) => {
-    acc[category.key] = assets.filter((asset) => asset.type === category.key)
+    acc[category.key] = filteredAssets.filter((asset) => asset.type === category.key)
     return acc
   }, {})
 
@@ -334,6 +359,28 @@ export default function Dashboard() {
     return value
   }
 
+  const getAccountValue = (account: Account): number => {
+    let value = account.balance
+    if (account.currency !== "USD" && exchangeRates[account.currency]) {
+      value = value / exchangeRates[account.currency]
+    }
+    if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
+      return value * exchangeRates[displayCurrency]
+    }
+    return value
+  }
+
+  const entityTotals = entities.reduce<Record<number, number>>((acc, entity) => {
+    const entityAssets = assets.filter((a) => a.entityId === entity.id)
+    const entityAccounts = accounts.filter((a) => a.entityId === entity.id)
+
+    const assetsTotal = entityAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
+    const accountsTotal = entityAccounts.reduce((sum, account) => sum + getAccountValue(account), 0)
+
+    acc[entity.id] = assetsTotal + accountsTotal
+    return acc
+  }, {})
+
   useEffect(() => {
     if (!loading && assets.length > 0) {
       const recordSnapshot = async () => {
@@ -376,6 +423,15 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 relative">
+        <EntitySelector
+          entities={entities}
+          selectedEntityId={selectedEntityId}
+          onSelect={setSelectedEntityId}
+          onAddCompany={() => setEntityFormOpen(true)}
+          entityTotals={entityTotals}
+          displayCurrency={displayCurrency}
+        />
+
         <Card className="gradient-border bg-primary mb-8 hover:shadow-glow-gold/30">
           <CardContent className="p-6 lg:grid lg:grid-cols-2 gap-8">
             <div>
@@ -397,176 +453,135 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="space-y-8 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Assets</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                  onClick={() => setAssetFormOpen(true)}
-                >
-                  <span className="text-xl leading-none">+</span>
-                </Button>
-              </div>
-              {assets.length === 0 ? (
+        <div className="space-y-6 mb-8">
+          <div className="rounded-xl bg-slate-800/40 border border-slate-800/50 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Assets</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                onClick={() => setAssetFormOpen(true)}
+              >
+                <span className="text-xl leading-none">+</span>
+              </Button>
+            </div>
+            {filteredAssets.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
+                  {ASSET_CATEGORIES.map((category) => {
+                    const categoryAssets = assetsByType[category.key]
+                    const hasAssets = categoryAssets.length > 0
+                    const categoryTotal = getCategoryTotal(category.key)
+                    const isActive = activeTab === category.key
+
+                    return (
+                      <TabsTrigger
+                        key={category.key}
+                        value={category.key}
+                        disabled={!hasAssets}
+                        className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md transition-colors duration-200 ease-out hover:bg-slate-700/20 data-[state=active]:hover:bg-transparent data-[state=active]:text-accent disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeTabBackground"
+                            className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-md shadow-sm"
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 30,
+                            }}
+                          />
+                        )}
+                        <div className="relative flex items-center gap-1.5">
+                          <span className="text-current">{category.icon}</span>
+                          <span className="font-medium text-xs">{category.label}</span>
+                        </div>
+                        {hasAssets && (
+                          <span className="relative text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
+                            {formatCurrency(categoryTotal, displayCurrency)}
+                          </span>
+                        )}
+                      </TabsTrigger>
+                    )
+                  })}
+                </TabsList>
+
+                {ASSET_CATEGORIES.map((category) => {
+                  const categoryAssets = assetsByType[category.key]
+
+                  return (
+                    <TabsContent key={category.key} value={category.key} className="mt-0">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                      >
+                        {categoryAssets.length === 0 ? (
+                          <div className="text-center py-12 text-muted-foreground">
+                            No {category.label.toLowerCase()} assets yet.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            {categoryAssets.map((asset) => (
+                              <AssetTile
+                                key={asset.id}
+                                asset={asset}
+                                displayValue={getAssetValue(asset)}
+                                displayCurrency={displayCurrency}
+                                categoryStyle={CATEGORY_STYLES[category.key]}
+                                onEdit={handleEditAsset}
+                                onDelete={handleDeleteAsset}
+                                onQuantityChange={handleQuantityChange}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    </TabsContent>
+                  )
+                })}
+              </Tabs>
+            )}
+          </div>
+
+          <div className="rounded-xl bg-amber-950/20 border border-amber-900/30 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                onClick={() => setAccountFormOpen(true)}
+              >
+                <span className="text-xl leading-none">+</span>
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {filteredAccounts.length === 0 ? (
                 <Card>
-                  <CardContent className="p-8 text-center">
-                    <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+                  <CardContent className="p-4">
+                    <p className="text-muted-foreground text-sm text-center py-4">
+                      No vaults yet. Click + to add one.
+                    </p>
                   </CardContent>
                 </Card>
               ) : (
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
-                    {ASSET_CATEGORIES.map((category) => {
-                      const categoryAssets = assetsByType[category.key]
-                      const hasAssets = categoryAssets.length > 0
-                      const categoryTotal = getCategoryTotal(category.key)
-                      const isActive = activeTab === category.key
-
-                      return (
-                        <TabsTrigger
-                          key={category.key}
-                          value={category.key}
-                          disabled={!hasAssets}
-                          className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md transition-colors duration-200 ease-out hover:bg-slate-700/20 data-[state=active]:hover:bg-transparent data-[state=active]:text-accent disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                        >
-                          {isActive && (
-                            <motion.div
-                              layoutId="activeTabBackground"
-                              className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-md shadow-sm"
-                              transition={{
-                                type: "spring",
-                                stiffness: 400,
-                                damping: 30,
-                              }}
-                            />
-                          )}
-                          <div className="relative flex items-center gap-1.5">
-                            <span className="text-current">{category.icon}</span>
-                            <span className="font-medium text-xs">{category.label}</span>
-                          </div>
-                          {hasAssets && (
-                            <span className="relative text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
-                              {formatCurrency(categoryTotal, displayCurrency)}
-                            </span>
-                          )}
-                        </TabsTrigger>
-                      )
-                    })}
-                  </TabsList>
-
-                  {ASSET_CATEGORIES.map((category) => {
-                    const categoryAssets = assetsByType[category.key]
-
-                    return (
-                      <TabsContent key={category.key} value={category.key} className="mt-0">
-                        <motion.div
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
-                        >
-                          {categoryAssets.length === 0 ? (
-                            <div className="text-center py-12 text-muted-foreground">
-                              No {category.label.toLowerCase()} assets yet.
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                              {categoryAssets.map((asset) => (
-                                <AssetTile
-                                  key={asset.id}
-                                  asset={asset}
-                                  displayValue={getAssetValue(asset)}
-                                  displayCurrency={displayCurrency}
-                                  categoryStyle={CATEGORY_STYLES[category.key]}
-                                  onEdit={handleEditAsset}
-                                  onDelete={handleDeleteAsset}
-                                  onQuantityChange={handleQuantityChange}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </motion.div>
-                      </TabsContent>
-                    )
-                  })}
-                </Tabs>
+                filteredAccounts.map((account) => (
+                  <AccountCard
+                    key={account.id}
+                    account={account}
+                    displayCurrency={displayCurrency}
+                    exchangeRates={exchangeRates}
+                  />
+                ))
               )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                  onClick={() => setPersonalFormOpen(true)}
-                >
-                  <span className="text-xl leading-none">+</span>
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {accounts.filter((a) => a.accountType === "personal").length === 0 ? (
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-muted-foreground text-sm text-center py-4">
-                        No vaults yet. Click + to add one.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  accounts
-                    .filter((a) => a.accountType === "personal")
-                    .map((account) => (
-                      <AccountCard
-                        key={account.id}
-                        account={account}
-                        displayCurrency={displayCurrency}
-                        exchangeRates={exchangeRates}
-                      />
-                    ))
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Factories</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-purple-400 hover:text-purple-400/80 hover:bg-purple-400/10"
-                  onClick={() => setBusinessFormOpen(true)}
-                >
-                  <span className="text-xl leading-none">+</span>
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {accounts.filter((a) => a.accountType === "business").length === 0 ? (
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-muted-foreground text-sm text-center py-4">
-                        No factories yet. Click + to add one.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  accounts
-                    .filter((a) => a.accountType === "business")
-                    .map((account) => (
-                      <AccountCard
-                        key={account.id}
-                        account={account}
-                        displayCurrency={displayCurrency}
-                        exchangeRates={exchangeRates}
-                      />
-                    ))
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -579,17 +594,15 @@ export default function Dashboard() {
         />
 
         <AccountForm
-          open={personalFormOpen}
-          onOpenChange={setPersonalFormOpen}
+          open={accountFormOpen}
+          onOpenChange={setAccountFormOpen}
           onSubmit={handleAddAccount}
-          defaultType="personal"
         />
 
-        <AccountForm
-          open={businessFormOpen}
-          onOpenChange={setBusinessFormOpen}
-          onSubmit={handleAddAccount}
-          defaultType="business"
+        <EntityForm
+          open={entityFormOpen}
+          onOpenChange={setEntityFormOpen}
+          onSubmit={handleAddCompany}
         />
       </main>
     </div>
