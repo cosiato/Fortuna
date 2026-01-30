@@ -5,7 +5,9 @@ import Link from "next/link"
 import CurrencySelector from "@/components/CurrencySelector"
 import NetWorthChart from "@/components/NetWorthChart"
 import AssetForm from "@/components/AssetForm"
-import { Asset, Snapshot } from "@/lib/db"
+import AccountForm from "@/components/AccountForm"
+import AccountCard from "@/components/AccountCard"
+import { Asset, Snapshot, Account } from "@/lib/db"
 import { PriceResult } from "@/lib/prices"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,6 +21,7 @@ import {
 
 export default function Dashboard() {
   const [assets, setAssets] = useState<Asset[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({})
   const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>({
@@ -29,6 +32,8 @@ export default function Dashboard() {
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [loading, setLoading] = useState(true)
   const [assetFormOpen, setAssetFormOpen] = useState(false)
+  const [personalFormOpen, setPersonalFormOpen] = useState(false)
+  const [businessFormOpen, setBusinessFormOpen] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
@@ -58,20 +63,40 @@ export default function Dashboard() {
     }
   }
 
+  const handleAddAccount = async (data: Partial<Account>) => {
+    try {
+      const response = await fetch("/api/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (response.ok) {
+        setPersonalFormOpen(false)
+        setBusinessFormOpen(false)
+        fetchData()
+      }
+    } catch (error) {
+      console.error("Error creating account:", error)
+    }
+  }
+
   const fetchData = useCallback(async () => {
     try {
-      const [assetsRes, snapshotsRes, ratesRes] = await Promise.all([
+      const [assetsRes, snapshotsRes, ratesRes, accountsRes] = await Promise.all([
         fetch("/api/assets"),
         fetch("/api/snapshots"),
         fetch("/api/exchange-rates"),
+        fetch("/api/accounts"),
       ])
 
       const assetsData = await assetsRes.json()
       const snapshotsData = await snapshotsRes.json()
       const ratesData = await ratesRes.json()
+      const accountsData = await accountsRes.json()
 
-      setAssets(assetsData)
-      setSnapshots(snapshotsData)
+      setAssets(Array.isArray(assetsData) ? assetsData : [])
+      setSnapshots(Array.isArray(snapshotsData) ? snapshotsData : [])
+      setAccounts(Array.isArray(accountsData) ? accountsData : [])
       setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, BTC: 0.000024 })
 
       const tradeableAssets = assetsData.filter(
@@ -143,6 +168,14 @@ export default function Dashboard() {
         value = value / exchangeRates[currency]
       }
 
+      totalInUsd += value
+    }
+
+    for (const account of accounts) {
+      let value = account.balance
+      if (account.currency !== "USD" && exchangeRates[account.currency]) {
+        value = value / exchangeRates[account.currency]
+      }
       totalInUsd += value
     }
 
@@ -332,16 +365,74 @@ export default function Dashboard() {
             </Card>
           </div>
           <div>
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Personal Accounts</h2>
-            <Card className="h-40">
-              <CardContent>Personal Account 1</CardContent>
-            </Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                onClick={() => setPersonalFormOpen(true)}
+              >
+                <span className="text-xl leading-none">+</span>
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {accounts.filter((a) => a.accountType === "personal").length === 0 ? (
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-muted-foreground text-sm text-center py-4">
+                      No vaults yet. Click + to add one.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                accounts
+                  .filter((a) => a.accountType === "personal")
+                  .map((account) => (
+                    <AccountCard
+                      key={account.id}
+                      account={account}
+                      displayCurrency={displayCurrency}
+                      exchangeRates={exchangeRates}
+                    />
+                  ))
+              )}
+            </div>
           </div>
           <div>
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Business Accounts</h2>
-            <Card className="h-40">
-              <CardContent>business account 1</CardContent>
-            </Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Factories</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 text-purple-400 hover:text-purple-400/80 hover:bg-purple-400/10"
+                onClick={() => setBusinessFormOpen(true)}
+              >
+                <span className="text-xl leading-none">+</span>
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {accounts.filter((a) => a.accountType === "business").length === 0 ? (
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-muted-foreground text-sm text-center py-4">
+                      No factories yet. Click + to add one.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                accounts
+                  .filter((a) => a.accountType === "business")
+                  .map((account) => (
+                    <AccountCard
+                      key={account.id}
+                      account={account}
+                      displayCurrency={displayCurrency}
+                      exchangeRates={exchangeRates}
+                    />
+                  ))
+              )}
+            </div>
           </div>
         </div>
 
@@ -349,6 +440,20 @@ export default function Dashboard() {
           open={assetFormOpen}
           onOpenChange={setAssetFormOpen}
           onSubmit={handleAddAsset}
+        />
+
+        <AccountForm
+          open={personalFormOpen}
+          onOpenChange={setPersonalFormOpen}
+          onSubmit={handleAddAccount}
+          defaultType="personal"
+        />
+
+        <AccountForm
+          open={businessFormOpen}
+          onOpenChange={setBusinessFormOpen}
+          onSubmit={handleAddAccount}
+          defaultType="business"
         />
       </main>
     </div>
