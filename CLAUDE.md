@@ -133,20 +133,16 @@ DEBUG=false
 
 ## Gamification Concepts to Keep in Mind
 
-- Net worth = Power Level
-- Assets = Inventory
-- Savings goals = Quests
-- Milestones = Achievements
-- The UI should feel rewarding and progression-oriented
+- The UI should feel rewarding and progression-oriented.
 
-## Gamification Mapping
-
-| Finance Concept      | Game Equivalent        |
-| -------------------- | ---------------------- |
-| Net worth            | Power Level / Total XP |
-| Assets               | Inventory items        |
-| Savings goals        | Quests                 |
-| Monthly budget       | Daily challenges       |
-| Reaching a milestone | Achievement unlocked   |
-| Portfolio diversity  | Skill tree             |
-| Income streams       | Passive buffs          |
+| Finance Concept        | Game Equivalent        |
+| ---------------------- | ---------------------- |
+| Net worth              | Power Level / Total XP |
+| Assets                 | Inventory items        |
+| Personal Bank Accounts | Vaults                 |
+| Company bank accounts  | Factories              |
+| Savings goals          | Quests                 |
+| Monthly budget         | Daily challenges       |
+| Reaching a milestone   | Achievement unlocked   |
+| Portfolio diversity    | Skill tree             |
+| Income streams         | Passive buffs          |
