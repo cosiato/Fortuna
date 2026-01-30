@@ -12,12 +12,8 @@ import { PriceResult } from "@/lib/prices"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
 
 export default function Dashboard() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -194,21 +190,65 @@ export default function Dashboard() {
 
   const netWorth = calculateNetWorth()
 
-  const ASSET_TYPE_LABELS: Record<string, string> = {
-    crypto: "Crypto",
-    stock: "Stocks",
-    real_estate: "Real Estate",
-    other: "Other",
-  }
+  const ASSET_CATEGORIES = [
+    {
+      key: "stock",
+      label: "Stocks",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+          <path d="m13 13 6 6"/>
+        </svg>
+      ),
+    },
+    {
+      key: "crypto",
+      label: "Crypto",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <path d="M12 17h.01"/>
+        </svg>
+      ),
+    },
+    {
+      key: "real_estate",
+      label: "Real Estate",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      ),
+    },
+    {
+      key: "other",
+      label: "Other",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4"/>
+          <path d="M12 8h.01"/>
+        </svg>
+      ),
+    },
+  ]
 
-  const assetsByType = assets.reduce<Record<string, Asset[]>>((acc, asset) => {
-    const type = asset.type
-    if (!acc[type]) {
-      acc[type] = []
-    }
-    acc[type].push(asset)
+  const assetsByType = ASSET_CATEGORIES.reduce<Record<string, Asset[]>>((acc, category) => {
+    acc[category.key] = assets.filter((asset) => asset.type === category.key)
     return acc
   }, {})
+
+  const nonEmptyCategories = ASSET_CATEGORIES.filter(
+    (category) => assetsByType[category.key].length > 0
+  )
+
+  const defaultAssetTab = nonEmptyCategories[0]?.key || "stock"
+
+  const getCategoryTotal = (categoryKey: string): number => {
+    return assetsByType[categoryKey].reduce((sum, asset) => sum + getAssetValue(asset), 0)
+  }
 
   const getAssetValue = (asset: Asset): number => {
     let value = 0
@@ -298,8 +338,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div>
+        <div className="space-y-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Assets</h2>
               <Button
@@ -311,60 +352,72 @@ export default function Dashboard() {
                 <span className="text-xl leading-none">+</span>
               </Button>
             </div>
-            <Card>
-              <CardContent className="p-4">
-                {Object.keys(assetsByType).length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-4">
-                    No assets yet. Click + to add one.
-                  </p>
-                ) : (
-                  <Accordion type="multiple" className="w-full">
-                    {Object.entries(assetsByType).map(([type, typeAssets]) => (
-                      <AccordionItem key={type} value={type} className="border-border">
-                        <AccordionTrigger className="hover:no-underline hover:text-accent">
-                          <span className="flex items-center justify-between w-full pr-2">
-                            <span className="flex items-center gap-2">
-                              {ASSET_TYPE_LABELS[type] || type}
-                              <span className="text-xs text-muted-foreground">
-                                ({typeAssets.length})
-                              </span>
-                            </span>
-                            <span className="text-sm font-medium text-accent">
-                              {formatCurrency(
-                                typeAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0),
-                                displayCurrency,
-                              )}
-                            </span>
+            {assets.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Tabs defaultValue={defaultAssetTab} className="w-full">
+                <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-xl grid grid-cols-4 gap-1 mb-6">
+                  {ASSET_CATEGORIES.map((category) => {
+                    const categoryAssets = assetsByType[category.key]
+                    const hasAssets = categoryAssets.length > 0
+                    const categoryTotal = getCategoryTotal(category.key)
+
+                    return (
+                      <TabsTrigger
+                        key={category.key}
+                        value={category.key}
+                        disabled={!hasAssets}
+                        className="flex flex-col items-center gap-1 py-3 px-2 rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-accent/20 data-[state=active]:to-accent/5 data-[state=active]:text-accent data-[state=active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-current">{category.icon}</span>
+                          <span className="font-medium text-sm">{category.label}</span>
+                        </div>
+                        {hasAssets && (
+                          <span className="text-xs text-muted-foreground data-[state=active]:text-accent/80">
+                            {formatCurrency(categoryTotal, displayCurrency)}
                           </span>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-2">
-                            {typeAssets.map((asset) => (
-                              <div
-                                key={asset.id}
-                                className="flex items-center justify-between p-2 rounded-lg bg-secondary/50"
-                              >
-                                <div>
-                                  <p className="font-medium text-foreground">{asset.name}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {asset.quantity}{" "}
-                                    {asset.symbol ? `(${asset.symbol.toUpperCase()})` : "units"}
-                                  </p>
-                                </div>
-                                <p className="text-sm font-medium text-accent">
-                                  {formatCurrency(getAssetValue(asset), displayCurrency)}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                )}
-              </CardContent>
-            </Card>
+                        )}
+                      </TabsTrigger>
+                    )
+                  })}
+                </TabsList>
+
+                {ASSET_CATEGORIES.map((category) => {
+                  const categoryAssets = assetsByType[category.key]
+
+                  return (
+                    <TabsContent key={category.key} value={category.key} className="mt-0">
+                      {categoryAssets.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground">
+                          No {category.label.toLowerCase()} assets yet.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {categoryAssets.map((asset) => (
+                            <AssetTile
+                              key={asset.id}
+                              asset={asset}
+                              displayValue={getAssetValue(asset)}
+                              displayCurrency={displayCurrency}
+                              categoryStyle={CATEGORY_STYLES[category.key]}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  )
+                })}
+              </Tabs>
+            )}
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
@@ -435,6 +488,7 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        </div>
         </div>
 
         <AssetForm open={assetFormOpen} onOpenChange={setAssetFormOpen} onSubmit={handleAddAsset} />
