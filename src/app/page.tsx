@@ -103,6 +103,23 @@ export default function Dashboard() {
     }
   }
 
+  const handleQuantityChange = async (id: string, newQuantity: number) => {
+    try {
+      const response = await fetch(`/api/assets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQuantity }),
+      })
+      if (response.ok) {
+        setAssets((prev) =>
+          prev.map((asset) => (asset.id === id ? { ...asset, quantity: newQuantity } : asset)),
+        )
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error)
+    }
+  }
+
   const handleAssetFormClose = (open: boolean) => {
     setAssetFormOpen(open)
     if (!open) {
@@ -251,22 +268,22 @@ export default function Dashboard() {
     {
       key: "stock",
       label: "Stocks",
-      icon: <Icon icon="solar:chart-bold" width={12} height={12} />,
+      icon: <Icon icon="solar:chart-linear" width={12} height={12} />,
     },
     {
       key: "crypto",
       label: "Crypto",
-      icon: <Icon icon="solar:bitcoin-bold" width={12} height={12} />,
+      icon: <Icon icon="solar:bitcoin-linear" width={12} height={12} />,
     },
     {
       key: "real_estate",
       label: "Real Estate",
-      icon: <Icon icon="solar:home-bold" width={12} height={12} />,
+      icon: <Icon icon="solar:home-linear" width={12} height={12} />,
     },
     {
       key: "other",
       label: "Other",
-      icon: <Icon icon="solar:box-bold" width={12} height={12} />,
+      icon: <Icon icon="solar:box-linear" width={12} height={12} />,
     },
   ]
 
@@ -466,6 +483,7 @@ export default function Dashboard() {
                                   categoryStyle={CATEGORY_STYLES[category.key]}
                                   onEdit={handleEditAsset}
                                   onDelete={handleDeleteAsset}
+                                  onQuantityChange={handleQuantityChange}
                                 />
                               ))}
                             </div>

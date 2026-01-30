@@ -38,6 +38,7 @@ interface AssetTileProps {
   categoryStyle?: CategoryStyle
   onEdit?: (asset: Asset) => void
   onDelete?: (id: string) => void
+  onQuantityChange?: (id: string, newQuantity: number) => void
 }
 
 export default function AssetTile({
@@ -47,10 +48,23 @@ export default function AssetTile({
   categoryStyle,
   onEdit,
   onDelete,
+  onQuantityChange,
 }: AssetTileProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const style = categoryStyle || CATEGORY_STYLES[asset.type] || CATEGORY_STYLES.other
   const showActions = onEdit || onDelete
+
+  const canDecrement = asset.quantity > 1
+
+  const handleIncrement = () => {
+    onQuantityChange?.(asset.id, asset.quantity + 1)
+  }
+
+  const handleDecrement = () => {
+    if (canDecrement) {
+      onQuantityChange?.(asset.id, asset.quantity - 1)
+    }
+  }
 
   const handleDeleteClick = () => {
     setIsFlipped(true)
@@ -87,7 +101,7 @@ export default function AssetTile({
                   onClick={() => onEdit(asset)}
                   className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
                 >
-                  <Icon icon="solar:pen-bold" width={10} height={10} />
+                  <Icon icon="solar:pen-linear" width={10} height={10} />
                 </Button>
               )}
               {onDelete && (
@@ -97,7 +111,7 @@ export default function AssetTile({
                   onClick={handleDeleteClick}
                   className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <Icon icon="solar:trash-bin-trash-bold" width={10} height={10} />
+                  <Icon icon="solar:trash-bin-trash-linear" width={10} height={10} />
                 </Button>
               )}
             </div>
@@ -127,9 +141,36 @@ export default function AssetTile({
                 <span className="text-[9px] text-muted-foreground uppercase tracking-wide">
                   Qty
                 </span>
-                <span className="text-sm font-medium text-foreground">
-                  {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </span>
+                <div className="flex items-center">
+                  {onQuantityChange && (
+                    <div className="w-0 group-hover:w-5 overflow-hidden transition-all duration-200">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDecrement}
+                        disabled={!canDecrement}
+                        className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                      >
+                        <Icon icon="solar:minus-circle-linear" width={12} height={12} />
+                      </Button>
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-foreground">
+                    {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </span>
+                  {onQuantityChange && (
+                    <div className="w-0 group-hover:w-5 overflow-hidden transition-all duration-200">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleIncrement}
+                        className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                      >
+                        <Icon icon="solar:add-circle-linear" width={12} height={12} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-[9px] text-muted-foreground uppercase tracking-wide">
