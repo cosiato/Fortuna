@@ -24,7 +24,7 @@ export default function Dashboard() {
     USD: 1,
     EUR: 0.92,
     GBP: 0.79,
-    JPY: 149.50,
+    JPY: 149.5,
     CHF: 0.88,
     HKD: 7.82,
     SGD: 1.34,
@@ -99,7 +99,19 @@ export default function Dashboard() {
       setAssets(Array.isArray(assetsData) ? assetsData : [])
       setSnapshots(Array.isArray(snapshotsData) ? snapshotsData : [])
       setAccounts(Array.isArray(accountsData) ? accountsData : [])
-      setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.50, CHF: 0.88, HKD: 7.82, SGD: 1.34, AED: 3.67, BTC: 0.000024 })
+      setExchangeRates(
+        ratesData.rates || {
+          USD: 1,
+          EUR: 0.92,
+          GBP: 0.79,
+          JPY: 149.5,
+          CHF: 0.88,
+          HKD: 7.82,
+          SGD: 1.34,
+          AED: 3.67,
+          BTC: 0.000024,
+        },
+      )
 
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
@@ -195,9 +207,19 @@ export default function Dashboard() {
       key: "stock",
       label: "Stocks",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
-          <path d="m13 13 6 6"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+          <path d="m13 13 6 6" />
         </svg>
       ),
     },
@@ -205,10 +227,20 @@ export default function Dashboard() {
       key: "crypto",
       label: "Crypto",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-          <path d="M12 17h.01"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <path d="M12 17h.01" />
         </svg>
       ),
     },
@@ -216,9 +248,19 @@ export default function Dashboard() {
       key: "real_estate",
       label: "Real Estate",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
       ),
     },
@@ -226,10 +268,20 @@ export default function Dashboard() {
       key: "other",
       label: "Other",
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4"/>
-          <path d="M12 8h.01"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 16v-4" />
+          <path d="M12 8h.01" />
         </svg>
       ),
     },
@@ -241,7 +293,7 @@ export default function Dashboard() {
   }, {})
 
   const nonEmptyCategories = ASSET_CATEGORIES.filter(
-    (category) => assetsByType[category.key].length > 0
+    (category) => assetsByType[category.key].length > 0,
   )
 
   const defaultAssetTab = nonEmptyCategories[0]?.key || "stock"
@@ -339,156 +391,156 @@ export default function Dashboard() {
         </Card>
 
         <div className="space-y-8 mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Assets</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                onClick={() => setAssetFormOpen(true)}
-              >
-                <span className="text-xl leading-none">+</span>
-              </Button>
-            </div>
-            {assets.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Tabs defaultValue={defaultAssetTab} className="w-full">
-                <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-xl grid grid-cols-4 gap-1 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-3">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Assets</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                  onClick={() => setAssetFormOpen(true)}
+                >
+                  <span className="text-xl leading-none">+</span>
+                </Button>
+              </div>
+              {assets.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Tabs defaultValue={defaultAssetTab} className="w-full">
+                  <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
+                    {ASSET_CATEGORIES.map((category) => {
+                      const categoryAssets = assetsByType[category.key]
+                      const hasAssets = categoryAssets.length > 0
+                      const categoryTotal = getCategoryTotal(category.key)
+
+                      return (
+                        <TabsTrigger
+                          key={category.key}
+                          value={category.key}
+                          disabled={!hasAssets}
+                          className="flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md data-[state=active]:bg-gradient-to-br data-[state=active]:from-accent/20 data-[state=active]:to-accent/5 data-[state=active]:text-accent data-[state=active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-current">{category.icon}</span>
+                            <span className="font-medium text-xs">{category.label}</span>
+                          </div>
+                          {hasAssets && (
+                            <span className="text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
+                              {formatCurrency(categoryTotal, displayCurrency)}
+                            </span>
+                          )}
+                        </TabsTrigger>
+                      )
+                    })}
+                  </TabsList>
+
                   {ASSET_CATEGORIES.map((category) => {
                     const categoryAssets = assetsByType[category.key]
-                    const hasAssets = categoryAssets.length > 0
-                    const categoryTotal = getCategoryTotal(category.key)
 
                     return (
-                      <TabsTrigger
-                        key={category.key}
-                        value={category.key}
-                        disabled={!hasAssets}
-                        className="flex flex-col items-center gap-1 py-3 px-2 rounded-lg data-[state=active]:bg-gradient-to-br data-[state=active]:from-accent/20 data-[state=active]:to-accent/5 data-[state=active]:text-accent data-[state=active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-current">{category.icon}</span>
-                          <span className="font-medium text-sm">{category.label}</span>
-                        </div>
-                        {hasAssets && (
-                          <span className="text-xs text-muted-foreground data-[state=active]:text-accent/80">
-                            {formatCurrency(categoryTotal, displayCurrency)}
-                          </span>
+                      <TabsContent key={category.key} value={category.key} className="mt-0">
+                        {categoryAssets.length === 0 ? (
+                          <div className="text-center py-12 text-muted-foreground">
+                            No {category.label.toLowerCase()} assets yet.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            {categoryAssets.map((asset) => (
+                              <AssetTile
+                                key={asset.id}
+                                asset={asset}
+                                displayValue={getAssetValue(asset)}
+                                displayCurrency={displayCurrency}
+                                categoryStyle={CATEGORY_STYLES[category.key]}
+                              />
+                            ))}
+                          </div>
                         )}
-                      </TabsTrigger>
+                      </TabsContent>
                     )
                   })}
-                </TabsList>
-
-                {ASSET_CATEGORIES.map((category) => {
-                  const categoryAssets = assetsByType[category.key]
-
-                  return (
-                    <TabsContent key={category.key} value={category.key} className="mt-0">
-                      {categoryAssets.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground">
-                          No {category.label.toLowerCase()} assets yet.
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {categoryAssets.map((asset) => (
-                            <AssetTile
-                              key={asset.id}
-                              asset={asset}
-                              displayValue={getAssetValue(asset)}
-                              displayCurrency={displayCurrency}
-                              categoryStyle={CATEGORY_STYLES[category.key]}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-                  )
-                })}
-              </Tabs>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                onClick={() => setPersonalFormOpen(true)}
-              >
-                <span className="text-xl leading-none">+</span>
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {accounts.filter((a) => a.accountType === "personal").length === 0 ? (
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-muted-foreground text-sm text-center py-4">
-                      No vaults yet. Click + to add one.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                accounts
-                  .filter((a) => a.accountType === "personal")
-                  .map((account) => (
-                    <AccountCard
-                      key={account.id}
-                      account={account}
-                      displayCurrency={displayCurrency}
-                      exchangeRates={exchangeRates}
-                    />
-                  ))
+                </Tabs>
               )}
             </div>
           </div>
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Factories</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-purple-400 hover:text-purple-400/80 hover:bg-purple-400/10"
-                onClick={() => setBusinessFormOpen(true)}
-              >
-                <span className="text-xl leading-none">+</span>
-              </Button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                  onClick={() => setPersonalFormOpen(true)}
+                >
+                  <span className="text-xl leading-none">+</span>
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {accounts.filter((a) => a.accountType === "personal").length === 0 ? (
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-muted-foreground text-sm text-center py-4">
+                        No vaults yet. Click + to add one.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  accounts
+                    .filter((a) => a.accountType === "personal")
+                    .map((account) => (
+                      <AccountCard
+                        key={account.id}
+                        account={account}
+                        displayCurrency={displayCurrency}
+                        exchangeRates={exchangeRates}
+                      />
+                    ))
+                )}
+              </div>
             </div>
-            <div className="space-y-3">
-              {accounts.filter((a) => a.accountType === "business").length === 0 ? (
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-muted-foreground text-sm text-center py-4">
-                      No factories yet. Click + to add one.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                accounts
-                  .filter((a) => a.accountType === "business")
-                  .map((account) => (
-                    <AccountCard
-                      key={account.id}
-                      account={account}
-                      displayCurrency={displayCurrency}
-                      exchangeRates={exchangeRates}
-                    />
-                  ))
-              )}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Factories</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-purple-400 hover:text-purple-400/80 hover:bg-purple-400/10"
+                  onClick={() => setBusinessFormOpen(true)}
+                >
+                  <span className="text-xl leading-none">+</span>
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {accounts.filter((a) => a.accountType === "business").length === 0 ? (
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-muted-foreground text-sm text-center py-4">
+                        No factories yet. Click + to add one.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  accounts
+                    .filter((a) => a.accountType === "business")
+                    .map((account) => (
+                      <AccountCard
+                        key={account.id}
+                        account={account}
+                        displayCurrency={displayCurrency}
+                        exchangeRates={exchangeRates}
+                      />
+                    ))
+                )}
+              </div>
             </div>
           </div>
-        </div>
         </div>
 
         <AssetForm open={assetFormOpen} onOpenChange={setAssetFormOpen} onSubmit={handleAddAsset} />
