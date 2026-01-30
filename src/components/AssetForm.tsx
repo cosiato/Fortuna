@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
+import CryptoSelector from '@/components/CryptoSelector';
+import { getCryptoById } from '@/lib/cryptocurrencies';
 
 interface AssetFormProps {
   asset?: Asset | null;
@@ -113,23 +115,32 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             </Select>
           </div>
 
-          {requiresSymbol && (
+          {type === 'crypto' && (
             <div className="space-y-2">
-              <Label htmlFor="symbol">
-                {type === 'stock' ? 'Ticker Symbol' : 'Coin ID'}
-              </Label>
+              <Label>Cryptocurrency</Label>
+              <CryptoSelector
+                value={symbol}
+                onChange={(cryptoId) => {
+                  setSymbol(cryptoId);
+                  const crypto = getCryptoById(cryptoId);
+                  if (crypto && !name) {
+                    setName(crypto.name);
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {type === 'stock' && (
+            <div className="space-y-2">
+              <Label htmlFor="symbol">Ticker Symbol</Label>
               <Input
                 id="symbol"
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
-                placeholder={type === 'stock' ? 'e.g., AAPL, GOOGL' : 'e.g., bitcoin, ethereum'}
+                placeholder="e.g., AAPL, GOOGL"
                 required
               />
-              {type === 'crypto' && (
-                <p className="text-xs text-muted-foreground">
-                  Use CoinGecko coin IDs (lowercase)
-                </p>
-              )}
             </div>
           )}
 
