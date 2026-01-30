@@ -3,8 +3,10 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Icon } from "@iconify/react"
+import Image from "next/image"
 import { Asset } from "@/lib/db"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { Button } from "@/components/ui/button"
 
 export interface CategoryStyle {
@@ -39,6 +41,32 @@ interface AssetTileProps {
   onEdit?: (asset: Asset) => void
   onDelete?: (id: string) => void
   onQuantityChange?: (id: string, newQuantity: number) => void
+}
+
+function CryptoAvatar({ symbol }: { symbol: string }) {
+  const crypto = getCryptoBySymbol(symbol)
+
+  if (crypto?.logo) {
+    return (
+      <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-slate-800">
+        <Image
+          src={crypto.logo}
+          alt={crypto.name}
+          width={24}
+          height={24}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
+      <span className="text-accent font-bold text-[10px]">
+        {symbol.slice(0, 2).toUpperCase()}
+      </span>
+    </div>
+  )
 }
 
 export default function AssetTile({
@@ -119,16 +147,22 @@ export default function AssetTile({
 
           <div className="flex flex-col gap-2">
             <div className="flex items-start gap-2">
-              <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
-                <span className="text-accent font-bold text-[10px]">
-                  {asset.symbol?.slice(0, 2).toUpperCase() || asset.name.slice(0, 2).toUpperCase()}
-                </span>
-              </div>
+              {asset.type === "crypto" && asset.symbol ? (
+                <CryptoAvatar symbol={asset.symbol} />
+              ) : (
+                <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
+                  <span className="text-accent font-bold text-[10px]">
+                    {asset.symbol?.slice(0, 2).toUpperCase() || asset.name.slice(0, 2).toUpperCase()}
+                  </span>
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <h3
                   className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
                 >
-                  {asset.name}
+                  {asset.type === "crypto" && asset.symbol
+                    ? getCryptoBySymbol(asset.symbol)?.name || asset.name
+                    : asset.name}
                 </h3>
                 {asset.symbol && (
                   <p className="text-[10px] text-muted-foreground uppercase">{asset.symbol}</p>
