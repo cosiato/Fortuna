@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import {
   LineChart,
@@ -8,39 +8,39 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
-import { Snapshot } from '@/lib/db';
-import { SupportedCurrency, formatCurrency } from '@/lib/currency';
-import { Card, CardContent } from '@/components/ui/card';
+} from "recharts"
+import { Snapshot } from "@/lib/db"
+import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface NetWorthChartProps {
-  snapshots: Snapshot[];
-  displayCurrency: SupportedCurrency;
-  exchangeRates: { [currency: string]: number };
+  snapshots: Snapshot[]
+  displayCurrency: SupportedCurrency
+  exchangeRates: { [currency: string]: number }
 }
 
 function convertValue(
   value: number,
   fromCurrency: string,
   toCurrency: string,
-  rates: { [currency: string]: number }
+  rates: { [currency: string]: number },
 ): number {
-  if (fromCurrency === toCurrency) return value;
+  if (fromCurrency === toCurrency) return value
 
-  let valueInUsd = value;
-  if (fromCurrency !== 'USD') {
-    const fromRate = rates[fromCurrency];
+  let valueInUsd = value
+  if (fromCurrency !== "USD") {
+    const fromRate = rates[fromCurrency]
     if (fromRate && fromRate > 0) {
-      valueInUsd = value / fromRate;
+      valueInUsd = value / fromRate
     }
   }
 
-  const toRate = rates[toCurrency];
+  const toRate = rates[toCurrency]
   if (toRate && toRate > 0) {
-    return valueInUsd * toRate;
+    return valueInUsd * toRate
   }
 
-  return valueInUsd;
+  return valueInUsd
 }
 
 export default function NetWorthChart({
@@ -49,25 +49,27 @@ export default function NetWorthChart({
   exchangeRates,
 }: NetWorthChartProps) {
   const data = snapshots.map((snapshot) => ({
-    date: new Date(snapshot.recordedAt).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
+    date: new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     }),
     value: convertValue(snapshot.totalValue, snapshot.currency, displayCurrency, exchangeRates),
-  }));
+  }))
 
   if (data.length === 0) {
     return (
-      <Card className="h-64">
+      <Card className="h-32">
         <CardContent className="h-full flex items-center justify-center p-8">
-          <p className="text-muted-foreground">No historical data yet. Snapshots are recorded daily.</p>
+          <p className="text-muted-foreground">
+            No historical data yet. Snapshots are recorded daily.
+          </p>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
-    <Card className="h-64">
+    <Card className="h-40">
       <CardContent className="h-full p-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
@@ -77,27 +79,24 @@ export default function NetWorthChart({
               stroke="#6B7280"
               fontSize={12}
               tickFormatter={(value) =>
-                displayCurrency === 'BTC'
+                displayCurrency === "BTC"
                   ? `B${value.toFixed(4)}`
-                  : new Intl.NumberFormat('en-US', {
-                      style: 'currency',
+                  : new Intl.NumberFormat("en-US", {
+                      style: "currency",
                       currency: displayCurrency,
-                      notation: 'compact',
+                      notation: "compact",
                     }).format(value)
               }
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1E1E2E',
-                border: '1px solid #2D2D3D',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(15, 15, 26, 0.3)',
+                backgroundColor: "#1E1E2E",
+                border: "1px solid #2D2D3D",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(15, 15, 26, 0.3)",
               }}
-              labelStyle={{ color: '#6B7280' }}
-              formatter={(value) => [
-                formatCurrency(value as number, displayCurrency),
-                'Net Worth',
-              ]}
+              labelStyle={{ color: "#6B7280" }}
+              formatter={(value) => [formatCurrency(value as number, displayCurrency), "Net Worth"]}
             />
             <Line
               type="monotone"
@@ -105,11 +104,11 @@ export default function NetWorthChart({
               stroke="#FFD700"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: '#FFD700' }}
+              activeDot={{ r: 4, fill: "#FFD700" }}
             />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
-  );
+  )
 }

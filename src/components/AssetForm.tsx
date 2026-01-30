@@ -27,10 +27,9 @@ interface AssetFormProps {
 }
 
 const ASSET_TYPES = [
-  { value: 'stock', label: 'Stock' },
   { value: 'crypto', label: 'Cryptocurrency' },
-  { value: 'real_estate', label: 'Real Estate' },
-  { value: 'cash', label: 'Cash' },
+  { value: 'stock', label: 'Stock' },
+  { value: 'real_estate', label: 'House / Real Estate' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -62,7 +61,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
   const isEditing = !!asset;
   const requiresSymbol = type === 'stock' || type === 'crypto';
-  const requiresManualPrice = type === 'real_estate' || type === 'cash' || type === 'other';
+  const requiresManualPrice = type === 'real_estate' || type === 'other';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
