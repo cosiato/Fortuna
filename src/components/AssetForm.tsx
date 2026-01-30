@@ -1,73 +1,68 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import { Asset } from '@/lib/db';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react"
+import { Asset } from "@/lib/db"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
-import CryptoSelector from '@/components/CryptoSelector';
-import { getCryptoById } from '@/lib/cryptocurrencies';
+} from "@/components/ui/select"
+import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/currency"
+import CryptoSelector from "@/components/CryptoSelector"
+import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 
 interface AssetFormProps {
-  asset?: Asset | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: Partial<Asset>) => void;
+  asset?: Asset | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSubmit: (data: Partial<Asset>) => void
 }
 
 const ASSET_TYPES = [
-  { value: 'crypto', label: 'Cryptocurrency' },
-  { value: 'stock', label: 'Stock' },
-  { value: 'real_estate', label: 'House / Real Estate' },
-  { value: 'other', label: 'Other' },
-];
+  { value: "crypto", label: "Cryptocurrency" },
+  { value: "stock", label: "Stock" },
+  { value: "real_estate", label: "House / Real Estate" },
+  { value: "other", label: "Other" },
+]
 
 export default function AssetForm({ asset, open, onOpenChange, onSubmit }: AssetFormProps) {
-  const [name, setName] = useState(asset?.name || '');
-  const [type, setType] = useState<Asset['type']>(asset?.type || 'stock');
-  const [symbol, setSymbol] = useState(asset?.symbol || '');
-  const [quantity, setQuantity] = useState(asset?.quantity?.toString() || '1');
-  const [manualPrice, setManualPrice] = useState(asset?.manualPrice?.toString() || '');
-  const [currency, setCurrency] = useState(asset?.currency || 'USD');
+  const [name, setName] = useState(asset?.name || "")
+  const [type, setType] = useState<Asset["type"]>(asset?.type || "stock")
+  const [symbol, setSymbol] = useState(asset?.symbol || "")
+  const [quantity, setQuantity] = useState(asset?.quantity?.toString() || "1")
+  const [manualPrice, setManualPrice] = useState(asset?.manualPrice?.toString() || "")
+  const [currency, setCurrency] = useState(asset?.currency || "USD")
 
   useEffect(() => {
     if (asset) {
-      setName(asset.name || '');
-      setType(asset.type || 'stock');
-      setSymbol(asset.symbol || '');
-      setQuantity(asset.quantity?.toString() || '1');
-      setManualPrice(asset.manualPrice?.toString() || '');
-      setCurrency(asset.currency || 'USD');
+      setName(asset.name || "")
+      setType(asset.type || "stock")
+      setSymbol(asset.symbol || "")
+      setQuantity(asset.quantity?.toString() || "1")
+      setManualPrice(asset.manualPrice?.toString() || "")
+      setCurrency(asset.currency || "USD")
     } else {
-      setName('');
-      setType('stock');
-      setSymbol('');
-      setQuantity('1');
-      setManualPrice('');
-      setCurrency('USD');
+      setName("")
+      setType("stock")
+      setSymbol("")
+      setQuantity("1")
+      setManualPrice("")
+      setCurrency("USD")
     }
-  }, [asset, open]);
+  }, [asset, open])
 
-  const isEditing = !!asset;
-  const requiresSymbol = type === 'stock' || type === 'crypto';
-  const requiresManualPrice = type === 'real_estate' || type === 'other';
+  const isEditing = !!asset
+  const requiresSymbol = type === "stock" || type === "crypto"
+  const requiresManualPrice = type === "real_estate" || type === "other"
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     onSubmit({
       name,
       type,
@@ -75,16 +70,14 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       quantity: parseFloat(quantity) || 0,
       manualPrice: requiresManualPrice ? parseFloat(manualPrice) || null : null,
       currency,
-    });
-  };
+    })
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? 'Edit Asset' : 'Add New Asset'}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Asset" : "Add New Asset"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -101,7 +94,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
           <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
-            <Select value={type} onValueChange={(val) => setType(val as Asset['type'])}>
+            <Select value={type} onValueChange={(val) => setType(val as Asset["type"])}>
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -115,23 +108,23 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             </Select>
           </div>
 
-          {type === 'crypto' && (
+          {type === "crypto" && (
             <div className="space-y-2">
               <Label>Cryptocurrency</Label>
               <CryptoSelector
                 value={symbol}
-                onChange={(cryptoId) => {
-                  setSymbol(cryptoId);
-                  const crypto = getCryptoById(cryptoId);
+                onChange={(cryptoSymbol) => {
+                  setSymbol(cryptoSymbol)
+                  const crypto = getCryptoBySymbol(cryptoSymbol)
                   if (crypto && !name) {
-                    setName(crypto.name);
+                    setName(crypto.name)
                   }
                 }}
               />
             </div>
           )}
 
-          {type === 'stock' && (
+          {type === "stock" && (
             <div className="space-y-2">
               <Label htmlFor="symbol">Ticker Symbol</Label>
               <Input
@@ -185,7 +178,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {SUPPORTED_CURRENCIES.filter((c) => c !== 'BTC').map((c) => (
+                {SUPPORTED_CURRENCIES.filter((c) => c !== "BTC").map((c) => (
                   <SelectItem key={c} value={c}>
                     <span className="flex items-center gap-2">
                       <span>{CURRENCY_INFO[c].flag}</span>
@@ -207,11 +200,11 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              {isEditing ? 'Update' : 'Add Asset'}
+              {isEditing ? "Update" : "Add Asset"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

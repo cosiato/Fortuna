@@ -1,4 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
+import { getCryptoBySymbol } from '@/lib/cryptocurrencies';
 
 interface PriceCache {
   [symbol: string]: {
@@ -58,13 +59,16 @@ export async function getStockPrice(symbol: string): Promise<PriceResult> {
   }
 }
 
-export async function getCryptoPrice(coinId: string): Promise<PriceResult> {
-  const cacheKey = `crypto:${coinId.toLowerCase()}`;
+export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
+  const crypto = getCryptoBySymbol(symbol);
+  const coinId = crypto?.id || symbol.toLowerCase();
+
+  const cacheKey = `crypto:${symbol.toUpperCase()}`;
   const cached = cache[cacheKey];
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return {
-      symbol: coinId,
+      symbol,
       price: cached.price,
       currency: cached.currency,
     };
@@ -84,11 +88,11 @@ export async function getCryptoPrice(coinId: string): Promise<PriceResult> {
     const price = data[coinId.toLowerCase()]?.usd;
 
     if (price === undefined) {
-      return { symbol: coinId, price: 0, currency: 'USD', error: 'Coin not found' };
+      return { symbol, price: 0, currency: 'USD', error: 'Coin not found' };
     }
 
     const result = {
-      symbol: coinId,
+      symbol,
       price,
       currency: 'USD',
     };
@@ -101,8 +105,8 @@ export async function getCryptoPrice(coinId: string): Promise<PriceResult> {
 
     return result;
   } catch (error) {
-    console.error(`Error fetching crypto price for ${coinId}:`, error);
-    return { symbol: coinId, price: 0, currency: 'USD', error: 'Failed to fetch price' };
+    console.error(`Error fetching crypto price for ${symbol}:`, error);
+    return { symbol, price: 0, currency: 'USD', error: 'Failed to fetch price' };
   }
 }
 

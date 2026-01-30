@@ -17,16 +17,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { CRYPTOCURRENCIES, getCryptoById } from '@/lib/cryptocurrencies';
+import { CRYPTOCURRENCIES, getCryptoBySymbol } from '@/lib/cryptocurrencies';
 
 interface CryptoSelectorProps {
   value: string;
-  onChange: (cryptoId: string) => void;
+  onChange: (symbol: string) => void;
 }
 
 export default function CryptoSelector({ value, onChange }: CryptoSelectorProps) {
   const [open, setOpen] = useState(false);
-  const selectedCrypto = getCryptoById(value);
+  const selectedCrypto = getCryptoBySymbol(value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -64,14 +64,14 @@ export default function CryptoSelector({ value, onChange }: CryptoSelectorProps)
                   key={crypto.id}
                   value={`${crypto.name} ${crypto.symbol} ${crypto.id}`}
                   onSelect={() => {
-                    onChange(crypto.id);
+                    onChange(crypto.symbol);
                     setOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === crypto.id ? 'opacity-100' : 'opacity-0'
+                      value.toUpperCase() === crypto.symbol.toUpperCase() ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <span className="flex items-center gap-2">
