@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
+import { motion } from "framer-motion"
 
 export default function Dashboard() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -297,6 +298,13 @@ export default function Dashboard() {
   )
 
   const defaultAssetTab = nonEmptyCategories[0]?.key || "stock"
+  const [activeTab, setActiveTab] = useState(defaultAssetTab)
+
+  useEffect(() => {
+    if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some((c) => c.key === activeTab)) {
+      setActiveTab(nonEmptyCategories[0].key)
+    }
+  }, [nonEmptyCategories, activeTab])
 
   const getCategoryTotal = (categoryKey: string): number => {
     return assetsByType[categoryKey].reduce((sum, asset) => sum + getAssetValue(asset), 0)
@@ -411,26 +419,38 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
               ) : (
-                <Tabs defaultValue={defaultAssetTab} className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
                     {ASSET_CATEGORIES.map((category) => {
                       const categoryAssets = assetsByType[category.key]
                       const hasAssets = categoryAssets.length > 0
                       const categoryTotal = getCategoryTotal(category.key)
+                      const isActive = activeTab === category.key
 
                       return (
                         <TabsTrigger
                           key={category.key}
                           value={category.key}
                           disabled={!hasAssets}
-                          className="flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md data-[state=active]:bg-gradient-to-br data-[state=active]:from-accent/20 data-[state=active]:to-accent/5 data-[state=active]:text-accent data-[state=active]:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md transition-colors duration-200 ease-out hover:bg-slate-700/20 data-[state=active]:hover:bg-transparent data-[state=active]:text-accent disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                         >
-                          <div className="flex items-center gap-1.5">
+                          {isActive && (
+                            <motion.div
+                              layoutId="activeTabBackground"
+                              className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-md shadow-sm"
+                              transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 30,
+                              }}
+                            />
+                          )}
+                          <div className="relative flex items-center gap-1.5">
                             <span className="text-current">{category.icon}</span>
                             <span className="font-medium text-xs">{category.label}</span>
                           </div>
                           {hasAssets && (
-                            <span className="text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
+                            <span className="relative text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
                               {formatCurrency(categoryTotal, displayCurrency)}
                             </span>
                           )}
@@ -444,23 +464,29 @@ export default function Dashboard() {
 
                     return (
                       <TabsContent key={category.key} value={category.key} className="mt-0">
-                        {categoryAssets.length === 0 ? (
-                          <div className="text-center py-12 text-muted-foreground">
-                            No {category.label.toLowerCase()} assets yet.
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                            {categoryAssets.map((asset) => (
-                              <AssetTile
-                                key={asset.id}
-                                asset={asset}
-                                displayValue={getAssetValue(asset)}
-                                displayCurrency={displayCurrency}
-                                categoryStyle={CATEGORY_STYLES[category.key]}
-                              />
-                            ))}
-                          </div>
-                        )}
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                        >
+                          {categoryAssets.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground">
+                              No {category.label.toLowerCase()} assets yet.
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                              {categoryAssets.map((asset) => (
+                                <AssetTile
+                                  key={asset.id}
+                                  asset={asset}
+                                  displayValue={getAssetValue(asset)}
+                                  displayCurrency={displayCurrency}
+                                  categoryStyle={CATEGORY_STYLES[category.key]}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </motion.div>
                       </TabsContent>
                     )
                   })}
