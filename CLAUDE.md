@@ -63,6 +63,9 @@ src/
 |   |   |-- assets/               # Asset CRUD endpoints
 |   |   |   |-- route.ts          # GET/POST /api/assets
 |   |   |   |-- [id]/route.ts     # PUT/DELETE /api/assets/:id
+|   |   |-- entities/             # Entity CRUD endpoints
+|   |   |   |-- route.ts          # GET/POST /api/entities
+|   |   |   |-- [id]/route.ts     # GET/PUT/DELETE /api/entities/:id
 |   |   |-- exchange-rates/       # Currency exchange rates
 |   |   |-- prices/               # Asset price fetching
 |   |   |-- snapshots/            # Portfolio snapshots
@@ -88,16 +91,22 @@ src/
 |   |-- AssetForm.tsx             # Form for adding/editing assets
 |   |-- AssetTile.tsx             # Tile for displaying assets
 |   |-- CountrySelector.tsx       # Country picker with flags
+|   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
 |   |-- CurrencySelector.tsx      # Currency picker dropdown
+|   |-- EntityForm.tsx            # Form for adding/editing entities
+|   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart
 |-- hooks/                        # Custom React hooks
 |-- lib/                          # Utility libraries
 |   |-- countries.ts              # Country data and utilities
+|   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting utilities
 |   |-- db.ts                     # Database connection (SQLite)
 |   |-- prices.ts                 # Price fetching logic
 |   |-- utils.ts                  # General utilities (cn helper)
 |-- types/                        # TypeScript definitions
+|-- config/                       # Configuration files
+|   |-- cryptocurrencies.json     # Top 200 cryptocurrencies data
 |-- generated/                    # Auto-generated Prisma types
 |   |-- prisma/                   # Prisma client types
 ```
@@ -151,14 +160,13 @@ DEBUG=false
 
 - The UI should feel rewarding and progression-oriented.
 
-| Finance Concept        | Game Equivalent        |
-| ---------------------- | ---------------------- |
-| Net worth              | Power Level / Total XP |
-| Assets                 | Inventory items        |
-| Personal Bank Accounts | Vaults                 |
-| Company bank accounts  | Factories              |
-| Savings goals          | Quests                 |
-| Monthly budget         | Daily challenges       |
-| Reaching a milestone   | Achievement unlocked   |
-| Portfolio diversity    | Skill tree             |
-| Income streams         | Passive buffs          |
+| Finance Concept       | Game Equivalent        |
+| --------------------- | ---------------------- |
+| Net worth             | Power Level / Total XP |
+| Assets                | Inventory items        |
+| Bank Accounts         | Vaults                 |
+| Savings goals         | Quests                 |
+| Monthly budget        | Daily challenges       |
+| Reaching a milestone  | Achievement unlocked   |
+| Portfolio diversity   | Skill tree             |
+| Income streams        | Passive buffs          |
