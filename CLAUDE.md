@@ -5,14 +5,14 @@ We are building Fortuna, an offline personal wealth management app with a gamifi
 Use the following tech stack:
 
 - Next.js 16
-- TailwindCss
+- TailwindCSS
 - SQLite for local database
 - Prisma ORM and Prisma Client
 - Recharts library for charts
 - Shadcn for UI components
-- Typescript
-- Framer motion for animations
-- Three.js for 3D elements
+- TypeScript
+- Framer Motion for animations
+- Iconify with Solar icon set (linear variant)
 
 ## Critical Rules
 
@@ -47,43 +47,59 @@ Use the following tech stack:
 ## File Structure
 
 ```
+data/                             # SQLite database files
+|-- fortuna.db                    # Main database file
+prisma/                           # Database schema & migrations
+|-- schema.prisma                 # Prisma data model
+|-- migrations/                   # Database migrations
 public/                           # Static assets to be served
 src/
 |-- app/                          # Next.js app router
 |   |-- fonts/                    # Custom fonts (Geist)
 |   |-- api/                      # API routes
+|   |   |-- accounts/             # Account CRUD endpoints
+|   |   |   |-- route.ts          # GET/POST /api/accounts
+|   |   |   |-- [id]/route.ts     # PUT/DELETE /api/accounts/:id
 |   |   |-- assets/               # Asset CRUD endpoints
 |   |   |   |-- route.ts          # GET/POST /api/assets
 |   |   |   |-- [id]/route.ts     # PUT/DELETE /api/assets/:id
 |   |   |-- exchange-rates/       # Currency exchange rates
 |   |   |-- prices/               # Asset price fetching
 |   |   |-- snapshots/            # Portfolio snapshots
-|   |-- assets/                   # Assets management page
 |   |-- page.tsx                  # Dashboard home page
 |   |-- layout.tsx                # Root layout
 |   |-- globals.css               # Global styles
 |-- components/                   # Reusable UI components
 |   |-- ui/                       # Shadcn UI primitives
+|   |   |-- accordion.tsx
 |   |   |-- badge.tsx
 |   |   |-- button.tsx
 |   |   |-- card.tsx
+|   |   |-- command.tsx
 |   |   |-- dialog.tsx
 |   |   |-- input.tsx
 |   |   |-- label.tsx
+|   |   |-- popover.tsx
 |   |   |-- select.tsx
 |   |   |-- table.tsx
+|   |   |-- tabs.tsx
+|   |-- AccountCard.tsx           # Card for displaying accounts
+|   |-- AccountForm.tsx           # Form for adding/editing accounts
 |   |-- AssetForm.tsx             # Form for adding/editing assets
-|   |-- AssetList.tsx             # Table of user assets
+|   |-- AssetTile.tsx             # Tile for displaying assets
+|   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CurrencySelector.tsx      # Currency picker dropdown
 |   |-- NetWorthChart.tsx         # Net worth over time chart
-|   |-- PortfolioBreakdown.tsx    # Portfolio allocation view
 |-- hooks/                        # Custom React hooks
 |-- lib/                          # Utility libraries
+|   |-- countries.ts              # Country data and utilities
 |   |-- currency.ts               # Currency formatting utilities
 |   |-- db.ts                     # Database connection (SQLite)
 |   |-- prices.ts                 # Price fetching logic
 |   |-- utils.ts                  # General utilities (cn helper)
 |-- types/                        # TypeScript definitions
+|-- generated/                    # Auto-generated Prisma types
+|   |-- prisma/                   # Prisma client types
 ```
 
 ## Key Patterns
