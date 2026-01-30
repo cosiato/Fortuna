@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
 import CountrySelector from '@/components/CountrySelector';
 
 interface AccountFormProps {
@@ -107,11 +108,22 @@ export default function AccountForm({
             <Label htmlFor="currency">Currency</Label>
             <Select value={currency} onValueChange={setCurrency}>
               <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
+                <SelectValue>
+                  <span className="flex items-center gap-2">
+                    <span>{CURRENCY_INFO[currency as SupportedCurrency]?.flag}</span>
+                    <span>{currency}</span>
+                  </span>
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="EUR">EUR</SelectItem>
+                {SUPPORTED_CURRENCIES.filter((c) => c !== 'BTC').map((c) => (
+                  <SelectItem key={c} value={c}>
+                    <span className="flex items-center gap-2">
+                      <span>{CURRENCY_INFO[c].flag}</span>
+                      <span>{c}</span>
+                    </span>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
