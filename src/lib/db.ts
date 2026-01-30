@@ -1,4 +1,4 @@
-import { PrismaClient, Asset, Snapshot } from '@/generated/prisma/client';
+import { PrismaClient, Asset, Snapshot, Account } from '@/generated/prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import path from 'path';
 import fs from 'fs';
@@ -25,7 +25,7 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-export type { Asset, Snapshot };
+export type { Asset, Snapshot, Account };
 
 export type AssetType = 'stock' | 'crypto' | 'real_estate' | 'cash' | 'other';
 
@@ -138,4 +138,74 @@ export async function getTodaySnapshot(): Promise<Snapshot | null> {
     },
     orderBy: { recordedAt: 'desc' },
   });
+}
+
+export type AccountType = 'personal' | 'business';
+
+export interface CreateAccountInput {
+  name: string;
+  accountType: AccountType;
+  balance?: number;
+  currency?: string;
+  countryCode: string;
+}
+
+export interface UpdateAccountInput {
+  name?: string;
+  accountType?: AccountType;
+  balance?: number;
+  currency?: string;
+  countryCode?: string;
+}
+
+export async function getAllAccounts(type?: AccountType): Promise<Account[]> {
+  const where = type ? { accountType: type } : {};
+  return prisma.account.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getAccountById(id: string): Promise<Account | null> {
+  return prisma.account.findUnique({
+    where: { id },
+  });
+}
+
+export async function createAccount(input: CreateAccountInput): Promise<Account> {
+  return prisma.account.create({
+    data: {
+      name: input.name,
+      accountType: input.accountType,
+      balance: input.balance ?? 0,
+      currency: input.currency ?? 'USD',
+      countryCode: input.countryCode,
+    },
+  });
+}
+
+export async function updateAccount(
+  id: string,
+  updates: UpdateAccountInput
+): Promise<Account | null> {
+  const existing = await getAccountById(id);
+  if (!existing) {
+    return null;
+  }
+
+  return prisma.account.update({
+    where: { id },
+    data: updates,
+  });
+}
+
+export async function deleteAccount(id: string): Promise<boolean> {
+  try {
+    await prisma.account.delete({
+      where: { id },
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
