@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { Asset } from "@/lib/db"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
@@ -45,99 +47,155 @@ export default function AssetTile({
   onEdit,
   onDelete,
 }: AssetTileProps) {
+  const [isFlipped, setIsFlipped] = useState(false)
   const style = categoryStyle || CATEGORY_STYLES[asset.type] || CATEGORY_STYLES.other
   const showActions = onEdit || onDelete
 
+  const handleDeleteClick = () => {
+    setIsFlipped(true)
+  }
+
+  const handleConfirmDelete = () => {
+    onDelete?.(asset.id)
+    setIsFlipped(false)
+  }
+
+  const handleCancelDelete = () => {
+    setIsFlipped(false)
+  }
+
   return (
-    <div
-      className={`group relative p-2.5 rounded-lg bg-gradient-to-br ${style.gradient} border border-border/40`}
-    >
-      {showActions && (
-        <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-          {onEdit && (
+    <div className="relative h-[104px]" style={{ perspective: "1000px" }}>
+      <motion.div
+        className="relative w-full h-full"
+        initial={false}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.4, ease: "easeInOut" }}
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        <div
+          className={`absolute inset-0 group p-2.5 rounded-lg bg-gradient-to-br ${style.gradient} border border-border/40`}
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          {showActions && (
+            <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(asset)}
+                  className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteClick}
+                  className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
+                </Button>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
+                <span className="text-accent font-bold text-[10px]">
+                  {asset.symbol?.slice(0, 2).toUpperCase() || asset.name.slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3
+                  className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
+                >
+                  {asset.name}
+                </h3>
+                {asset.symbol && (
+                  <p className="text-[10px] text-muted-foreground uppercase">{asset.symbol}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-end justify-between gap-2">
+              <div className="flex flex-col">
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wide">
+                  Qty
+                </span>
+                <span className="text-sm font-medium text-foreground">
+                  {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wide">
+                  Value
+                </span>
+                <span className="text-sm font-bold text-accent">
+                  {displayValue > 0 ? formatCurrency(displayValue, displayCurrency) : "-"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="absolute inset-0 p-2.5 rounded-lg bg-gradient-to-br from-red-950 to-red-900 border border-red-800/60 flex flex-col items-center justify-center gap-3"
+          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+        >
+          <p className="text-red-200 text-xs font-medium text-center px-2 truncate max-w-full">
+            Delete {asset.name}?
+          </p>
+          <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onEdit(asset)}
-              className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+              onClick={handleCancelDelete}
+              className="h-7 px-3 text-xs text-red-200 hover:text-white hover:bg-red-800/50"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                <path d="m15 5 4 4" />
-              </svg>
+              Cancel
             </Button>
-          )}
-          {onDelete && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDelete(asset.id)}
-              className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={handleConfirmDelete}
+              className="h-7 px-3 text-xs bg-red-700 text-white hover:bg-red-600"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              </svg>
+              Confirm
             </Button>
-          )}
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2">
-        <div className="flex items-start gap-2">
-          <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
-            <span className="text-accent font-bold text-[10px]">
-              {asset.symbol?.slice(0, 2).toUpperCase() || asset.name.slice(0, 2).toUpperCase()}
-            </span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3
-              className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
-            >
-              {asset.name}
-            </h3>
-            {asset.symbol && (
-              <p className="text-[10px] text-muted-foreground uppercase">{asset.symbol}</p>
-            )}
           </div>
         </div>
-
-        <div className="flex items-end justify-between gap-2">
-          <div className="flex flex-col">
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Qty</span>
-            <span className="text-sm font-medium text-foreground">
-              {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-            </span>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] text-muted-foreground uppercase tracking-wide">Value</span>
-            <span className="text-sm font-bold text-accent">
-              {displayValue > 0 ? formatCurrency(displayValue, displayCurrency) : "-"}
-            </span>
-          </div>
-        </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

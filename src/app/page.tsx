@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [loading, setLoading] = useState(true)
   const [assetFormOpen, setAssetFormOpen] = useState(false)
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [personalFormOpen, setPersonalFormOpen] = useState(false)
   const [businessFormOpen, setBusinessFormOpen] = useState(false)
 
@@ -63,6 +64,49 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error creating asset:", error)
+    }
+  }
+
+  const handleEditAsset = (asset: Asset) => {
+    setEditingAsset(asset)
+    setAssetFormOpen(true)
+  }
+
+  const handleUpdateAsset = async (data: Partial<Asset>) => {
+    if (!editingAsset) return
+    try {
+      const response = await fetch(`/api/assets/${editingAsset.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (response.ok) {
+        setAssetFormOpen(false)
+        setEditingAsset(null)
+        fetchData()
+      }
+    } catch (error) {
+      console.error("Error updating asset:", error)
+    }
+  }
+
+  const handleDeleteAsset = async (id: string) => {
+    try {
+      const response = await fetch(`/api/assets/${id}`, {
+        method: "DELETE",
+      })
+      if (response.ok) {
+        fetchData()
+      }
+    } catch (error) {
+      console.error("Error deleting asset:", error)
+    }
+  }
+
+  const handleAssetFormClose = (open: boolean) => {
+    setAssetFormOpen(open)
+    if (!open) {
+      setEditingAsset(null)
     }
   }
 
@@ -482,6 +526,8 @@ export default function Dashboard() {
                                   displayValue={getAssetValue(asset)}
                                   displayCurrency={displayCurrency}
                                   categoryStyle={CATEGORY_STYLES[category.key]}
+                                  onEdit={handleEditAsset}
+                                  onDelete={handleDeleteAsset}
                                 />
                               ))}
                             </div>
@@ -569,7 +615,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <AssetForm open={assetFormOpen} onOpenChange={setAssetFormOpen} onSubmit={handleAddAsset} />
+        <AssetForm
+          asset={editingAsset}
+          open={assetFormOpen}
+          onOpenChange={handleAssetFormClose}
+          onSubmit={editingAsset ? handleUpdateAsset : handleAddAsset}
+        />
 
         <AccountForm
           open={personalFormOpen}
