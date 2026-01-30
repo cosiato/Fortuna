@@ -27,6 +27,12 @@ export default function Dashboard() {
   const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>({
     USD: 1,
     EUR: 0.92,
+    GBP: 0.79,
+    JPY: 149.50,
+    CHF: 0.88,
+    HKD: 7.82,
+    SGD: 1.34,
+    AED: 3.67,
     BTC: 0.000024,
   })
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
@@ -97,7 +103,7 @@ export default function Dashboard() {
       setAssets(Array.isArray(assetsData) ? assetsData : [])
       setSnapshots(Array.isArray(snapshotsData) ? snapshotsData : [])
       setAccounts(Array.isArray(accountsData) ? accountsData : [])
-      setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, BTC: 0.000024 })
+      setExchangeRates(ratesData.rates || { USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149.50, CHF: 0.88, HKD: 7.82, SGD: 1.34, AED: 3.67, BTC: 0.000024 })
 
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
@@ -265,12 +271,6 @@ export default function Dashboard() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-accent">Fortuna</h1>
           <div className="flex items-center gap-4">
-            <Link
-              href="/assets"
-              className="text-muted-foreground hover:text-accent transition-colors"
-            >
-              Manage Assets
-            </Link>
             <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
           </div>
         </div>
@@ -332,7 +332,7 @@ export default function Dashboard() {
                             <span className="text-sm font-medium text-accent">
                               {formatCurrency(
                                 typeAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0),
-                                displayCurrency
+                                displayCurrency,
                               )}
                             </span>
                           </span>
@@ -347,7 +347,8 @@ export default function Dashboard() {
                                 <div>
                                   <p className="font-medium text-foreground">{asset.name}</p>
                                   <p className="text-xs text-muted-foreground">
-                                    {asset.quantity} {asset.symbol ? `(${asset.symbol.toUpperCase()})` : "units"}
+                                    {asset.quantity}{" "}
+                                    {asset.symbol ? `(${asset.symbol.toUpperCase()})` : "units"}
                                   </p>
                                 </div>
                                 <p className="text-sm font-medium text-accent">
@@ -436,11 +437,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <AssetForm
-          open={assetFormOpen}
-          onOpenChange={setAssetFormOpen}
-          onSubmit={handleAddAsset}
-        />
+        <AssetForm open={assetFormOpen} onOpenChange={setAssetFormOpen} onSubmit={handleAddAsset} />
 
         <AccountForm
           open={personalFormOpen}
