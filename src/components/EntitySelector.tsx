@@ -1,7 +1,5 @@
-"use client"
-
 import { Icon } from "@iconify/react"
-import { Entity } from "@/lib/db"
+import type { Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"

@@ -1,7 +1,5 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { Entity } from '@/lib/db';
+import type { Entity } from '@/types/database';
 import {
   Dialog,
   DialogContent,

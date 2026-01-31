@@ -1,3 +1,5 @@
+import { fetch } from '@tauri-apps/plugin-http';
+
 interface ExchangeRates {
   base: string;
   rates: { [currency: string]: number };
@@ -30,8 +32,7 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
   try {
     // Fetch USD-based rates from exchangerate-api (free tier)
     const response = await fetch(
-      'https://api.exchangerate-api.com/v4/latest/USD',
-      { next: { revalidate: 3600 } }
+      'https://api.exchangerate-api.com/v4/latest/USD'
     );
 
     if (!response.ok) {
@@ -42,8 +43,7 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
 
     // Get BTC price to add BTC as a currency option
     const btcResponse = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
-      { next: { revalidate: 300 } }
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'
     );
 
     let btcRate = 0;

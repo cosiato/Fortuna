@@ -1,10 +1,7 @@
-"use client"
-
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Icon } from "@iconify/react"
-import Image from "next/image"
-import { Asset } from "@/lib/db"
+import type { Asset } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { Button } from "@/components/ui/button"
@@ -49,7 +46,7 @@ function CryptoAvatar({ symbol }: { symbol: string }) {
   if (crypto?.logo) {
     return (
       <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-slate-800">
-        <Image
+        <img
           src={crypto.logo}
           alt={crypto.name}
           width={24}

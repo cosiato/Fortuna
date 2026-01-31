@@ -1,5 +1,5 @@
-import YahooFinance from 'yahoo-finance2';
 import { getCryptoBySymbol } from '@/lib/cryptocurrencies';
+import { fetch } from '@tauri-apps/plugin-http';
 
 interface PriceCache {
   [symbol: string]: {
@@ -12,14 +12,22 @@ interface PriceCache {
 const cache: PriceCache = {};
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-// Create a single instance to reuse
-const yahooFinance = new YahooFinance();
-
 export interface PriceResult {
   symbol: string;
   price: number;
   currency: string;
   error?: string;
+}
+
+interface YahooQuoteResponse {
+  quoteResponse: {
+    result: Array<{
+      symbol: string;
+      regularMarketPrice: number;
+      currency: string;
+    }>;
+    error: null | { code: string; description: string };
+  };
 }
 
 export async function getStockPrice(symbol: string): Promise<PriceResult> {
@@ -35,7 +43,16 @@ export async function getStockPrice(symbol: string): Promise<PriceResult> {
   }
 
   try {
-    const quote = await yahooFinance.quote(symbol);
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Yahoo Finance API error: ${response.status}`);
+    }
+
+    const data: YahooQuoteResponse = await response.json();
+    const quote = data.quoteResponse?.result?.[0];
+
     if (!quote || !quote.regularMarketPrice) {
       return { symbol, price: 0, currency: 'USD', error: 'Quote not found' };
     }
@@ -54,8 +71,8 @@ export async function getStockPrice(symbol: string): Promise<PriceResult> {
 
     return result;
   } catch (error) {
-    console.error(`Error fetching stock price for ${symbol}:`, error);
-    return { symbol, price: 0, currency: 'USD', error: 'Failed to fetch price' };
+    const message = error instanceof Error ? error.message : 'Failed to fetch price';
+    return { symbol, price: 0, currency: 'USD', error: message };
   }
 }
 
@@ -76,8 +93,7 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
 
   try {
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
-      { next: { revalidate: 300 } }
+      `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`
     );
 
     if (!response.ok) {

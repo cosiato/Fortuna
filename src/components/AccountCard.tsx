@@ -1,6 +1,4 @@
-"use client"
-
-import { Account } from "@/lib/db"
+import type { Account } from "@/types/database"
 import { getCountryFlag, getCountryName } from "@/lib/countries"
 import { formatCurrency, SupportedCurrency } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"

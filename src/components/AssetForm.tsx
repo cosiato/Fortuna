@@ -1,7 +1,5 @@
-"use client"
-
 import { useState, useEffect } from "react"
-import { Asset } from "@/lib/db"
+import type { Asset } from "@/types/database"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

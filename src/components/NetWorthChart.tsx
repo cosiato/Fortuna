@@ -1,5 +1,3 @@
-"use client"
-
 import {
   LineChart,
   Line,
@@ -9,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { Snapshot } from "@/lib/db"
+import type { Snapshot } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
 
