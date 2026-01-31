@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.tauri.app/v2/capability",
+  "identifier": "default",
+  "description": "Default capabilities for Fortuna",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "sql:default",
+    "sql:allow-select",
+    "sql:allow-execute",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://query1.finance.yahoo.com/*" },
+        { "url": "https://api.coingecko.com/*" },
+        { "url": "https://api.exchangerate-api.com/*" }
+      ]
+    }
+  ]
+}

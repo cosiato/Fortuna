@@ -1,0 +1,242 @@
+use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, State};
+use std::sync::Mutex;
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Entity {
+    pub id: i64,
+    pub name: String,
+    #[serde(rename = "type")]
+    pub entity_type: String,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateEntityInput {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub entity_type: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateEntityInput {
+    pub name: Option<String>,
+    #[serde(rename = "type")]
+    pub entity_type: Option<String>,
+}
+
+pub struct DbConnection(pub Mutex<Connection>);
+
+#[tauri::command]
+pub fn get_all_entities(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Entity>, String> {
+    let _ = app;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let mut stmt = conn
+        .prepare("SELECT id, name, type, created_at, updated_at FROM entities ORDER BY id")
+        .map_err(|e| e.to_string())?;
+
+    let entities = stmt
+        .query_map([], |row| {
+            Ok(Entity {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                entity_type: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        })
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
+
+    Ok(entities)
+}
+
+#[tauri::command]
+pub fn get_entity_by_id(
+    app: AppHandle,
+    db: State<DbConnection>,
+    id: i64,
+) -> Result<Option<Entity>, String> {
+    let _ = app;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT id, name, type, created_at, updated_at FROM entities WHERE id = ?",
+        [id],
+        |row| {
+            Ok(Entity {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                entity_type: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        },
+    );
+
+    match result {
+        Ok(entity) => Ok(Some(entity)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn create_entity(
+    app: AppHandle,
+    db: State<DbConnection>,
+    input: CreateEntityInput,
+) -> Result<Entity, String> {
+    let _ = app;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let entity_type = input.entity_type.unwrap_or_else(|| "company".to_string());
+
+    conn.execute(
+        "INSERT INTO entities (name, type, created_at, updated_at) VALUES (?, ?, datetime('now'), datetime('now'))",
+        rusqlite::params![input.name, entity_type],
+    )
+    .map_err(|e| e.to_string())?;
+
+    let id = conn.last_insert_rowid();
+
+    conn.query_row(
+        "SELECT id, name, type, created_at, updated_at FROM entities WHERE id = ?",
+        [id],
+        |row| {
+            Ok(Entity {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                entity_type: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        },
+    )
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn update_entity(
+    app: AppHandle,
+    db: State<DbConnection>,
+    id: i64,
+    input: UpdateEntityInput,
+) -> Result<Entity, String> {
+    let _ = app;
+    if id == 0 {
+        return Err("Cannot modify the Individual entity".to_string());
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let mut updates = Vec::new();
+    let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+    if let Some(ref name) = input.name {
+        updates.push("name = ?");
+        params.push(Box::new(name.clone()));
+    }
+
+    if let Some(ref entity_type) = input.entity_type {
+        updates.push("type = ?");
+        params.push(Box::new(entity_type.clone()));
+    }
+
+    if updates.is_empty() {
+        return Err("No fields to update".to_string());
+    }
+
+    updates.push("updated_at = datetime('now')");
+
+    let sql = format!(
+        "UPDATE entities SET {} WHERE id = ?",
+        updates.join(", ")
+    );
+
+    params.push(Box::new(id));
+
+    let params_refs: Vec<&dyn rusqlite::ToSql> = params.iter().map(|p| p.as_ref()).collect();
+
+    conn.execute(&sql, params_refs.as_slice())
+        .map_err(|e| e.to_string())?;
+
+    conn.query_row(
+        "SELECT id, name, type, created_at, updated_at FROM entities WHERE id = ?",
+        [id],
+        |row| {
+            Ok(Entity {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                entity_type: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        },
+    )
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn delete_entity(app: AppHandle, db: State<DbConnection>, id: i64) -> Result<(), String> {
+    let _ = app;
+    if id == 0 {
+        return Err("Cannot delete the Individual entity".to_string());
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let affected = conn
+        .execute("DELETE FROM entities WHERE id = ?", [id])
+        .map_err(|e| e.to_string())?;
+
+    if affected == 0 {
+        return Err("Entity not found".to_string());
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn ensure_individual_entity(app: AppHandle, db: State<DbConnection>) -> Result<Entity, String> {
+    let _ = app;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM entities WHERE id = 0)",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+
+    if !exists {
+        conn.execute(
+            "INSERT INTO entities (id, name, type, created_at, updated_at) VALUES (0, 'Individual', 'individual', datetime('now'), datetime('now'))",
+            [],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    conn.query_row(
+        "SELECT id, name, type, created_at, updated_at FROM entities WHERE id = 0",
+        [],
+        |row| {
+            Ok(Entity {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                entity_type: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        },
+    )
+    .map_err(|e| e.to_string())
+}
