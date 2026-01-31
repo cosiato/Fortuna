@@ -1,16 +1,15 @@
 ## Project Overview
 
-We are building Fortuna, an offline personal wealth management app with a gamified, RPG-inspired visual identity. Think "Hades meets fintech" — dark, atmospheric, with progression systems.
+We are building Fortuna, an offline personal wealth management desktop app with a gamified, RPG-inspired visual identity. Think "Hades meets fintech" - dark, atmospheric, with progression systems.
 
 Use the following tech stack:
 
-- Next.js 16
+- Tauri v2 (Rust backend + Vite frontend)
+- React 19 with TypeScript
 - TailwindCSS
-- SQLite for local database
-- Prisma ORM and Prisma Client
+- SQLite for local database (via rusqlite in Rust)
 - Recharts library for charts
 - Shadcn for UI components
-- TypeScript
 - Framer Motion for animations
 - Iconify with Solar icon set (linear variant)
 
@@ -27,51 +26,45 @@ Use the following tech stack:
 
 - No console.log in production code
 - Proper error handling with try/catch
-- Input validation with Zod or similar
+- Input validation in Rust commands
 
 ### 3. Testing
 
 - TDD: Write tests first
 - 80% minimum coverage
 - Unit tests for utilities
-- Integration tests for APIs
+- Integration tests for Tauri commands
 
 ### 4. Security
 
 - No hardcoded secrets
 - Environment variables for sensitive data
 - Validate all user inputs
-- Parameterized queries only
-- CSRF protection enabled
+- Parameterized queries only (Rust handles this)
 
 ## File Structure
 
 ```
-data/                             # SQLite database files
-|-- fortuna.db                    # Main database file
-prisma/                           # Database schema & migrations
-|-- schema.prisma                 # Prisma data model
-|-- migrations/                   # Database migrations
-public/                           # Static assets to be served
+src-tauri/                        # Tauri backend (Rust)
+|-- Cargo.toml                    # Rust dependencies
+|-- tauri.conf.json               # Tauri configuration
+|-- capabilities/                 # Tauri security capabilities
+|   |-- default.json
+|-- icons/                        # App icons
+|-- src/
+|   |-- main.rs                   # Entry point
+|   |-- lib.rs                    # App setup and command registration
+|   |-- database.rs               # SQLite initialization
+|   |-- commands/                 # Tauri IPC commands
+|       |-- mod.rs                # Command exports
+|       |-- assets.rs             # Asset CRUD
+|       |-- accounts.rs           # Account CRUD
+|       |-- entities.rs           # Entity CRUD
+|       |-- snapshots.rs          # Snapshot CRUD
 src/
-|-- app/                          # Next.js app router
-|   |-- fonts/                    # Custom fonts (Geist)
-|   |-- api/                      # API routes
-|   |   |-- accounts/             # Account CRUD endpoints
-|   |   |   |-- route.ts          # GET/POST /api/accounts
-|   |   |   |-- [id]/route.ts     # PUT/DELETE /api/accounts/:id
-|   |   |-- assets/               # Asset CRUD endpoints
-|   |   |   |-- route.ts          # GET/POST /api/assets
-|   |   |   |-- [id]/route.ts     # PUT/DELETE /api/assets/:id
-|   |   |-- entities/             # Entity CRUD endpoints
-|   |   |   |-- route.ts          # GET/POST /api/entities
-|   |   |   |-- [id]/route.ts     # GET/PUT/DELETE /api/entities/:id
-|   |   |-- exchange-rates/       # Currency exchange rates
-|   |   |-- prices/               # Asset price fetching
-|   |   |-- snapshots/            # Portfolio snapshots
-|   |-- page.tsx                  # Dashboard home page
-|   |-- layout.tsx                # Root layout
-|   |-- globals.css               # Global styles
+|-- main.tsx                      # React entry point
+|-- App.tsx                       # Main dashboard component
+|-- globals.css                   # Global styles
 |-- components/                   # Reusable UI components
 |   |-- ui/                       # Shadcn UI primitives
 |   |   |-- accordion.tsx
@@ -96,54 +89,73 @@ src/
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart
-|-- hooks/                        # Custom React hooks
 |-- lib/                          # Utility libraries
+|   |-- api.ts                    # Tauri IPC wrapper functions
 |   |-- countries.ts              # Country data and utilities
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
-|   |-- currency.ts               # Currency formatting utilities
-|   |-- db.ts                     # Database connection (SQLite)
-|   |-- prices.ts                 # Price fetching logic
+|   |-- currency.ts               # Currency formatting and exchange rates
+|   |-- prices.ts                 # Price fetching (Yahoo Finance, CoinGecko)
 |   |-- utils.ts                  # General utilities (cn helper)
 |-- types/                        # TypeScript definitions
+|   |-- database.ts               # Database entity types
 |-- config/                       # Configuration files
 |   |-- cryptocurrencies.json     # Top 200 cryptocurrencies data
-|-- generated/                    # Auto-generated Prisma types
-|   |-- prisma/                   # Prisma client types
+public/                           # Static assets
+|-- favicon.ico
+index.html                        # Vite entry HTML
+vite.config.ts                    # Vite configuration
+tailwind.config.ts                # Tailwind configuration
 ```
 
 ## Key Patterns
 
-### API Response Format
+### Tauri Command Invocation
 
 ```typescript
-interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: string
+import { invoke } from '@tauri-apps/api/core';
+
+// Call Rust commands via IPC
+const assets = await invoke<Asset[]>('get_all_assets');
+const newAsset = await invoke<Asset>('create_asset', { input: { name: 'BTC', type: 'crypto' } });
+```
+
+### API Layer (src/lib/api.ts)
+
+```typescript
+export const api = {
+  assets: {
+    getAll: () => invoke<Asset[]>('get_all_assets'),
+    create: (input: CreateAssetInput) => invoke<Asset>('create_asset', { input }),
+  },
+  // ... other domains
+};
+```
+
+### Error Handling (Rust)
+
+```rust
+#[tauri::command]
+pub fn create_asset(db: State<DbConnection>, input: CreateAssetInput) -> Result<Asset, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    // ... operation
+    Ok(asset)
 }
 ```
 
-### Error Handling
-
-```typescript
-try {
-  const result = await operation()
-  return { success: true, data: result }
-} catch (error) {
-  console.error("Operation failed:", error)
-  return { success: false, error: "User-friendly message" }
-}
-```
-
-## Environment Variables
+## Development Commands
 
 ```bash
-# Required
-DATABASE_URL=
-API_KEY=
+# Development (starts both Vite and Tauri)
+npm run tauri dev
 
-# Optional
-DEBUG=false
+# Build for production
+npm run tauri build
+
+# Type check
+npm run build
+
+# Lint
+npm run lint
 ```
 
 ## General Style

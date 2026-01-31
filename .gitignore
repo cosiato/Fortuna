@@ -9,12 +9,9 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -29,15 +26,12 @@ yarn-error.log*
 .env
 .env*.local
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # database
 /data/
 .claude/settings.local.json
 
-/src/generated/prisma
+# Tauri
+/src-tauri/target/
