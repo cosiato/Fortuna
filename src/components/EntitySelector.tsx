@@ -101,7 +101,7 @@ export default function EntitySelector({
           const isCompany = entity.type === "company"
 
           return (
-            <div key={entity.id} className="relative flex-shrink-0">
+            <div key={entity.id} className="relative flex-shrink-0 group">
               <button
                 onClick={() => onSelect(entity.id)}
                 className={`
@@ -154,7 +154,7 @@ export default function EntitySelector({
                         e.stopPropagation()
                         setOpenPopoverId(openPopoverId === entity.id ? null : entity.id)
                       }}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-700/50 transition-colors"
+                      className={`absolute right-1 top-1 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-700/50 transition-all duration-200 ${openPopoverId === entity.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                       aria-label="Entity options"
                     >
                       <Icon icon="solar:menu-dots-bold" width={14} height={14} />
