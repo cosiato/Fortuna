@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import type { Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
@@ -21,63 +22,150 @@ export default function EntitySelector({
   entityTotals,
   displayCurrency,
 }: EntitySelectorProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const updateScrollState = useCallback(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setCanScrollLeft(scrollLeft > 0)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
+  }, [])
+
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    updateScrollState()
+
+    const resizeObserver = new ResizeObserver(updateScrollState)
+    resizeObserver.observe(container)
+
+    container.addEventListener("scroll", updateScrollState)
+
+    return () => {
+      resizeObserver.disconnect()
+      container.removeEventListener("scroll", updateScrollState)
+    }
+  }, [updateScrollState, entities])
+
+  const scroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const scrollAmount = 200
+    container.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    })
+  }
+
   return (
-    <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-      {entities.map((entity) => {
-        const isSelected = entity.id === selectedEntityId
-        const total = entityTotals[entity.id] ?? 0
-
-        return (
-          <button
-            key={entity.id}
-            onClick={() => onSelect(entity.id)}
-            className={`
-              relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
-              transition-colors duration-200 ease-out min-w-[120px]
-              ${
-                isSelected
-                  ? "text-accent"
-                  : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
-              }
-            `}
-          >
-            {isSelected && (
-              <motion.div
-                layoutId="activeEntityBackground"
-                className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 30,
-                }}
-              />
-            )}
-            <div className="relative flex items-center gap-2">
-              <Icon
-                icon={entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"}
-                width={16}
-                height={16}
-              />
-              <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
-            </div>
-            <span
-              className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
-            >
-              {formatCurrency(total, displayCurrency)}
-            </span>
-          </button>
-        )
-      })}
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-auto py-2 px-3 text-muted-foreground hover:text-accent hover:bg-accent/10 flex items-center gap-1.5"
-        onClick={onAddCompany}
+    <div className="relative flex items-center gap-2 mb-6">
+      {/* Left scroll arrow */}
+      <div
+        className={`
+          absolute left-0 z-10 flex items-center h-full
+          transition-opacity duration-200
+          ${canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
       >
-        <Icon icon="solar:add-circle-linear" width={16} height={16} />
-        <span className="text-xs">Add Company</span>
-      </Button>
+        <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent pointer-events-none" />
+        <button
+          onClick={() => scroll("left")}
+          className="relative z-10 p-1.5 rounded-full bg-slate-800/80 border border-slate-700/50 text-muted-foreground hover:text-foreground hover:bg-slate-700 transition-colors"
+          aria-label="Scroll left"
+        >
+          <Icon icon="solar:alt-arrow-left-linear" width={16} height={16} />
+        </button>
+      </div>
+
+      {/* Scrollable entities container */}
+      <div
+        ref={scrollContainerRef}
+        className="flex items-center gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-1"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {entities.map((entity) => {
+          const isSelected = entity.id === selectedEntityId
+          const total = entityTotals[entity.id] ?? 0
+
+          return (
+            <button
+              key={entity.id}
+              onClick={() => onSelect(entity.id)}
+              className={`
+                relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
+                transition-colors duration-200 ease-out min-w-[120px] flex-shrink-0
+                ${
+                  isSelected
+                    ? "text-accent"
+                    : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
+                }
+              `}
+            >
+              {isSelected && (
+                <motion.div
+                  layoutId="activeEntityBackground"
+                  className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                  }}
+                />
+              )}
+              <div className="relative flex items-center gap-2">
+                <Icon
+                  icon={entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"}
+                  width={16}
+                  height={16}
+                />
+                <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
+              </div>
+              <span
+                className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+              >
+                {formatCurrency(total, displayCurrency)}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Right scroll arrow */}
+      <div
+        className={`
+          absolute right-[110px] z-10 flex items-center h-full
+          transition-opacity duration-200
+          ${canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
+      >
+        <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+        <button
+          onClick={() => scroll("right")}
+          className="relative z-10 p-1.5 rounded-full bg-slate-800/80 border border-slate-700/50 text-muted-foreground hover:text-foreground hover:bg-slate-700 transition-colors"
+          aria-label="Scroll right"
+        >
+          <Icon icon="solar:alt-arrow-right-linear" width={16} height={16} />
+        </button>
+      </div>
+
+      {/* Sticky Add Company button */}
+      <div className="flex-shrink-0 pl-2 border-l border-slate-700/50">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-auto py-2 px-3 text-muted-foreground hover:text-accent hover:bg-accent/10 flex items-center gap-1.5"
+          onClick={onAddCompany}
+        >
+          <Icon icon="solar:add-circle-linear" width={16} height={16} />
+          <span className="text-xs">Add Company</span>
+        </Button>
+      </div>
     </div>
   )
 }
