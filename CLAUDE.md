@@ -24,7 +24,7 @@ Use the following tech stack:
 
 ### 2. Code Style
 
-- No console.log in production code
+- No console.log or console.error in production code
 - Proper error handling with try/catch
 - Input validation in Rust commands
 
@@ -37,8 +37,6 @@ Use the following tech stack:
 
 ### 4. Security
 
-- No hardcoded secrets
-- Environment variables for sensitive data
 - Validate all user inputs
 - Parameterized queries only (Rust handles this)
 
@@ -112,11 +110,11 @@ tailwind.config.ts                # Tailwind configuration
 ### Tauri Command Invocation
 
 ```typescript
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from "@tauri-apps/api/core"
 
 // Call Rust commands via IPC
-const assets = await invoke<Asset[]>('get_all_assets');
-const newAsset = await invoke<Asset>('create_asset', { input: { name: 'BTC', type: 'crypto' } });
+const assets = await invoke<Asset[]>("get_all_assets")
+const newAsset = await invoke<Asset>("create_asset", { input: { name: "BTC", type: "crypto" } })
 ```
 
 ### API Layer (src/lib/api.ts)
@@ -124,11 +122,11 @@ const newAsset = await invoke<Asset>('create_asset', { input: { name: 'BTC', typ
 ```typescript
 export const api = {
   assets: {
-    getAll: () => invoke<Asset[]>('get_all_assets'),
-    create: (input: CreateAssetInput) => invoke<Asset>('create_asset', { input }),
+    getAll: () => invoke<Asset[]>("get_all_assets"),
+    create: (input: CreateAssetInput) => invoke<Asset>("create_asset", { input }),
   },
   // ... other domains
-};
+}
 ```
 
 ### Error Handling (Rust)
@@ -172,13 +170,13 @@ npm run lint
 
 - The UI should feel rewarding and progression-oriented.
 
-| Finance Concept       | Game Equivalent        |
-| --------------------- | ---------------------- |
-| Net worth             | Power Level / Total XP |
-| Assets                | Inventory items        |
-| Bank Accounts         | Vaults                 |
-| Savings goals         | Quests                 |
-| Monthly budget        | Daily challenges       |
-| Reaching a milestone  | Achievement unlocked   |
-| Portfolio diversity   | Skill tree             |
-| Income streams        | Passive buffs          |
+| Finance Concept      | Game Equivalent        |
+| -------------------- | ---------------------- |
+| Net worth            | Power Level / Total XP |
+| Assets               | Inventory items        |
+| Bank Accounts        | Vaults                 |
+| Savings goals        | Quests                 |
+| Monthly budget       | Daily challenges       |
+| Reaching a milestone | Achievement unlocked   |
+| Portfolio diversity  | Skill tree             |
+| Income streams       | Passive buffs          |
