@@ -8,7 +8,12 @@ import AccountCard from "@/components/AccountCard"
 import type { Asset, Snapshot, Account, Entity } from "@/types/database"
 import { api } from "@/lib/api"
 import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
-import { SupportedCurrency, formatCurrency, getExchangeRates, forceRefreshExchangeRates } from "@/lib/currency"
+import {
+  SupportedCurrency,
+  formatCurrency,
+  getExchangeRates,
+  forceRefreshExchangeRates,
+} from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -43,7 +48,7 @@ export default function App() {
   const [entityFormOpen, setEntityFormOpen] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCooldown, setRefreshCooldown] = useState(false)
-  const REFRESH_COOLDOWN = 30 * 1000 // 30 seconds
+  const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
 
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
@@ -407,7 +412,10 @@ export default function App() {
         value = priceData.price * asset.quantity
         currency = priceData.currency
       } else if (asset.type === "crypto" || asset.type === "stock") {
-        console.error(`[DEBUG] No price found for ${asset.symbol}. Available keys:`, Object.keys(prices))
+        console.error(
+          `[DEBUG] No price found for ${asset.symbol}. Available keys:`,
+          Object.keys(prices),
+        )
       }
     }
 
@@ -479,17 +487,30 @@ export default function App() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              className="h-auto px-2 py-1.5 text-muted-foreground hover:text-foreground disabled:opacity-100"
               onClick={handleManualRefresh}
               disabled={isRefreshing || refreshCooldown}
               title="Refresh prices"
             >
-              <Icon
-                icon="solar:refresh-linear"
-                width={18}
-                height={18}
-                className={isRefreshing ? "animate-spin" : ""}
-              />
+              {refreshCooldown && !isRefreshing ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="text-xs text-emerald-500">Updated</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <Icon
+                    icon="solar:refresh-linear"
+                    width={16}
+                    height={16}
+                    className={isRefreshing ? "animate-spin" : ""}
+                  />
+                  <span className="text-xs">Update</span>
+                </span>
+              )}
             </Button>
             <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
           </div>
