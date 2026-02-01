@@ -64,6 +64,11 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
         );
 
         CREATE INDEX IF NOT EXISTS idx_accounts_entity_id ON accounts(entity_id);
+
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
         ",
     )?;
 

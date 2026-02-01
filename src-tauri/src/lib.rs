@@ -43,6 +43,10 @@ pub fn run() {
             commands::get_today_snapshot,
             commands::get_latest_snapshot,
             commands::create_snapshot,
+            commands::set_pin,
+            commands::verify_pin,
+            commands::remove_pin,
+            commands::is_pin_enabled,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
