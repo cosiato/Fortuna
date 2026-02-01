@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import type { Asset } from "@/types/database"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import {
 import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/currency"
 import CryptoSelector from "@/components/CryptoSelector"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
+import { getStockInfo } from "@/lib/prices"
 
 interface AssetFormProps {
   asset?: Asset | null
@@ -36,8 +37,19 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
   const [quantity, setQuantity] = useState(asset?.quantity?.toString() || "1")
   const [manualPrice, setManualPrice] = useState(asset?.manualPrice?.toString() || "")
   const [currency, setCurrency] = useState(asset?.currency || "USD")
+  const [resolvedName, setResolvedName] = useState("")
+  const [isLoadingName, setIsLoadingName] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestIdRef = useRef(0)
 
   useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    requestIdRef.current++
+
     if (asset) {
       setName(asset.name || "")
       setType(asset.type || "stock")
@@ -45,6 +57,9 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setQuantity(asset.quantity?.toString() || "1")
       setManualPrice(asset.manualPrice?.toString() || "")
       setCurrency(asset.currency || "USD")
+      setResolvedName(asset.name || "")
+      setNameError(null)
+      setIsLoadingName(false)
     } else {
       setName("")
       setType("stock")
@@ -52,17 +67,95 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setQuantity("1")
       setManualPrice("")
       setCurrency("USD")
+      setResolvedName("")
+      setNameError(null)
+      setIsLoadingName(false)
     }
   }, [asset, open])
+
+  const fetchStockName = useCallback(async (tickerSymbol: string) => {
+    if (!tickerSymbol.trim()) {
+      setResolvedName("")
+      setNameError(null)
+      return
+    }
+
+    const currentRequestId = ++requestIdRef.current
+    setIsLoadingName(true)
+    setNameError(null)
+
+    const info = await getStockInfo(tickerSymbol.trim().toUpperCase())
+
+    if (currentRequestId !== requestIdRef.current) {
+      return
+    }
+
+    setIsLoadingName(false)
+
+    if (info.error) {
+      setNameError(info.error)
+      setResolvedName("")
+    } else {
+      setResolvedName(info.name)
+      setNameError(null)
+    }
+  }, [])
+
+  const handleStockSymbolChange = useCallback(
+    (value: string) => {
+      setSymbol(value)
+      setResolvedName("")
+      setNameError(null)
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+
+      debounceTimerRef.current = setTimeout(() => {
+        fetchStockName(value)
+      }, 500)
+    },
+    [fetchStockName],
+  )
+
+  const handleCryptoChange = useCallback((cryptoSymbol: string) => {
+    setSymbol(cryptoSymbol)
+    const crypto = getCryptoBySymbol(cryptoSymbol)
+    if (crypto) {
+      setResolvedName(crypto.name)
+      setNameError(null)
+    } else {
+      setResolvedName("")
+      setNameError("Cryptocurrency not found")
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   const isEditing = !!asset
   const requiresSymbol = type === "stock" || type === "crypto"
   const requiresManualPrice = type === "real_estate" || type === "other"
+  const usesApiName = type === "stock" || type === "crypto"
+
+  const getEffectiveName = () => {
+    if (usesApiName) {
+      return resolvedName
+    }
+    return name
+  }
+
+  const isSubmitDisabled = usesApiName && (!resolvedName.trim() || isLoadingName)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit({
-      name,
+      name: getEffectiveName(),
       type,
       symbol: requiresSymbol ? symbol : null,
       quantity: parseFloat(quantity) || 0,
@@ -80,19 +173,18 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Apple Stock, Bitcoin, House"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="type">Type</Label>
-            <Select value={type} onValueChange={(val) => setType(val as Asset["type"])}>
+            <Select
+              value={type}
+              onValueChange={(val) => {
+                setType(val as Asset["type"])
+                setResolvedName("")
+                setNameError(null)
+                if (val !== "stock" && val !== "crypto") {
+                  setSymbol("")
+                }
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -109,16 +201,8 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
           {type === "crypto" && (
             <div className="space-y-2">
               <Label>Cryptocurrency</Label>
-              <CryptoSelector
-                value={symbol}
-                onChange={(cryptoSymbol) => {
-                  setSymbol(cryptoSymbol)
-                  const crypto = getCryptoBySymbol(cryptoSymbol)
-                  if (crypto && !name) {
-                    setName(crypto.name)
-                  }
-                }}
-              />
+              <CryptoSelector value={symbol} onChange={handleCryptoChange} />
+              {nameError && <p className="text-sm text-destructive">{nameError}</p>}
             </div>
           )}
 
@@ -128,8 +212,30 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               <Input
                 id="symbol"
                 value={symbol}
-                onChange={(e) => setSymbol(e.target.value)}
+                onChange={(e) => handleStockSymbolChange(e.target.value)}
                 placeholder="e.g., AAPL, GOOGL"
+                required
+              />
+              {isLoadingName && (
+                <p className="text-sm text-muted-foreground">Looking up stock...</p>
+              )}
+              {resolvedName && !isLoadingName && (
+                <p className="text-sm text-muted-foreground">{resolvedName}</p>
+              )}
+              {nameError && !isLoadingName && (
+                <p className="text-sm text-destructive">{nameError}</p>
+              )}
+            </div>
+          )}
+
+          {!usesApiName && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., House, Car"
                 required
               />
             </div>
@@ -197,8 +303,8 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
-              {isEditing ? "Update" : "Add Asset"}
+            <Button type="submit" className="flex-1" disabled={isSubmitDisabled}>
+              {isLoadingName ? "Loading..." : isEditing ? "Update" : "Add Asset"}
             </Button>
           </div>
         </form>
