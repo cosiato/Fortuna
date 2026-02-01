@@ -43,6 +43,104 @@ export interface PriceResult {
   error?: string;
 }
 
+export interface StockInfo {
+  symbol: string;
+  name: string;
+  price: number;
+  currency: string;
+  error?: string;
+}
+
+interface YahooChartMeta {
+  shortName?: string;
+  longName?: string;
+  regularMarketPrice?: number;
+  currency?: string;
+}
+
+interface StockInfoCacheEntry {
+  name: string;
+  price: number;
+  currency: string;
+  timestamp: number;
+}
+
+interface StockInfoCache {
+  [symbol: string]: StockInfoCacheEntry;
+}
+
+const stockInfoCache: StockInfoCache = {};
+
+async function fetchYahooChartData(symbol: string): Promise<{ meta: YahooChartMeta | null; error?: string }> {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return { meta: null, error: `Yahoo Finance API error: ${response.status}` };
+    }
+
+    const data = await response.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+
+    if (!meta) {
+      return { meta: null, error: 'Quote not found' };
+    }
+
+    return { meta };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch data';
+    return { meta: null, error: message };
+  }
+}
+
+export async function getStockInfo(symbol: string): Promise<StockInfo> {
+  const trimmedSymbol = symbol.trim().toUpperCase();
+
+  if (!trimmedSymbol || trimmedSymbol.length > 12) {
+    return { symbol, name: '', price: 0, currency: 'USD', error: 'Invalid symbol' };
+  }
+
+  const cacheKey = `stockinfo:${trimmedSymbol}`;
+  const cached = stockInfoCache[cacheKey];
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return {
+      symbol,
+      name: cached.name,
+      price: cached.price,
+      currency: cached.currency,
+    };
+  }
+
+  const { meta, error } = await fetchYahooChartData(trimmedSymbol);
+
+  if (error || !meta) {
+    return { symbol, name: '', price: 0, currency: 'USD', error: error || 'Quote not found' };
+  }
+
+  const result: StockInfo = {
+    symbol,
+    name: meta.shortName || meta.longName || symbol,
+    price: meta.regularMarketPrice ?? 0,
+    currency: meta.currency || 'USD',
+  };
+
+  stockInfoCache[cacheKey] = {
+    name: result.name,
+    price: result.price,
+    currency: result.currency,
+    timestamp: Date.now(),
+  };
+
+  return result;
+}
+
 export async function getStockPrice(symbol: string): Promise<PriceResult> {
   const cacheKey = `stock:${symbol.toUpperCase()}`;
   const cached = cache[cacheKey];
@@ -55,45 +153,26 @@ export async function getStockPrice(symbol: string): Promise<PriceResult> {
     };
   }
 
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-        'Accept': 'application/json',
-      },
-    });
+  const { meta, error } = await fetchYahooChartData(symbol);
 
-    if (!response.ok) {
-      throw new Error(`Yahoo Finance API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const chart = data?.chart?.result?.[0];
-    const meta = chart?.meta;
-
-    if (!meta || meta.regularMarketPrice === undefined) {
-      return { symbol, price: 0, currency: 'USD', error: 'Quote not found' };
-    }
-
-    const result = {
-      symbol,
-      price: meta.regularMarketPrice,
-      currency: meta.currency || 'USD',
-    };
-
-    cache[cacheKey] = {
-      price: result.price,
-      currency: result.currency,
-      timestamp: Date.now(),
-    };
-    saveCacheToStorage(cache);
-
-    return result;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch price';
-    return { symbol, price: 0, currency: 'USD', error: message };
+  if (error || !meta || meta.regularMarketPrice === undefined) {
+    return { symbol, price: 0, currency: 'USD', error: error || 'Quote not found' };
   }
+
+  const result = {
+    symbol,
+    price: meta.regularMarketPrice,
+    currency: meta.currency || 'USD',
+  };
+
+  cache[cacheKey] = {
+    price: result.price,
+    currency: result.currency,
+    timestamp: Date.now(),
+  };
+  saveCacheToStorage(cache);
+
+  return result;
 }
 
 export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
@@ -116,8 +195,6 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
     const response = await fetch(url);
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error(`CoinGecko API error for ${symbol}: ${response.status}`, text);
       throw new Error(`CoinGecko API error: ${response.status}`);
     }
 
@@ -125,7 +202,6 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
     const price = data[coinId]?.usd ?? data[coinId.toLowerCase()]?.usd;
 
     if (price === undefined) {
-      console.error(`Price not found for ${symbol} (coinId: ${coinId})`, data);
       return { symbol, price: 0, currency: 'USD', error: 'Coin not found' };
     }
 
@@ -143,8 +219,7 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
     saveCacheToStorage(cache);
 
     return result;
-  } catch (error) {
-    console.error(`Error fetching crypto price for ${symbol}:`, error);
+  } catch {
     return { symbol, price: 0, currency: 'USD', error: 'Failed to fetch price' };
   }
 }
@@ -171,7 +246,6 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
   }
 
   if (uncachedSymbols.length === 0) {
-    console.error('[DEBUG] All crypto prices from cache:', cachedResults);
     return cachedResults;
   }
 
@@ -180,12 +254,9 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
     return { symbol, coinId: crypto?.id || symbol.toLowerCase() };
   });
 
-  console.error('[DEBUG] Fetching crypto prices for coinIds:', coinIds);
-
   try {
     const idsParam = coinIds.map((c) => c.coinId).join(',');
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${idsParam}&vs_currencies=usd`;
-    console.error('[DEBUG] CoinGecko URL:', url);
 
     const response = await fetch(url, {
       headers: {
@@ -193,22 +264,16 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
       },
     });
 
-    console.error('[DEBUG] CoinGecko response status:', response.status);
-
     if (!response.ok) {
-      const text = await response.text();
-      console.error('[DEBUG] CoinGecko error response:', text);
       throw new Error(`CoinGecko API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.error('[DEBUG] CoinGecko response data:', data);
 
     const results: PriceResult[] = [...cachedResults];
 
     for (const { symbol, coinId } of coinIds) {
       const price = data[coinId]?.usd ?? data[coinId.toLowerCase()]?.usd;
-      console.error(`[DEBUG] Price for ${symbol} (${coinId}):`, price);
       const result: PriceResult = {
         symbol,
         price: price ?? 0,
@@ -228,8 +293,7 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
 
     saveCacheToStorage(cache);
     return results;
-  } catch (error) {
-    console.error('[DEBUG] Batch crypto fetch failed, falling back to individual:', error);
+  } catch {
     const individualResults = await Promise.all(
       uncachedSymbols.map((symbol) => getCryptoPrice(symbol))
     );
