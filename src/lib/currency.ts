@@ -6,8 +6,33 @@ interface ExchangeRates {
   timestamp: number;
 }
 
-let cachedRates: ExchangeRates | null = null;
+const RATES_STORAGE_KEY = 'fortuna_exchange_rates';
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+function loadRatesFromStorage(): ExchangeRates | null {
+  try {
+    const stored = localStorage.getItem(RATES_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as ExchangeRates;
+      if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL) {
+        return parsed;
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+}
+
+function saveRatesToStorage(rates: ExchangeRates): void {
+  try {
+    localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+let cachedRates: ExchangeRates | null = loadRatesFromStorage();
 
 export const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'HKD', 'SGD', 'AED', 'BTC'] as const;
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
@@ -70,6 +95,7 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
       },
       timestamp: Date.now(),
     };
+    saveRatesToStorage(cachedRates);
 
     return cachedRates;
   } catch (error) {
@@ -133,4 +159,9 @@ export function formatCurrency(
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+export async function forceRefreshExchangeRates(): Promise<ExchangeRates> {
+  cachedRates = null;
+  return getExchangeRates();
 }
