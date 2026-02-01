@@ -50,4 +50,11 @@ export const api = {
     getLatest: () => invoke<Snapshot | null>('get_latest_snapshot'),
     create: (input: CreateSnapshotInput) => invoke<Snapshot>('create_snapshot', { input }),
   },
+
+  settings: {
+    setPin: (pin: string) => invoke<void>('set_pin', { pin }),
+    verifyPin: (pin: string) => invoke<boolean>('verify_pin', { pin }),
+    removePin: (currentPin: string) => invoke<void>('remove_pin', { currentPin }),
+    isPinEnabled: () => invoke<boolean>('is_pin_enabled'),
+  },
 };

@@ -21,6 +21,8 @@ import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
 import EntitySelector from "@/components/EntitySelector"
 import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
+import LockScreen from "@/components/LockScreen"
+import SettingsDialog from "@/components/SettingsDialog"
 import { motion } from "framer-motion"
 
 export default function App() {
@@ -52,6 +54,9 @@ export default function App() {
   const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCooldown, setRefreshCooldown] = useState(false)
+  const [isLocked, setIsLocked] = useState(false)
+  const [isPinEnabled, setIsPinEnabled] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
 
   useEffect(() => {
@@ -367,10 +372,33 @@ export default function App() {
     const initializeApp = async () => {
       const assetsData = await fetchDataOnly()
       await refreshPrices(assetsData)
+
+      try {
+        const pinEnabled = await api.settings.isPinEnabled()
+        setIsPinEnabled(pinEnabled)
+        if (pinEnabled) {
+          setIsLocked(true)
+        }
+      } catch {
+        // PIN check failed, continue without lock
+      }
+
       setLoading(false)
     }
     initializeApp()
   }, [fetchDataOnly, refreshPrices])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "l" && isPinEnabled && !isLocked) {
+        e.preventDefault()
+        setIsLocked(true)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isPinEnabled, isLocked])
 
   const calculateNetWorth = () => {
     let totalInUsd = 0
@@ -575,6 +603,15 @@ export default function App() {
               )}
             </Button>
             <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto px-2 py-1.5 text-muted-foreground hover:text-foreground"
+              onClick={() => setSettingsOpen(true)}
+              title="Settings"
+            >
+              <Icon icon="solar:settings-linear" width={16} height={16} />
+            </Button>
           </div>
         </div>
       </header>
@@ -784,7 +821,17 @@ export default function App() {
           }
           onConfirm={handleConfirmDeleteEntity}
         />
+
+        <SettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          isPinEnabled={isPinEnabled}
+          onPinStatusChange={setIsPinEnabled}
+          onLock={() => setIsLocked(true)}
+        />
       </main>
+
+      <LockScreen isLocked={isLocked} onUnlock={() => setIsLocked(false)} />
     </div>
   )
 }
