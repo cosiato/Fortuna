@@ -59,9 +59,7 @@ function CryptoAvatar({ symbol }: { symbol: string }) {
 
   return (
     <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
-      <span className="text-accent font-bold text-[10px]">
-        {symbol.slice(0, 2).toUpperCase()}
-      </span>
+      <span className="text-accent font-bold text-[10px]">{symbol.slice(0, 2).toUpperCase()}</span>
     </div>
   )
 }
@@ -149,7 +147,8 @@ export default function AssetTile({
               ) : (
                 <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
                   <span className="text-accent font-bold text-[10px]">
-                    {asset.symbol?.slice(0, 2).toUpperCase() || asset.name.slice(0, 2).toUpperCase()}
+                    {asset.symbol?.slice(0, 2).toUpperCase() ||
+                      asset.name.slice(0, 2).toUpperCase()}
                   </span>
                 </div>
               )}
@@ -180,7 +179,7 @@ export default function AssetTile({
                         size="sm"
                         onClick={handleDecrement}
                         disabled={!canDecrement}
-                        className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                        className="h-5 w-5 p-0 mt-0.5 text-muted-foreground hover:text-accent hover:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                       >
                         <Icon icon="solar:minus-circle-linear" width={12} height={12} />
                       </Button>
@@ -197,7 +196,7 @@ export default function AssetTile({
                         variant="ghost"
                         size="sm"
                         onClick={handleIncrement}
-                        className="h-5 w-5 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                        className="h-5 w-5 p-0 mt-0.5 text-muted-foreground hover:text-accent hover:bg-accent/10"
                       >
                         <Icon icon="solar:add-circle-linear" width={12} height={12} />
                       </Button>
