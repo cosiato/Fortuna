@@ -7,8 +7,8 @@ import AccountForm from "@/components/AccountForm"
 import AccountCard from "@/components/AccountCard"
 import type { Asset, Snapshot, Account, Entity } from "@/types/database"
 import { api } from "@/lib/api"
-import { PriceResult, getMultiplePrices } from "@/lib/prices"
-import { SupportedCurrency, formatCurrency, getExchangeRates } from "@/lib/currency"
+import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
+import { SupportedCurrency, formatCurrency, getExchangeRates, forceRefreshExchangeRates } from "@/lib/currency"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -41,6 +41,9 @@ export default function App() {
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [accountFormOpen, setAccountFormOpen] = useState(false)
   const [entityFormOpen, setEntityFormOpen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [refreshCooldown, setRefreshCooldown] = useState(false)
+  const REFRESH_COOLDOWN = 30 * 1000 // 30 seconds
 
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
@@ -66,7 +69,18 @@ export default function App() {
         entityId: selectedEntityId,
       })
       setAssetFormOpen(false)
-      fetchData()
+      await fetchDataOnly()
+
+      if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
+        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
+        if (priceResult.price > 0) {
+          setPrices((prev) => ({
+            ...prev,
+            [priceResult.symbol.toLowerCase()]: priceResult,
+            [priceResult.symbol.toUpperCase()]: priceResult,
+          }))
+        }
+      }
     } catch (error) {
       console.error("Error creating asset:", error)
     }
@@ -90,7 +104,18 @@ export default function App() {
       })
       setAssetFormOpen(false)
       setEditingAsset(null)
-      fetchData()
+      await fetchDataOnly()
+
+      if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
+        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
+        if (priceResult.price > 0) {
+          setPrices((prev) => ({
+            ...prev,
+            [priceResult.symbol.toLowerCase()]: priceResult,
+            [priceResult.symbol.toUpperCase()]: priceResult,
+          }))
+        }
+      }
     } catch (error) {
       console.error("Error updating asset:", error)
     }
@@ -99,7 +124,7 @@ export default function App() {
   const handleDeleteAsset = async (id: string) => {
     try {
       await api.assets.delete(id)
-      fetchData()
+      await fetchDataOnly()
     } catch (error) {
       console.error("Error deleting asset:", error)
     }
@@ -133,7 +158,7 @@ export default function App() {
         entityId: selectedEntityId,
       })
       setAccountFormOpen(false)
-      fetchData()
+      await fetchDataOnly()
     } catch (error) {
       console.error("Error creating account:", error)
     }
@@ -143,20 +168,19 @@ export default function App() {
     try {
       await api.entities.create({ name: data.name, type: "company" })
       setEntityFormOpen(false)
-      fetchData()
+      await fetchDataOnly()
     } catch (error) {
       console.error("Error creating entity:", error)
     }
   }
 
-  const fetchData = useCallback(async () => {
+  const fetchDataOnly = useCallback(async () => {
     try {
       await api.entities.ensureIndividual()
 
-      const [assetsData, snapshotsData, ratesData, accountsData, entitiesData] = await Promise.all([
+      const [assetsData, snapshotsData, accountsData, entitiesData] = await Promise.all([
         api.assets.getAll(),
         api.snapshots.getAll(),
-        getExchangeRates(),
         api.accounts.getAll(),
         api.entities.getAll(),
       ])
@@ -165,6 +189,17 @@ export default function App() {
       setSnapshots(snapshotsData)
       setAccounts(accountsData)
       setEntities(entitiesData)
+
+      return assetsData
+    } catch (error) {
+      console.error("Error fetching data:", error)
+      return []
+    }
+  }, [])
+
+  const refreshPrices = useCallback(async (assetsData: Asset[]) => {
+    try {
+      const ratesData = await getExchangeRates()
       setExchangeRates(
         ratesData.rates || {
           USD: 1,
@@ -190,6 +225,7 @@ export default function App() {
         }))
 
         const pricesArray = await getMultiplePrices(symbolsWithTypes)
+
         const pricesMap: { [symbol: string]: PriceResult } = {}
 
         for (const p of pricesArray) {
@@ -197,18 +233,77 @@ export default function App() {
           pricesMap[p.symbol.toUpperCase()] = p
         }
 
-        setPrices(pricesMap)
+        setPrices((prev) => ({ ...prev, ...pricesMap }))
       }
     } catch (error) {
-      console.error("Error fetching data:", error)
-    } finally {
-      setLoading(false)
+      console.error("Error refreshing prices:", error)
     }
   }, [])
 
+  const handleManualRefresh = useCallback(async () => {
+    if (refreshCooldown) {
+      return
+    }
+
+    setIsRefreshing(true)
+    setRefreshCooldown(true)
+
+    setTimeout(() => {
+      setRefreshCooldown(false)
+    }, REFRESH_COOLDOWN)
+
+    try {
+      const tradeableAssets = assets.filter(
+        (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
+      )
+
+      const [ratesData] = await Promise.all([
+        forceRefreshExchangeRates(),
+        tradeableAssets.length > 0
+          ? forceRefreshPrices(
+              tradeableAssets.map((a: Asset) => ({
+                symbol: a.symbol!,
+                type: a.type as "stock" | "crypto",
+              })),
+            ).then((pricesArray) => {
+              const pricesMap: { [symbol: string]: PriceResult } = {}
+              for (const p of pricesArray) {
+                pricesMap[p.symbol.toLowerCase()] = p
+                pricesMap[p.symbol.toUpperCase()] = p
+              }
+              setPrices((prev) => ({ ...prev, ...pricesMap }))
+            })
+          : Promise.resolve(),
+      ])
+
+      setExchangeRates(
+        ratesData.rates || {
+          USD: 1,
+          EUR: 0.92,
+          GBP: 0.79,
+          JPY: 149.5,
+          CHF: 0.88,
+          HKD: 7.82,
+          SGD: 1.34,
+          AED: 3.67,
+          BTC: 0.000024,
+        },
+      )
+    } catch (error) {
+      console.error("Error during manual refresh:", error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [assets, refreshCooldown])
+
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    const initializeApp = async () => {
+      const assetsData = await fetchDataOnly()
+      await refreshPrices(assetsData)
+      setLoading(false)
+    }
+    initializeApp()
+  }, [fetchDataOnly, refreshPrices])
 
   const calculateNetWorth = () => {
     let totalInUsd = 0
@@ -311,6 +406,8 @@ export default function App() {
       if (priceData && priceData.price > 0) {
         value = priceData.price * asset.quantity
         currency = priceData.currency
+      } else if (asset.type === "crypto" || asset.type === "stock") {
+        console.error(`[DEBUG] No price found for ${asset.symbol}. Available keys:`, Object.keys(prices))
       }
     }
 
@@ -379,6 +476,21 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-bold text-accent">Fortuna</h1>
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              onClick={handleManualRefresh}
+              disabled={isRefreshing || refreshCooldown}
+              title="Refresh prices"
+            >
+              <Icon
+                icon="solar:refresh-linear"
+                width={18}
+                height={18}
+                className={isRefreshing ? "animate-spin" : ""}
+              />
+            </Button>
             <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
           </div>
         </div>
