@@ -120,7 +120,9 @@ export default function EntitySelector({
               )}
               <div className="relative flex items-center gap-2">
                 <Icon
-                  icon={entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"}
+                  icon={
+                    entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"
+                  }
                   width={16}
                   height={16}
                 />
@@ -163,7 +165,7 @@ export default function EntitySelector({
           onClick={onAddCompany}
         >
           <Icon icon="solar:add-circle-linear" width={16} height={16} />
-          <span className="text-xs">Add Company</span>
+          <span className="text-xs">Add</span>
         </Button>
       </div>
     </div>
