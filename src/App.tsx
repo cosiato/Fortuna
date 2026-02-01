@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
 import EntitySelector from "@/components/EntitySelector"
 import EntityForm from "@/components/EntityForm"
+import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import { motion } from "framer-motion"
 
 export default function App() {
@@ -46,6 +47,9 @@ export default function App() {
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [accountFormOpen, setAccountFormOpen] = useState(false)
   const [entityFormOpen, setEntityFormOpen] = useState(false)
+  const [editingEntity, setEditingEntity] = useState<Entity | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCooldown, setRefreshCooldown] = useState(false)
   const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
@@ -176,6 +180,64 @@ export default function App() {
       await fetchDataOnly()
     } catch (error) {
       console.error("Error creating entity:", error)
+    }
+  }
+
+  const handleEditEntity = (entity: Entity) => {
+    setEditingEntity(entity)
+    setEntityFormOpen(true)
+  }
+
+  const handleUpdateEntity = async (data: { name: string }) => {
+    if (!editingEntity) return
+    try {
+      await api.entities.update(editingEntity.id, { name: data.name })
+      setEntityFormOpen(false)
+      setEditingEntity(null)
+      await fetchDataOnly()
+    } catch (error) {
+      console.error("Error updating entity:", error)
+    }
+  }
+
+  const handleEntityFormClose = (open: boolean) => {
+    setEntityFormOpen(open)
+    if (!open) {
+      setEditingEntity(null)
+    }
+  }
+
+  const handleDeleteEntityRequest = (entity: Entity) => {
+    setEntityToDelete(entity)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDeleteEntity = async () => {
+    if (!entityToDelete) return
+
+    try {
+      const entityAssets = assets.filter((a) => a.entityId === entityToDelete.id)
+      const entityAccounts = accounts.filter((a) => a.entityId === entityToDelete.id)
+
+      for (const asset of entityAssets) {
+        await api.assets.delete(asset.id)
+      }
+
+      for (const account of entityAccounts) {
+        await api.accounts.delete(account.id)
+      }
+
+      await api.entities.delete(entityToDelete.id)
+
+      if (selectedEntityId === entityToDelete.id) {
+        setSelectedEntityId(0)
+      }
+
+      setDeleteDialogOpen(false)
+      setEntityToDelete(null)
+      await fetchDataOnly()
+    } catch (error) {
+      console.error("Error deleting entity:", error)
     }
   }
 
@@ -544,6 +606,8 @@ export default function App() {
           selectedEntityId={selectedEntityId}
           onSelect={setSelectedEntityId}
           onAddCompany={() => setEntityFormOpen(true)}
+          onEditEntity={handleEditEntity}
+          onDeleteEntity={handleDeleteEntityRequest}
           entityTotals={entityTotals}
           displayCurrency={displayCurrency}
         />
@@ -702,9 +766,23 @@ export default function App() {
         />
 
         <EntityForm
+          entity={editingEntity}
           open={entityFormOpen}
-          onOpenChange={setEntityFormOpen}
-          onSubmit={handleAddCompany}
+          onOpenChange={handleEntityFormClose}
+          onSubmit={editingEntity ? handleUpdateEntity : handleAddCompany}
+        />
+
+        <DeleteEntityDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          entity={entityToDelete}
+          associatedAssetCount={
+            entityToDelete ? assets.filter((a) => a.entityId === entityToDelete.id).length : 0
+          }
+          associatedAccountCount={
+            entityToDelete ? accounts.filter((a) => a.entityId === entityToDelete.id).length : 0
+          }
+          onConfirm={handleConfirmDeleteEntity}
         />
       </main>
     </div>

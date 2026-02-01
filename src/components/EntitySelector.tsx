@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useCallback } from "react"
 import type { Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { motion } from "framer-motion"
 
 interface EntitySelectorProps {
@@ -10,6 +11,8 @@ interface EntitySelectorProps {
   selectedEntityId: number
   onSelect: (entityId: number) => void
   onAddCompany: () => void
+  onEditEntity?: (entity: Entity) => void
+  onDeleteEntity?: (entity: Entity) => void
   entityTotals: Record<number, number>
   displayCurrency: SupportedCurrency
 }
@@ -19,12 +22,15 @@ export default function EntitySelector({
   selectedEntityId,
   onSelect,
   onAddCompany,
+  onEditEntity,
+  onDeleteEntity,
   entityTotals,
   displayCurrency,
 }: EntitySelectorProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
+  const [openPopoverId, setOpenPopoverId] = useState<number | null>(null)
 
   const updateScrollState = useCallback(() => {
     const container = scrollContainerRef.current
@@ -92,48 +98,98 @@ export default function EntitySelector({
         {entities.map((entity) => {
           const isSelected = entity.id === selectedEntityId
           const total = entityTotals[entity.id] ?? 0
+          const isCompany = entity.type === "company"
 
           return (
-            <button
-              key={entity.id}
-              onClick={() => onSelect(entity.id)}
-              className={`
-                relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
-                transition-colors duration-200 ease-out min-w-[120px] flex-shrink-0
-                ${
-                  isSelected
-                    ? "text-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
-                }
-              `}
-            >
-              {isSelected && (
-                <motion.div
-                  layoutId="activeEntityBackground"
-                  className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                  }}
-                />
-              )}
-              <div className="relative flex items-center gap-2">
-                <Icon
-                  icon={
-                    entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"
+            <div key={entity.id} className="relative flex-shrink-0">
+              <button
+                onClick={() => onSelect(entity.id)}
+                className={`
+                  relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
+                  transition-colors duration-200 ease-out min-w-[120px]
+                  ${isCompany ? "pr-8" : ""}
+                  ${
+                    isSelected
+                      ? "text-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
                   }
-                  width={16}
-                  height={16}
-                />
-                <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
-              </div>
-              <span
-                className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                `}
               >
-                {formatCurrency(total, displayCurrency)}
-              </span>
-            </button>
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeEntityBackground"
+                    className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 30,
+                    }}
+                  />
+                )}
+                <div className="relative flex items-center gap-2">
+                  <Icon
+                    icon={
+                      entity.type === "individual" ? "solar:user-linear" : "solar:buildings-linear"
+                    }
+                    width={16}
+                    height={16}
+                  />
+                  <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
+                </div>
+                <span
+                  className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                >
+                  {formatCurrency(total, displayCurrency)}
+                </span>
+              </button>
+
+              {isCompany && (
+                <Popover
+                  open={openPopoverId === entity.id}
+                  onOpenChange={(open) => setOpenPopoverId(open ? entity.id : null)}
+                >
+                  <PopoverTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenPopoverId(openPopoverId === entity.id ? null : entity.id)
+                      }}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-700/50 transition-colors"
+                      aria-label="Entity options"
+                    >
+                      <Icon icon="solar:menu-dots-bold" width={14} height={14} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="w-36 p-1 bg-slate-800 border-slate-700"
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenPopoverId(null)
+                        onEditEntity?.(entity)
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-slate-700/50 rounded-md transition-colors"
+                    >
+                      <Icon icon="solar:pen-linear" width={14} height={14} />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenPopoverId(null)
+                        onDeleteEntity?.(entity)
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
+                    >
+                      <Icon icon="solar:trash-bin-trash-linear" width={14} height={14} />
+                      <span>Delete</span>
+                    </button>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
           )
         })}
       </div>
