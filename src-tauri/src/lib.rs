@@ -47,6 +47,9 @@ pub fn run() {
             commands::verify_pin,
             commands::remove_pin,
             commands::is_pin_enabled,
+            commands::get_activity_log,
+            commands::get_activity_log_by_asset,
+            commands::get_activity_log_by_entity,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

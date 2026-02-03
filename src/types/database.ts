@@ -91,3 +91,22 @@ export interface CreateSnapshotInput {
   totalValue: number;
   currency?: string;
 }
+
+export type ActivityAction =
+  | 'asset_created'
+  | 'asset_increased'
+  | 'asset_decreased'
+  | 'asset_deleted';
+
+export interface ActivityLogEntry {
+  id: string;
+  action: ActivityAction;
+  assetId: string;
+  assetName: string;
+  assetType: AssetType;
+  entityId: number;
+  quantityBefore: number | null;
+  quantityAfter: number | null;
+  currency: string | null;
+  createdAt: string;
+}

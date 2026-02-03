@@ -69,6 +69,24 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS activity_log (
+            id TEXT PRIMARY KEY,
+            action TEXT NOT NULL CHECK(action IN ('asset_created','asset_increased','asset_decreased','asset_deleted')),
+            asset_id TEXT NOT NULL,
+            asset_name TEXT NOT NULL,
+            asset_type TEXT NOT NULL,
+            entity_id INTEGER NOT NULL DEFAULT 0,
+            quantity_before REAL,
+            quantity_after REAL,
+            currency TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_activity_log_action ON activity_log(action);
+        CREATE INDEX IF NOT EXISTS idx_activity_log_asset_id ON activity_log(asset_id);
+        CREATE INDEX IF NOT EXISTS idx_activity_log_entity_id ON activity_log(entity_id);
+        CREATE INDEX IF NOT EXISTS idx_activity_log_created_at ON activity_log(created_at);
         ",
     )?;
 

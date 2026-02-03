@@ -21,6 +21,7 @@ Use the following tech stack:
 - High cohesion, low coupling
 - 200-400 lines typical, 800 max per file
 - Organize by feature/domain, not by type
+- keep CLAUDE.md file udpated when adding / deleting / renaming files
 
 ### 2. Code Style
 
@@ -32,7 +33,7 @@ Use the following tech stack:
 
 - TDD: Write tests first
 - 80% minimum coverage
-- Unit tests for utilities
+- Unit tests for utilities, APIs wrapper
 - Integration tests for Tauri commands
 
 ### 4. Security
@@ -55,8 +56,9 @@ src-tauri/                        # Tauri backend (Rust)
 |   |-- database.rs               # SQLite initialization
 |   |-- commands/                 # Tauri IPC commands
 |       |-- mod.rs                # Command exports
-|       |-- assets.rs             # Asset CRUD
 |       |-- accounts.rs           # Account CRUD
+|       |-- activity_log.rs       # Activity log helper + query commands
+|       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
 |       |-- entities.rs           # Entity CRUD
 |       |-- snapshots.rs          # Snapshot CRUD
 src/

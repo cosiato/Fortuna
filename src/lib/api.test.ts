@@ -6,6 +6,7 @@ import type {
   Asset,
   Account,
   Snapshot,
+  ActivityLogEntry,
   CreateEntityInput,
   UpdateEntityInput,
   CreateAssetInput,
@@ -346,6 +347,55 @@ describe('api', () => {
 
       expect(mockInvoke).toHaveBeenCalledWith('is_pin_enabled');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('activityLog', () => {
+    const mockEntry: ActivityLogEntry = {
+      id: 'log-uuid-1',
+      action: 'asset_created',
+      assetId: 'asset-uuid-1',
+      assetName: 'Bitcoin',
+      assetType: 'crypto',
+      entityId: 0,
+      quantityBefore: null,
+      quantityAfter: 1.5,
+      currency: 'USD',
+      createdAt: '2024-01-01T00:00:00Z',
+    };
+
+    it('getAll should invoke get_activity_log', async () => {
+      const entries = [mockEntry];
+      mockInvoke.mockResolvedValueOnce(entries);
+
+      const result = await api.activityLog.getAll();
+
+      expect(mockInvoke).toHaveBeenCalledWith('get_activity_log');
+      expect(result).toEqual(entries);
+    });
+
+    it('getByAsset should invoke get_activity_log_by_asset with assetId', async () => {
+      const entries = [mockEntry];
+      mockInvoke.mockResolvedValueOnce(entries);
+
+      const result = await api.activityLog.getByAsset('asset-uuid-1');
+
+      expect(mockInvoke).toHaveBeenCalledWith('get_activity_log_by_asset', {
+        assetId: 'asset-uuid-1',
+      });
+      expect(result).toEqual(entries);
+    });
+
+    it('getByEntity should invoke get_activity_log_by_entity with entityId', async () => {
+      const entries = [mockEntry];
+      mockInvoke.mockResolvedValueOnce(entries);
+
+      const result = await api.activityLog.getByEntity(0);
+
+      expect(mockInvoke).toHaveBeenCalledWith('get_activity_log_by_entity', {
+        entityId: 0,
+      });
+      expect(result).toEqual(entries);
     });
   });
 

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
 use uuid::Uuid;
 
+use super::activity_log::log_activity;
 use super::entities::DbConnection;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -199,26 +200,41 @@ pub fn create_asset(
     )
     .map_err(|e| e.to_string())?;
 
-    conn.query_row(
-        "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-         FROM assets WHERE id = ?",
-        [&id],
-        |row| {
-            Ok(Asset {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                asset_type: row.get(2)?,
-                symbol: row.get(3)?,
-                quantity: row.get(4)?,
-                manual_price: row.get(5)?,
-                currency: row.get(6)?,
-                entity_id: row.get(7)?,
-                created_at: row.get(8)?,
-                updated_at: row.get(9)?,
-            })
-        },
-    )
-    .map_err(|e| e.to_string())
+    let asset = conn
+        .query_row(
+            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
+             FROM assets WHERE id = ?",
+            [&id],
+            |row| {
+                Ok(Asset {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    asset_type: row.get(2)?,
+                    symbol: row.get(3)?,
+                    quantity: row.get(4)?,
+                    manual_price: row.get(5)?,
+                    currency: row.get(6)?,
+                    entity_id: row.get(7)?,
+                    created_at: row.get(8)?,
+                    updated_at: row.get(9)?,
+                })
+            },
+        )
+        .map_err(|e| e.to_string())?;
+
+    let _ = log_activity(
+        &conn,
+        "asset_created",
+        &asset.id,
+        &asset.name,
+        &asset.asset_type,
+        asset.entity_id,
+        None,
+        Some(asset.quantity),
+        Some(&asset.currency),
+    );
+
+    Ok(asset)
 }
 
 #[tauri::command]
@@ -234,6 +250,17 @@ pub fn update_asset(
     }
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let old_quantity = if input.quantity.is_some() {
+        conn.query_row(
+            "SELECT quantity FROM assets WHERE id = ?",
+            [&id],
+            |row| row.get::<_, f64>(0),
+        )
+        .ok()
+    } else {
+        None
+    };
 
     let mut updates = Vec::new();
     let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -293,32 +320,79 @@ pub fn update_asset(
         return Err("Asset not found".to_string());
     }
 
-    conn.query_row(
-        "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-         FROM assets WHERE id = ?",
-        [&id],
-        |row| {
-            Ok(Asset {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                asset_type: row.get(2)?,
-                symbol: row.get(3)?,
-                quantity: row.get(4)?,
-                manual_price: row.get(5)?,
-                currency: row.get(6)?,
-                entity_id: row.get(7)?,
-                created_at: row.get(8)?,
-                updated_at: row.get(9)?,
-            })
-        },
-    )
-    .map_err(|e| e.to_string())
+    let asset = conn
+        .query_row(
+            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
+             FROM assets WHERE id = ?",
+            [&id],
+            |row| {
+                Ok(Asset {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    asset_type: row.get(2)?,
+                    symbol: row.get(3)?,
+                    quantity: row.get(4)?,
+                    manual_price: row.get(5)?,
+                    currency: row.get(6)?,
+                    entity_id: row.get(7)?,
+                    created_at: row.get(8)?,
+                    updated_at: row.get(9)?,
+                })
+            },
+        )
+        .map_err(|e| e.to_string())?;
+
+    if let Some(old_qty) = old_quantity {
+        let new_qty = asset.quantity;
+        if (new_qty - old_qty).abs() > f64::EPSILON {
+            let action = if new_qty > old_qty {
+                "asset_increased"
+            } else {
+                "asset_decreased"
+            };
+            let _ = log_activity(
+                &conn,
+                action,
+                &asset.id,
+                &asset.name,
+                &asset.asset_type,
+                asset.entity_id,
+                Some(old_qty),
+                Some(new_qty),
+                Some(&asset.currency),
+            );
+        }
+    }
+
+    Ok(asset)
 }
 
 #[tauri::command]
 pub fn delete_asset(app: AppHandle, db: State<DbConnection>, id: String) -> Result<(), String> {
     let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let asset = conn
+        .query_row(
+            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
+             FROM assets WHERE id = ?",
+            [&id],
+            |row| {
+                Ok(Asset {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    asset_type: row.get(2)?,
+                    symbol: row.get(3)?,
+                    quantity: row.get(4)?,
+                    manual_price: row.get(5)?,
+                    currency: row.get(6)?,
+                    entity_id: row.get(7)?,
+                    created_at: row.get(8)?,
+                    updated_at: row.get(9)?,
+                })
+            },
+        )
+        .map_err(|e| e.to_string())?;
 
     let affected = conn
         .execute("DELETE FROM assets WHERE id = ?", [&id])
@@ -327,6 +401,18 @@ pub fn delete_asset(app: AppHandle, db: State<DbConnection>, id: String) -> Resu
     if affected == 0 {
         return Err("Asset not found".to_string());
     }
+
+    let _ = log_activity(
+        &conn,
+        "asset_deleted",
+        &asset.id,
+        &asset.name,
+        &asset.asset_type,
+        asset.entity_id,
+        Some(asset.quantity),
+        None,
+        Some(&asset.currency),
+    );
 
     Ok(())
 }

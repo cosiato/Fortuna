@@ -4,6 +4,7 @@ import type {
   Account,
   Entity,
   Snapshot,
+  ActivityLogEntry,
   CreateAssetInput,
   UpdateAssetInput,
   CreateAccountInput,
@@ -49,6 +50,14 @@ export const api = {
     getToday: () => invoke<Snapshot | null>('get_today_snapshot'),
     getLatest: () => invoke<Snapshot | null>('get_latest_snapshot'),
     create: (input: CreateSnapshotInput) => invoke<Snapshot>('create_snapshot', { input }),
+  },
+
+  activityLog: {
+    getAll: () => invoke<ActivityLogEntry[]>('get_activity_log'),
+    getByAsset: (assetId: string) =>
+      invoke<ActivityLogEntry[]>('get_activity_log_by_asset', { assetId }),
+    getByEntity: (entityId: number) =>
+      invoke<ActivityLogEntry[]>('get_activity_log_by_entity', { entityId }),
   },
 
   settings: {
