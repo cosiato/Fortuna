@@ -59,6 +59,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- accounts.rs           # Account CRUD
 |       |-- activity_log.rs       # Activity log helper + query commands
 |       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
+|       |-- cash_flows.rs         # Cash flow CRUD (recurring income/expenses)
 |       |-- entities.rs           # Entity CRUD
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
@@ -81,16 +82,25 @@ src/
 |   |   |-- tabs.tsx
 |   |-- AccountCard.tsx           # Card for displaying accounts
 |   |-- AccountForm.tsx           # Form for adding/editing accounts
+|   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
 |   |-- AssetForm.tsx             # Form for adding/editing assets
 |   |-- AssetTile.tsx             # Tile for displaying assets
+|   |-- CashFlowForm.tsx          # Form for adding/editing cash flows
+|   |-- CashFlowNode.tsx          # React Flow node for cash flow entries
 |   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
 |   |-- CurrencySelector.tsx      # Currency picker dropdown
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart
+|   |-- VaultDetailView.tsx       # Expanded vault view with flows and projection
+|   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows
+|   |-- VaultFlowNode.tsx         # React Flow node for central vault
+|   |-- VaultProjectionChart.tsx  # Balance projection chart for vaults
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
+|   |-- cashFlowCategories.ts     # Cash flow category definitions and helpers
+|   |-- cashFlowProjection.ts     # Balance projection logic for cash flows
 |   |-- countries.ts              # Country data and utilities
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting and exchange rates
