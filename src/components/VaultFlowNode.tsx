@@ -17,9 +17,9 @@ export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNod
   const flag = getCountryFlag(data.countryCode);
 
   return (
-    <div className="relative px-5 py-4 rounded-xl bg-gradient-to-br from-amber-950/60 to-amber-900/30 border-2 border-amber-500/50 shadow-[0_0_20px_rgba(255,215,0,0.15)] min-w-[160px]">
-      <Handle type="target" position={Position.Left} className="!bg-green-500 !w-2 !h-2" />
-      <Handle type="source" position={Position.Right} className="!bg-red-500 !w-2 !h-2" />
+    <div className="relative px-5 py-4 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-slate-600/40 shadow-[0_0_12px_rgba(100,116,139,0.1)] min-w-[160px]">
+      <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-0 !h-0" />
+      <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-0 !h-0" />
 
       <div className="flex items-center gap-2 mb-1">
         <span className="text-lg">{flag}</span>
@@ -36,7 +36,7 @@ export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNod
             e.stopPropagation();
             data.onOpenProjection?.();
           }}
-          className="mt-1.5 flex items-center gap-1 mx-auto px-2 py-0.5 rounded-md text-[10px] text-muted-foreground hover:text-accent hover:bg-amber-900/30 transition-colors"
+          className="mt-1.5 flex items-center gap-1 mx-auto px-2 py-0.5 rounded-md text-[10px] text-muted-foreground hover:text-accent hover:bg-slate-700/40 transition-colors"
         >
           <Icon icon="solar:graph-up-linear" width={12} height={12} />
           <span>Projection</span>
