@@ -77,6 +77,65 @@ export interface UpdateAccountInput {
   entityId?: number;
 }
 
+export type CashFlowType = 'inflow' | 'outflow';
+
+export type CashFlowFrequency = 'weekly' | 'monthly' | 'yearly';
+
+export type CashFlowCategory =
+  | 'salary'
+  | 'freelance'
+  | 'investment_income'
+  | 'rental_income'
+  | 'other_income'
+  | 'rent'
+  | 'mortgage'
+  | 'subscription'
+  | 'utilities'
+  | 'insurance'
+  | 'groceries'
+  | 'transport'
+  | 'entertainment'
+  | 'savings_transfer'
+  | 'other_expense';
+
+export interface CashFlow {
+  id: string;
+  accountId: string;
+  name: string;
+  amount: number;
+  flowType: CashFlowType;
+  frequency: CashFlowFrequency;
+  category: CashFlowCategory;
+  startDate: string;
+  endDate: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCashFlowInput {
+  accountId: string;
+  name: string;
+  amount: number;
+  flowType: CashFlowType;
+  frequency: CashFlowFrequency;
+  category: CashFlowCategory;
+  startDate: string;
+  endDate?: string | null;
+  isActive?: boolean;
+}
+
+export interface UpdateCashFlowInput {
+  name?: string;
+  amount?: number;
+  flowType?: CashFlowType;
+  frequency?: CashFlowFrequency;
+  category?: CashFlowCategory;
+  startDate?: string;
+  endDate?: string | null;
+  isActive?: boolean;
+}
+
 export interface CreateEntityInput {
   name: string;
   type?: EntityType;

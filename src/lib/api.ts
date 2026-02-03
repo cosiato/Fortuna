@@ -5,6 +5,7 @@ import type {
   Entity,
   Snapshot,
   ActivityLogEntry,
+  CashFlow,
   CreateAssetInput,
   UpdateAssetInput,
   CreateAccountInput,
@@ -12,6 +13,8 @@ import type {
   CreateEntityInput,
   UpdateEntityInput,
   CreateSnapshotInput,
+  CreateCashFlowInput,
+  UpdateCashFlowInput,
 } from '@/types/database';
 
 export const api = {
@@ -50,6 +53,17 @@ export const api = {
     getToday: () => invoke<Snapshot | null>('get_today_snapshot'),
     getLatest: () => invoke<Snapshot | null>('get_latest_snapshot'),
     create: (input: CreateSnapshotInput) => invoke<Snapshot>('create_snapshot', { input }),
+  },
+
+  cashFlows: {
+    getAll: () => invoke<CashFlow[]>('get_all_cash_flows'),
+    getByAccount: (accountId: string) =>
+      invoke<CashFlow[]>('get_cash_flows_by_account', { accountId }),
+    getById: (id: string) => invoke<CashFlow | null>('get_cash_flow_by_id', { id }),
+    create: (input: CreateCashFlowInput) => invoke<CashFlow>('create_cash_flow', { input }),
+    update: (id: string, input: UpdateCashFlowInput) =>
+      invoke<CashFlow>('update_cash_flow', { id, input }),
+    delete: (id: string) => invoke<void>('delete_cash_flow', { id }),
   },
 
   activityLog: {
