@@ -13,7 +13,6 @@ This skill ensures all code development follows TDD principles with comprehensiv
 - Fixing bugs or issues
 - Refactoring existing code
 - Adding API endpoints
-- Creating new components
 
 ## Core Principles
 
@@ -33,7 +32,6 @@ ALWAYS write tests first, then implement code to make tests pass.
 #### Unit Tests
 
 - Individual functions and utilities
-- Component logic
 - Pure functions
 - Helpers and utilities
 
@@ -122,34 +120,6 @@ npm run test:coverage
 ```
 
 ## Testing Patterns
-
-### Unit Test Pattern (Jest/Vitest)
-
-```typescript
-import { render, screen, fireEvent } from '@testing-library/react'
-import { Button } from './Button'
-
-describe('Button Component', () => {
-  it('renders with correct text', () => {
-    render(<Button>Click me</Button>)
-    expect(screen.getByText('Click me')).toBeInTheDocument()
-  })
-
-  it('calls onClick when clicked', () => {
-    const handleClick = jest.fn()
-    render(<Button onClick={handleClick}>Click</Button>)
-
-    fireEvent.click(screen.getByRole('button'))
-
-    expect(handleClick).toHaveBeenCalledTimes(1)
-  })
-
-  it('is disabled when disabled prop is true', () => {
-    render(<Button disabled>Click</Button>)
-    expect(screen.getByRole('button')).toBeDisabled()
-  })
-})
-```
 
 ### API Integration Test Pattern
 
@@ -253,20 +223,6 @@ npm run test:coverage
 ```
 
 ## Common Testing Mistakes to Avoid
-
-### ❌ WRONG: Testing Implementation Details
-
-```typescript
-// Don't test internal state
-expect(component.state.count).toBe(5)
-```
-
-### ✅ CORRECT: Test User-Visible Behavior
-
-```typescript
-// Test what users see
-expect(screen.getByText("Count: 5")).toBeInTheDocument()
-```
 
 ### ❌ WRONG: Brittle Selectors
 

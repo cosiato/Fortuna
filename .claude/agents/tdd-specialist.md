@@ -207,20 +207,6 @@ Before marking tests complete:
 
 ## Test Smells (Anti-Patterns)
 
-### ❌ Testing Implementation Details
-
-```typescript
-// DON'T test internal state
-expect(component.state.count).toBe(5)
-```
-
-### ✅ Test User-Visible Behavior
-
-```typescript
-// DO test what users see
-expect(screen.getByText("Count: 5")).toBeInTheDocument()
-```
-
 ### ❌ Tests Depend on Each Other
 
 ```typescript
