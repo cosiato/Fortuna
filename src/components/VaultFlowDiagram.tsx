@@ -16,7 +16,9 @@ import type { SupportedCurrency } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
 import VaultFlowNode from '@/components/VaultFlowNode';
 import CashFlowNode from '@/components/CashFlowNode';
+import PlaceholderFlowNode from '@/components/PlaceholderFlowNode';
 import AnimatedFlowEdge from '@/components/AnimatedFlowEdge';
+import PlaceholderFlowEdge from '@/components/PlaceholderFlowEdge';
 
 interface VaultFlowDiagramProps {
   account: Account;
@@ -33,10 +35,12 @@ interface VaultFlowDiagramProps {
 const nodeTypes: NodeTypes = {
   vault: VaultFlowNode,
   cashFlow: CashFlowNode,
+  placeholder: PlaceholderFlowNode,
 };
 
 const edgeTypes: EdgeTypes = {
   animated: AnimatedFlowEdge,
+  placeholder: PlaceholderFlowEdge,
 };
 
 const NODE_WIDTH = 160;
@@ -66,8 +70,11 @@ export default function VaultFlowDiagram({
   );
 
   const buildNodes = useCallback((): Node[] => {
+    const inflowCount = Math.max(inflows.length, 1);
+    const outflowCount = Math.max(outflows.length, 1);
+
     const vaultY = Math.max(
-      (Math.max(inflows.length, outflows.length) * (NODE_HEIGHT + VERTICAL_GAP)) / 2 - NODE_HEIGHT / 2,
+      (Math.max(inflowCount, outflowCount) * (NODE_HEIGHT + VERTICAL_GAP)) / 2 - NODE_HEIGHT / 2,
       60,
     );
 
@@ -87,79 +94,121 @@ export default function VaultFlowDiagram({
       draggable: false,
     };
 
-    const inflowStartY = vaultY - ((inflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
+    const inflowNodes: Node[] = inflows.length > 0
+      ? inflows.map((flow, i) => {
+          const startY = vaultY - ((inflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
+          return {
+            id: `inflow-${flow.id}`,
+            type: 'cashFlow',
+            position: {
+              x: CENTER_X - SIDE_OFFSET - NODE_WIDTH,
+              y: startY + i * (NODE_HEIGHT + VERTICAL_GAP),
+            },
+            data: {
+              flowId: flow.id,
+              name: flow.name,
+              amount: flow.amount,
+              frequency: flow.frequency,
+              flowType: flow.flowType,
+              category: flow.category,
+              isActive: flow.isActive,
+              currency: displayCurrency,
+              onEdit,
+              onDelete,
+              onToggle,
+            },
+            sourcePosition: Position.Right,
+            draggable: false,
+          };
+        })
+      : [{
+          id: 'placeholder-inflow',
+          type: 'placeholder',
+          position: {
+            x: CENTER_X - SIDE_OFFSET - NODE_WIDTH,
+            y: vaultY,
+          },
+          data: { flowType: 'inflow' as const, onAdd: onAddFlow },
+          sourcePosition: Position.Right,
+          draggable: false,
+        }];
 
-    const inflowNodes: Node[] = inflows.map((flow, i) => ({
-      id: `inflow-${flow.id}`,
-      type: 'cashFlow',
-      position: {
-        x: CENTER_X - SIDE_OFFSET - NODE_WIDTH,
-        y: inflowStartY + i * (NODE_HEIGHT + VERTICAL_GAP),
-      },
-      data: {
-        flowId: flow.id,
-        name: flow.name,
-        amount: flow.amount,
-        frequency: flow.frequency,
-        flowType: flow.flowType,
-        category: flow.category,
-        isActive: flow.isActive,
-        currency: displayCurrency,
-        onEdit,
-        onDelete,
-        onToggle,
-      },
-      sourcePosition: Position.Right,
-      draggable: false,
-    }));
-
-    const outflowStartY = vaultY - ((outflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
-
-    const outflowNodes: Node[] = outflows.map((flow, i) => ({
-      id: `outflow-${flow.id}`,
-      type: 'cashFlow',
-      position: {
-        x: CENTER_X + SIDE_OFFSET,
-        y: outflowStartY + i * (NODE_HEIGHT + VERTICAL_GAP),
-      },
-      data: {
-        flowId: flow.id,
-        name: flow.name,
-        amount: flow.amount,
-        frequency: flow.frequency,
-        flowType: flow.flowType,
-        category: flow.category,
-        isActive: flow.isActive,
-        currency: displayCurrency,
-        onEdit,
-        onDelete,
-        onToggle,
-      },
-      targetPosition: Position.Left,
-      draggable: false,
-    }));
+    const outflowNodes: Node[] = outflows.length > 0
+      ? outflows.map((flow, i) => {
+          const startY = vaultY - ((outflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
+          return {
+            id: `outflow-${flow.id}`,
+            type: 'cashFlow',
+            position: {
+              x: CENTER_X + SIDE_OFFSET,
+              y: startY + i * (NODE_HEIGHT + VERTICAL_GAP),
+            },
+            data: {
+              flowId: flow.id,
+              name: flow.name,
+              amount: flow.amount,
+              frequency: flow.frequency,
+              flowType: flow.flowType,
+              category: flow.category,
+              isActive: flow.isActive,
+              currency: displayCurrency,
+              onEdit,
+              onDelete,
+              onToggle,
+            },
+            targetPosition: Position.Left,
+            draggable: false,
+          };
+        })
+      : [{
+          id: 'placeholder-outflow',
+          type: 'placeholder',
+          position: {
+            x: CENTER_X + SIDE_OFFSET,
+            y: vaultY,
+          },
+          data: { flowType: 'outflow' as const, onAdd: onAddFlow },
+          targetPosition: Position.Left,
+          draggable: false,
+        }];
 
     return [vaultNode, ...inflowNodes, ...outflowNodes];
-  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onOpenProjection]);
+  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onAddFlow, onOpenProjection]);
 
   const buildEdges = useCallback((): Edge[] => {
-    const inflowEdges: Edge[] = inflows.map((flow) => ({
-      id: `edge-inflow-${flow.id}`,
-      source: `inflow-${flow.id}`,
-      target: 'vault',
-      type: 'animated',
-      data: { flowType: 'inflow' as const },
-      animated: false,
-    }));
+    const inflowEdges: Edge[] = inflows.length > 0
+      ? inflows.map((flow) => ({
+          id: `edge-inflow-${flow.id}`,
+          source: `inflow-${flow.id}`,
+          target: 'vault',
+          type: 'animated',
+          data: { flowType: 'inflow' as const },
+          animated: false,
+        }))
+      : [{
+          id: 'edge-placeholder-inflow',
+          source: 'placeholder-inflow',
+          target: 'vault',
+          type: 'placeholder',
+          animated: false,
+        }];
 
-    const outflowEdges: Edge[] = outflows.map((flow) => ({
-      id: `edge-outflow-${flow.id}`,
-      source: 'vault',
-      target: `outflow-${flow.id}`,
-      type: 'animated',
-      data: { flowType: 'outflow' as const },
-      animated: false,
-    }));
+    const outflowEdges: Edge[] = outflows.length > 0
+      ? outflows.map((flow) => ({
+          id: `edge-outflow-${flow.id}`,
+          source: 'vault',
+          target: `outflow-${flow.id}`,
+          type: 'animated',
+          data: { flowType: 'outflow' as const },
+          animated: false,
+        }))
+      : [{
+          id: 'edge-placeholder-outflow',
+          source: 'vault',
+          target: 'placeholder-outflow',
+          type: 'placeholder',
+          animated: false,
+        }];
 
     return [...inflowEdges, ...outflowEdges];
   }, [inflows, outflows]);

@@ -92,6 +92,8 @@ src/
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart
+|   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
+|   |-- PlaceholderFlowNode.tsx   # "+Add inflow/outflow" placeholder node
 |   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows (inline per vault)
 |   |-- VaultFlowNode.tsx         # React Flow node for central vault (with projection button)
 |   |-- VaultProjectionChart.tsx  # Balance projection chart for vaults
