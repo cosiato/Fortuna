@@ -670,7 +670,7 @@ export default function App() {
               </Card>
             ) : (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full h-auto p-1 bg-card/50 border border-border/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
+                <TabsList className="w-full h-auto p-1 bg-slate-800/40 border border-slate-800/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
                   {ASSET_CATEGORIES.map((category) => {
                     const categoryAssets = assetsByType[category.key]
                     const hasAssets = categoryAssets.length > 0
@@ -682,12 +682,12 @@ export default function App() {
                         key={category.key}
                         value={category.key}
                         disabled={!hasAssets}
-                        className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md transition-colors duration-200 ease-out hover:bg-slate-700/20 data-[state=active]:hover:bg-transparent data-[state=active]:text-accent disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                        className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md border border-transparent transition-all duration-200 ease-out hover:bg-slate-700/30 hover:border-slate-600/50 data-[state=active]:hover:bg-transparent data-[state=active]:hover:border-transparent data-[state=active]:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent"
                       >
                         {isActive && (
                           <motion.div
                             layoutId="activeTabBackground"
-                            className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-md shadow-sm"
+                            className="absolute inset-0 bg-slate-700/30 rounded-md border border-slate-600/50"
                             transition={{
                               type: "spring",
                               stiffness: 400,

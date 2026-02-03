@@ -106,19 +106,20 @@ export default function EntitySelector({
                 onClick={() => onSelect(entity.id)}
                 className={`
                   relative flex flex-col items-start gap-0.5 py-2 px-4 rounded-lg
-                  transition-colors duration-200 ease-out min-w-[120px]
+                  border border-transparent
+                  transition-all duration-200 ease-out min-w-[120px]
                   ${isCompany ? "pr-8" : ""}
                   ${
                     isSelected
                       ? "text-accent"
-                      : "text-muted-foreground hover:text-foreground hover:bg-slate-700/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/10 hover:border-accent"
                   }
                 `}
               >
                 {isSelected && (
                   <motion.div
                     layoutId="activeEntityBackground"
-                    className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg border border-accent/20"
+                    className="absolute inset-0 bg-accent/10 rounded-lg border border-accent"
                     transition={{
                       type: "spring",
                       stiffness: 400,
@@ -160,10 +161,7 @@ export default function EntitySelector({
                       <Icon icon="solar:menu-dots-bold" width={14} height={14} />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent
-                    align="start"
-                    className="w-36 p-1 bg-slate-800 border-slate-700"
-                  >
+                  <PopoverContent align="start" className="w-36 p-1 bg-slate-800 border-slate-700">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
