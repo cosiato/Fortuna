@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetch } from '@tauri-apps/plugin-http';
 
 const mockFetch = vi.mocked(fetch);
+const RATES_STORAGE_KEY = 'fortuna_exchange_rates';
 
 const createMockResponse = (data: unknown, ok = true, status = 200) => ({
   ok,
@@ -225,6 +226,81 @@ describe('currency', () => {
 
       await forceRefreshExchangeRates();
       expect(mockFetch).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('convertCurrency edge cases', () => {
+    it('should return USD amount when target currency rate is missing', async () => {
+      const exchangeRateData = {
+        rates: {
+          EUR: 0.92,
+        },
+      };
+      const btcData = { bitcoin: { usd: 50000 } };
+
+      mockFetch
+        .mockResolvedValueOnce(createMockResponse(exchangeRateData))
+        .mockResolvedValueOnce(createMockResponse(btcData));
+
+      const { convertCurrency } = await import('./currency');
+      // XYZ is not in the rates, so toRate will be undefined
+      const result = await convertCurrency(100, 'USD', 'XYZ');
+      expect(result).toBe(100);
+    });
+  });
+
+  describe('loadRatesFromStorage', () => {
+    it('should load valid cached rates from localStorage on init', async () => {
+      const storedRates = {
+        base: 'USD',
+        rates: { USD: 1, EUR: 0.90, GBP: 0.78 },
+        timestamp: Date.now(),
+      };
+      localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(storedRates));
+
+      const { getExchangeRates } = await import('./currency');
+      const rates = await getExchangeRates();
+
+      // Should use the cached rates without calling fetch
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(rates.rates.EUR).toBe(0.90);
+    });
+
+    it('should ignore expired cached rates from localStorage', async () => {
+      const storedRates = {
+        base: 'USD',
+        rates: { USD: 1, EUR: 0.90 },
+        timestamp: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago (expired)
+      };
+      localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(storedRates));
+
+      const exchangeRateData = { rates: { EUR: 0.92 } };
+      const btcData = { bitcoin: { usd: 42000 } };
+      mockFetch
+        .mockResolvedValueOnce(createMockResponse(exchangeRateData))
+        .mockResolvedValueOnce(createMockResponse(btcData));
+
+      const { getExchangeRates } = await import('./currency');
+      const rates = await getExchangeRates();
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(rates.rates.EUR).toBe(0.92);
+    });
+
+    it('should handle corrupted localStorage data', async () => {
+      localStorage.setItem(RATES_STORAGE_KEY, 'not valid json');
+
+      const exchangeRateData = { rates: { EUR: 0.92 } };
+      const btcData = { bitcoin: { usd: 42000 } };
+      mockFetch
+        .mockResolvedValueOnce(createMockResponse(exchangeRateData))
+        .mockResolvedValueOnce(createMockResponse(btcData));
+
+      const { getExchangeRates } = await import('./currency');
+      const rates = await getExchangeRates();
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(rates.base).toBe('USD');
     });
   });
 

@@ -315,6 +315,196 @@ describe('prices', () => {
     });
   });
 
+  describe('getStockInfo', () => {
+    it('should fetch stock info from Yahoo Finance', async () => {
+      const yahooResponse = {
+        chart: {
+          result: [
+            {
+              meta: {
+                shortName: 'Apple Inc.',
+                longName: 'Apple Inc.',
+                regularMarketPrice: 175.50,
+                currency: 'USD',
+              },
+            },
+          ],
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(yahooResponse));
+
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('AAPL');
+
+      expect(result.symbol).toBe('AAPL');
+      expect(result.name).toBe('Apple Inc.');
+      expect(result.price).toBe(175.50);
+      expect(result.currency).toBe('USD');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should return cached stock info within TTL', async () => {
+      const yahooResponse = {
+        chart: {
+          result: [
+            {
+              meta: {
+                shortName: 'Apple Inc.',
+                regularMarketPrice: 175.50,
+                currency: 'USD',
+              },
+            },
+          ],
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(yahooResponse));
+
+      const { getStockInfo } = await import('./prices');
+
+      const first = await getStockInfo('AAPL');
+      const second = await getStockInfo('AAPL');
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(first.name).toEqual(second.name);
+    });
+
+    it('should return error for invalid symbol', async () => {
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('');
+
+      expect(result.error).toBe('Invalid symbol');
+      expect(result.price).toBe(0);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return error for too-long symbol', async () => {
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('TOOLONGSYMBOL1');
+
+      expect(result.error).toBe('Invalid symbol');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return error when API fails', async () => {
+      mockFetch.mockResolvedValueOnce(createMockResponse({}, false, 404));
+
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('INVALID');
+
+      expect(result.error).toContain('Yahoo Finance API error');
+      expect(result.price).toBe(0);
+    });
+
+    it('should use longName when shortName is missing', async () => {
+      const yahooResponse = {
+        chart: {
+          result: [
+            {
+              meta: {
+                longName: 'Tesla Inc.',
+                regularMarketPrice: 250.00,
+                currency: 'USD',
+              },
+            },
+          ],
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(yahooResponse));
+
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('TSLA');
+
+      expect(result.name).toBe('Tesla Inc.');
+    });
+
+    it('should fallback to symbol when no name is available', async () => {
+      const yahooResponse = {
+        chart: {
+          result: [
+            {
+              meta: {
+                regularMarketPrice: 100.00,
+                currency: 'USD',
+              },
+            },
+          ],
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(yahooResponse));
+
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('XYZ');
+
+      expect(result.name).toBe('XYZ');
+    });
+
+    it('should default currency to USD when not provided', async () => {
+      const yahooResponse = {
+        chart: {
+          result: [
+            {
+              meta: {
+                shortName: 'Test Corp',
+                regularMarketPrice: 50.00,
+              },
+            },
+          ],
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(yahooResponse));
+
+      const { getStockInfo } = await import('./prices');
+      const result = await getStockInfo('TEST');
+
+      expect(result.currency).toBe('USD');
+    });
+  });
+
+  describe('getBatchCryptoPrices (via getMultiplePrices)', () => {
+    it('should fall back to individual fetches when batch API fails', async () => {
+      // Batch request fails
+      mockFetch.mockRejectedValueOnce(new Error('API rate limit'));
+      // Individual fallback requests
+      mockFetch
+        .mockResolvedValueOnce(createMockResponse({ bitcoin: { usd: 42000 } }))
+        .mockResolvedValueOnce(createMockResponse({ ethereum: { usd: 2500 } }));
+
+      const { getMultiplePrices } = await import('./prices');
+      const results = await getMultiplePrices([
+        { symbol: 'BTC', type: 'crypto' },
+        { symbol: 'ETH', type: 'crypto' },
+      ]);
+
+      expect(results).toHaveLength(2);
+      expect(results.find((r) => r.symbol === 'BTC')?.price).toBe(42000);
+      expect(results.find((r) => r.symbol === 'ETH')?.price).toBe(2500);
+    });
+
+    it('should mark coins as not found in batch response', async () => {
+      const coinGeckoResponse = {
+        bitcoin: { usd: 42000 },
+        // 'solana' intentionally missing from response
+      };
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(coinGeckoResponse));
+
+      const { getMultiplePrices } = await import('./prices');
+      const results = await getMultiplePrices([
+        { symbol: 'BTC', type: 'crypto' },
+        { symbol: 'SOL', type: 'crypto' },
+      ]);
+
+      expect(results.find((r) => r.symbol === 'BTC')?.price).toBe(42000);
+      expect(results.find((r) => r.symbol === 'SOL')?.price).toBe(0);
+      expect(results.find((r) => r.symbol === 'SOL')?.error).toBe('Coin not found');
+    });
+  });
+
   describe('cache behavior', () => {
     it('should use case-insensitive cache keys', async () => {
       const yahooResponse = {

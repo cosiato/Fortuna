@@ -304,6 +304,51 @@ describe('api', () => {
     });
   });
 
+  describe('settings', () => {
+    it('setPin should invoke set_pin with pin', async () => {
+      mockInvoke.mockResolvedValueOnce(undefined);
+
+      await api.settings.setPin('1234');
+
+      expect(mockInvoke).toHaveBeenCalledWith('set_pin', { pin: '1234' });
+    });
+
+    it('verifyPin should invoke verify_pin and return boolean', async () => {
+      mockInvoke.mockResolvedValueOnce(true);
+
+      const result = await api.settings.verifyPin('1234');
+
+      expect(mockInvoke).toHaveBeenCalledWith('verify_pin', { pin: '1234' });
+      expect(result).toBe(true);
+    });
+
+    it('verifyPin should return false for wrong pin', async () => {
+      mockInvoke.mockResolvedValueOnce(false);
+
+      const result = await api.settings.verifyPin('0000');
+
+      expect(mockInvoke).toHaveBeenCalledWith('verify_pin', { pin: '0000' });
+      expect(result).toBe(false);
+    });
+
+    it('removePin should invoke remove_pin with current pin', async () => {
+      mockInvoke.mockResolvedValueOnce(undefined);
+
+      await api.settings.removePin('1234');
+
+      expect(mockInvoke).toHaveBeenCalledWith('remove_pin', { currentPin: '1234' });
+    });
+
+    it('isPinEnabled should invoke is_pin_enabled', async () => {
+      mockInvoke.mockResolvedValueOnce(true);
+
+      const result = await api.settings.isPinEnabled();
+
+      expect(mockInvoke).toHaveBeenCalledWith('is_pin_enabled');
+      expect(result).toBe(true);
+    });
+  });
+
   describe('error handling', () => {
     it('should propagate errors from invoke', async () => {
       const error = new Error('Database connection failed');
