@@ -5,7 +5,9 @@ import NetWorthChart from "@/components/NetWorthChart"
 import AssetForm from "@/components/AssetForm"
 import AccountForm from "@/components/AccountForm"
 import AccountCard from "@/components/AccountCard"
-import type { Asset, Snapshot, Account, Entity } from "@/types/database"
+import VaultDetailView from "@/components/VaultDetailView"
+import CashFlowForm from "@/components/CashFlowForm"
+import type { Asset, Snapshot, Account, Entity, CashFlow, CreateCashFlowInput, UpdateCashFlowInput } from "@/types/database"
 import { api } from "@/lib/api"
 import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
 import {
@@ -23,7 +25,7 @@ import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -57,6 +59,11 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
+  const [expandedVaultId, setExpandedVaultId] = useState<string | null>(null)
+  const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
+  const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
+  const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
   const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
 
   useEffect(() => {
@@ -246,21 +253,77 @@ export default function App() {
     }
   }
 
+  const handleAddCashFlow = async (data: CreateCashFlowInput | UpdateCashFlowInput, isEdit: boolean) => {
+    try {
+      if (isEdit && editingCashFlow) {
+        await api.cashFlows.update(editingCashFlow.id, data as UpdateCashFlowInput)
+      } else {
+        await api.cashFlows.create(data as CreateCashFlowInput)
+      }
+      setCashFlowFormOpen(false)
+      setEditingCashFlow(null)
+      const updated = await api.cashFlows.getAll()
+      setCashFlows(updated)
+    } catch {
+      // Cash flow save failed, form stays open for retry
+    }
+  }
+
+  const handleEditCashFlow = (id: string) => {
+    const flow = cashFlows.find((f) => f.id === id)
+    if (flow) {
+      setEditingCashFlow(flow)
+      setCashFlowAccountId(flow.accountId)
+      setCashFlowFormOpen(true)
+    }
+  }
+
+  const handleDeleteCashFlow = async (id: string) => {
+    try {
+      await api.cashFlows.delete(id)
+      const updated = await api.cashFlows.getAll()
+      setCashFlows(updated)
+    } catch {
+      // Cash flow delete failed
+    }
+  }
+
+  const handleToggleCashFlow = async (id: string) => {
+    const flow = cashFlows.find((f) => f.id === id)
+    if (!flow) return
+    try {
+      await api.cashFlows.update(id, { isActive: !flow.isActive })
+      const updated = await api.cashFlows.getAll()
+      setCashFlows(updated)
+    } catch {
+      // Cash flow toggle failed
+    }
+  }
+
+  const handleCashFlowFormClose = (open: boolean) => {
+    setCashFlowFormOpen(open)
+    if (!open) {
+      setEditingCashFlow(null)
+    }
+  }
+
   const fetchDataOnly = useCallback(async () => {
     try {
       await api.entities.ensureIndividual()
 
-      const [assetsData, snapshotsData, accountsData, entitiesData] = await Promise.all([
+      const [assetsData, snapshotsData, accountsData, entitiesData, cashFlowsData] = await Promise.all([
         api.assets.getAll(),
         api.snapshots.getAll(),
         api.accounts.getAll(),
         api.entities.getAll(),
+        api.cashFlows.getAll(),
       ])
 
       setAssets(assetsData)
       setSnapshots(snapshotsData)
       setAccounts(accountsData)
       setEntities(entitiesData)
+      setCashFlows(cashFlowsData)
 
       return assetsData
     } catch (error) {
@@ -776,14 +839,49 @@ export default function App() {
                   </CardContent>
                 </Card>
               ) : (
-                filteredAccounts.map((account) => (
-                  <AccountCard
-                    key={account.id}
-                    account={account}
-                    displayCurrency={displayCurrency}
-                    exchangeRates={exchangeRates}
-                  />
-                ))
+                filteredAccounts.map((account) => {
+                  const isExpanded = expandedVaultId === account.id
+                  return (
+                    <div key={account.id}>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => setExpandedVaultId(isExpanded ? null : account.id)}
+                      >
+                        <AccountCard
+                          account={account}
+                          displayCurrency={displayCurrency}
+                          exchangeRates={exchangeRates}
+                        />
+                      </div>
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <VaultDetailView
+                              account={account}
+                              cashFlows={cashFlows}
+                              displayCurrency={displayCurrency}
+                              displayBalance={getAccountValue(account)}
+                              onAddFlow={() => {
+                                setCashFlowAccountId(account.id)
+                                setEditingCashFlow(null)
+                                setCashFlowFormOpen(true)
+                              }}
+                              onEditFlow={handleEditCashFlow}
+                              onDeleteFlow={handleDeleteCashFlow}
+                              onToggleFlow={handleToggleCashFlow}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })
               )}
             </div>
           </div>
@@ -800,6 +898,14 @@ export default function App() {
           open={accountFormOpen}
           onOpenChange={setAccountFormOpen}
           onSubmit={handleAddAccount}
+        />
+
+        <CashFlowForm
+          cashFlow={editingCashFlow}
+          accountId={cashFlowAccountId}
+          open={cashFlowFormOpen}
+          onOpenChange={handleCashFlowFormClose}
+          onSubmit={handleAddCashFlow}
         />
 
         <EntityForm
