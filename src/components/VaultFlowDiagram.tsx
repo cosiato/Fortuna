@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   type Node,
@@ -10,8 +10,10 @@ import {
   Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Icon } from '@iconify/react';
 import type { Account, CashFlow } from '@/types/database';
 import type { SupportedCurrency } from '@/lib/currency';
+import { Button } from '@/components/ui/button';
 import VaultFlowNode from '@/components/VaultFlowNode';
 import CashFlowNode from '@/components/CashFlowNode';
 import AnimatedFlowEdge from '@/components/AnimatedFlowEdge';
@@ -24,6 +26,8 @@ interface VaultFlowDiagramProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
+  onAddFlow: () => void;
+  onOpenProjection: () => void;
 }
 
 const nodeTypes: NodeTypes = {
@@ -49,6 +53,8 @@ export default function VaultFlowDiagram({
   onEdit,
   onDelete,
   onToggle,
+  onAddFlow,
+  onOpenProjection,
 }: VaultFlowDiagramProps) {
   const inflows = useMemo(
     () => cashFlows.filter((f) => f.flowType === 'inflow'),
@@ -76,6 +82,7 @@ export default function VaultFlowDiagram({
         countryCode: account.countryCode,
         displayCurrency,
         displayBalance,
+        onOpenProjection,
       },
       draggable: false,
     };
@@ -133,7 +140,7 @@ export default function VaultFlowDiagram({
     }));
 
     return [vaultNode, ...inflowNodes, ...outflowNodes];
-  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle]);
+  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onOpenProjection]);
 
   const buildEdges = useCallback((): Edge[] => {
     const inflowEdges: Edge[] = inflows.map((flow) => ({
@@ -160,32 +167,35 @@ export default function VaultFlowDiagram({
   const initialNodes = useMemo(() => buildNodes(), [buildNodes]);
   const initialEdges = useMemo(() => buildEdges(), [buildEdges]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  const hasFlows = cashFlows.length > 0;
-  const containerHeight = hasFlows
-    ? Math.max(200, Math.max(inflows.length, outflows.length) * (NODE_HEIGHT + VERTICAL_GAP) + 80)
-    : 120;
+  useEffect(() => {
+    setNodes(initialNodes);
+  }, [initialNodes, setNodes]);
 
-  if (!hasFlows) {
-    return (
-      <div
-        className="flex items-center justify-center rounded-lg border border-dashed border-slate-700/50 bg-slate-900/20"
-        style={{ height: containerHeight }}
-      >
-        <p className="text-sm text-muted-foreground">
-          No cash flows yet. Add one to see the flow diagram.
-        </p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    setEdges(initialEdges);
+  }, [initialEdges, setEdges]);
+
+  const containerHeight = Math.max(200, Math.max(inflows.length, outflows.length) * (NODE_HEIGHT + VERTICAL_GAP) + 80);
 
   return (
     <div
-      className="rounded-lg border border-slate-800/50 bg-slate-900/20 overflow-hidden"
+      className="relative flex items-center justify-center rounded-lg border border-slate-800/50 bg-slate-900/20 overflow-hidden"
       style={{ height: containerHeight }}
     >
+      <div className="absolute top-2 right-2 z-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-accent hover:text-accent/80 hover:bg-accent/10"
+          onClick={onAddFlow}
+        >
+          <Icon icon="solar:add-circle-linear" width={14} height={14} className="mr-1" />
+          <span className="text-xs">Add Flow</span>
+        </Button>
+      </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}

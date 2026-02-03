@@ -4,8 +4,8 @@ import CurrencySelector from "@/components/CurrencySelector"
 import NetWorthChart from "@/components/NetWorthChart"
 import AssetForm from "@/components/AssetForm"
 import AccountForm from "@/components/AccountForm"
-import AccountCard from "@/components/AccountCard"
-import VaultDetailView from "@/components/VaultDetailView"
+import VaultFlowDiagram from "@/components/VaultFlowDiagram"
+import VaultProjectionModal from "@/components/VaultProjectionModal"
 import CashFlowForm from "@/components/CashFlowForm"
 import type { Asset, Snapshot, Account, Entity, CashFlow, CreateCashFlowInput, UpdateCashFlowInput } from "@/types/database"
 import { api } from "@/lib/api"
@@ -25,7 +25,7 @@ import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -60,7 +60,7 @@ export default function App() {
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
-  const [expandedVaultId, setExpandedVaultId] = useState<string | null>(null)
+  const [projectionAccount, setProjectionAccount] = useState<Account | null>(null)
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
@@ -840,46 +840,25 @@ export default function App() {
                 </Card>
               ) : (
                 filteredAccounts.map((account) => {
-                  const isExpanded = expandedVaultId === account.id
+                  const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
+                  const flowKey = accountFlows.map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`).join(",")
                   return (
-                    <div key={account.id}>
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => setExpandedVaultId(isExpanded ? null : account.id)}
-                      >
-                        <AccountCard
-                          account={account}
-                          displayCurrency={displayCurrency}
-                          exchangeRates={exchangeRates}
-                        />
-                      </div>
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="overflow-hidden"
-                          >
-                            <VaultDetailView
-                              account={account}
-                              cashFlows={cashFlows}
-                              displayCurrency={displayCurrency}
-                              displayBalance={getAccountValue(account)}
-                              onAddFlow={() => {
-                                setCashFlowAccountId(account.id)
-                                setEditingCashFlow(null)
-                                setCashFlowFormOpen(true)
-                              }}
-                              onEditFlow={handleEditCashFlow}
-                              onDeleteFlow={handleDeleteCashFlow}
-                              onToggleFlow={handleToggleCashFlow}
-                            />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                    <VaultFlowDiagram
+                      key={`${account.id}-${flowKey}`}
+                      account={account}
+                      cashFlows={accountFlows}
+                      displayCurrency={displayCurrency}
+                      displayBalance={getAccountValue(account)}
+                      onEdit={handleEditCashFlow}
+                      onDelete={handleDeleteCashFlow}
+                      onToggle={handleToggleCashFlow}
+                      onAddFlow={() => {
+                        setCashFlowAccountId(account.id)
+                        setEditingCashFlow(null)
+                        setCashFlowFormOpen(true)
+                      }}
+                      onOpenProjection={() => setProjectionAccount(account)}
+                    />
                   )
                 })
               )}
@@ -906,6 +885,15 @@ export default function App() {
           open={cashFlowFormOpen}
           onOpenChange={handleCashFlowFormClose}
           onSubmit={handleAddCashFlow}
+        />
+
+        <VaultProjectionModal
+          open={projectionAccount !== null}
+          onOpenChange={(open) => { if (!open) setProjectionAccount(null) }}
+          accountName={projectionAccount?.name ?? ""}
+          currentBalance={projectionAccount ? getAccountValue(projectionAccount) : 0}
+          cashFlows={projectionAccount ? cashFlows.filter((f) => f.accountId === projectionAccount.id) : []}
+          displayCurrency={displayCurrency}
         />
 
         <EntityForm
