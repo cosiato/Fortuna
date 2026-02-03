@@ -15,6 +15,8 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
     let db_path = get_db_path(app);
     let conn = Connection::open(&db_path)?;
 
+    conn.execute_batch("PRAGMA foreign_keys = ON;")?;
+
     conn.execute_batch(
         "
         CREATE TABLE IF NOT EXISTS entities (
@@ -87,6 +89,30 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
         CREATE INDEX IF NOT EXISTS idx_activity_log_asset_id ON activity_log(asset_id);
         CREATE INDEX IF NOT EXISTS idx_activity_log_entity_id ON activity_log(entity_id);
         CREATE INDEX IF NOT EXISTS idx_activity_log_created_at ON activity_log(created_at);
+
+        CREATE TABLE IF NOT EXISTS cash_flows (
+            id TEXT PRIMARY KEY,
+            account_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            amount REAL NOT NULL CHECK(amount > 0),
+            flow_type TEXT NOT NULL CHECK(flow_type IN ('inflow', 'outflow')),
+            frequency TEXT NOT NULL CHECK(frequency IN ('weekly', 'monthly', 'yearly')),
+            category TEXT NOT NULL CHECK(category IN (
+                'salary', 'freelance', 'investment_income', 'rental_income', 'other_income',
+                'rent', 'mortgage', 'subscription', 'utilities', 'insurance',
+                'groceries', 'transport', 'entertainment', 'savings_transfer', 'other_expense'
+            )),
+            start_date TEXT NOT NULL,
+            end_date TEXT,
+            is_active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_account_id ON cash_flows(account_id);
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_flow_type ON cash_flows(flow_type);
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_is_active ON cash_flows(is_active);
         ",
     )?;
 

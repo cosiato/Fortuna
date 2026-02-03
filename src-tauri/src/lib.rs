@@ -50,6 +50,12 @@ pub fn run() {
             commands::get_activity_log,
             commands::get_activity_log_by_asset,
             commands::get_activity_log_by_entity,
+            commands::get_all_cash_flows,
+            commands::get_cash_flows_by_account,
+            commands::get_cash_flow_by_id,
+            commands::create_cash_flow,
+            commands::update_cash_flow,
+            commands::delete_cash_flow,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
