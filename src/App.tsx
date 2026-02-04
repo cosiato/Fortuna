@@ -26,6 +26,7 @@ import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
 import { motion } from "framer-motion"
+import { showErrorToast } from "@/lib/errorHandling"
 
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -103,7 +104,7 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error("Error creating asset:", error)
+      showErrorToast(error, "Failed to create asset")
     }
   }
 
@@ -138,7 +139,7 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error("Error updating asset:", error)
+      showErrorToast(error, "Failed to update asset")
     }
   }
 
@@ -147,7 +148,7 @@ export default function App() {
       await api.assets.delete(id)
       await fetchDataOnly()
     } catch (error) {
-      console.error("Error deleting asset:", error)
+      showErrorToast(error, "Failed to delete asset")
     }
   }
 
@@ -158,7 +159,7 @@ export default function App() {
         prev.map((asset) => (asset.id === id ? { ...asset, quantity: newQuantity } : asset)),
       )
     } catch (error) {
-      console.error("Error updating quantity:", error)
+      showErrorToast(error, "Failed to update quantity")
     }
   }
 
@@ -181,7 +182,7 @@ export default function App() {
       setAccountFormOpen(false)
       await fetchDataOnly()
     } catch (error) {
-      console.error("Error creating account:", error)
+      showErrorToast(error, "Failed to create vault")
     }
   }
 
@@ -191,7 +192,7 @@ export default function App() {
       setEntityFormOpen(false)
       await fetchDataOnly()
     } catch (error) {
-      console.error("Error creating entity:", error)
+      showErrorToast(error, "Failed to create entity")
     }
   }
 
@@ -208,7 +209,7 @@ export default function App() {
       setEditingEntity(null)
       await fetchDataOnly()
     } catch (error) {
-      console.error("Error updating entity:", error)
+      showErrorToast(error, "Failed to update entity")
     }
   }
 
@@ -249,7 +250,7 @@ export default function App() {
       setEntityToDelete(null)
       await fetchDataOnly()
     } catch (error) {
-      console.error("Error deleting entity:", error)
+      showErrorToast(error, "Failed to delete entity")
     }
   }
 
@@ -264,8 +265,8 @@ export default function App() {
       setEditingCashFlow(null)
       const updated = await api.cashFlows.getAll()
       setCashFlows(updated)
-    } catch {
-      // Cash flow save failed, form stays open for retry
+    } catch (error) {
+      showErrorToast(error, "Failed to save cash flow")
     }
   }
 
@@ -283,8 +284,8 @@ export default function App() {
       await api.cashFlows.delete(id)
       const updated = await api.cashFlows.getAll()
       setCashFlows(updated)
-    } catch {
-      // Cash flow delete failed
+    } catch (error) {
+      showErrorToast(error, "Failed to delete cash flow")
     }
   }
 
@@ -295,8 +296,8 @@ export default function App() {
       await api.cashFlows.update(id, { isActive: !flow.isActive })
       const updated = await api.cashFlows.getAll()
       setCashFlows(updated)
-    } catch {
-      // Cash flow toggle failed
+    } catch (error) {
+      showErrorToast(error, "Failed to toggle cash flow")
     }
   }
 
@@ -327,7 +328,7 @@ export default function App() {
 
       return assetsData
     } catch (error) {
-      console.error("Error fetching data:", error)
+      showErrorToast(error, "Failed to load data")
       return []
     }
   }, [])
@@ -371,7 +372,7 @@ export default function App() {
         setPrices((prev) => ({ ...prev, ...pricesMap }))
       }
     } catch (error) {
-      console.error("Error refreshing prices:", error)
+      showErrorToast(error, "Failed to refresh prices")
     }
   }, [])
 
@@ -425,7 +426,7 @@ export default function App() {
         },
       )
     } catch (error) {
-      console.error("Error during manual refresh:", error)
+      showErrorToast(error, "Failed to refresh prices")
     } finally {
       setIsRefreshing(false)
     }
@@ -564,11 +565,6 @@ export default function App() {
       if (priceData && priceData.price > 0) {
         value = priceData.price * asset.quantity
         currency = priceData.currency
-      } else if (asset.type === "crypto" || asset.type === "stock") {
-        console.error(
-          `[DEBUG] No price found for ${asset.symbol}. Available keys:`,
-          Object.keys(prices),
-        )
       }
     }
 
@@ -614,7 +610,7 @@ export default function App() {
             currency: "USD",
           })
         } catch (error) {
-          console.error("Error recording snapshot:", error)
+          showErrorToast(error, "Failed to record snapshot")
         }
       }
       recordSnapshot()

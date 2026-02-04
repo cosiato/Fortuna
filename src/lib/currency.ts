@@ -98,8 +98,7 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
     saveRatesToStorage(cachedRates);
 
     return cachedRates;
-  } catch (error) {
-    console.error('Error fetching exchange rates:', error);
+  } catch {
     // Return fallback rates
     return {
       base: 'USD',
