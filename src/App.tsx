@@ -23,6 +23,7 @@ import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
 import EntitySelector from "@/components/EntitySelector"
 import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
+import DeleteAccountDialog from "@/components/DeleteAccountDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
@@ -53,6 +54,9 @@ export default function App() {
   const [assetFormOpen, setAssetFormOpen] = useState(false)
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [accountFormOpen, setAccountFormOpen] = useState(false)
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null)
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false)
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null)
   const [entityFormOpen, setEntityFormOpen] = useState(false)
   const [editingEntity, setEditingEntity] = useState<Entity | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -184,6 +188,54 @@ export default function App() {
       await fetchDataOnly()
     } catch (error) {
       showErrorToast(error, "Failed to create vault")
+    }
+  }
+
+  const handleEditAccount = (account: Account) => {
+    setEditingAccount(account)
+    setAccountFormOpen(true)
+  }
+
+  const handleUpdateAccount = async (data: Partial<Account>) => {
+    if (!editingAccount) return
+    try {
+      await api.accounts.update(editingAccount.id, {
+        name: data.name,
+        balance: data.balance,
+        currency: data.currency,
+        countryCode: data.countryCode,
+      })
+      setAccountFormOpen(false)
+      setEditingAccount(null)
+      await fetchDataOnly()
+    } catch (error) {
+      showErrorToast(error, "Failed to update vault")
+    }
+  }
+
+  const handleAccountFormClose = (open: boolean) => {
+    setAccountFormOpen(open)
+    if (!open) {
+      setEditingAccount(null)
+    }
+  }
+
+  const handleDeleteAccountRequest = (account: Account) => {
+    setAccountToDelete(account)
+    setDeleteAccountDialogOpen(true)
+  }
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!accountToDelete) return
+    try {
+      await api.accounts.delete(accountToDelete.id)
+      setDeleteAccountDialogOpen(false)
+      setAccountToDelete(null)
+      await fetchDataOnly()
+      const updated = await api.cashFlows.getAll()
+      setCashFlows(updated)
+    } catch (error) {
+      showErrorToast(error, "Failed to delete vault")
     }
   }
 
@@ -814,7 +866,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="rounded-xl bg-amber-950/20 border border-amber-900/30 p-5">
+          <div className="rounded-xl bg-slate-800/40 border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
               <Button
@@ -843,14 +895,38 @@ export default function App() {
                     <AccordionItem
                       key={account.id}
                       value={account.id}
-                      className="border border-amber-900/20 rounded-lg bg-slate-900/20 overflow-hidden"
+                      className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
                     >
-                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-amber-950/20">
+                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-800/40">
                         <div className="flex flex-1 items-center justify-between mr-2">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
                             <span className="text-sm font-semibold text-foreground">{account.name}</span>
                             <span className="text-xs text-muted-foreground">{account.currency}</span>
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditAccount(account)
+                                }}
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                              >
+                                <Icon icon="solar:pen-linear" width={12} height={12} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteAccountRequest(account)
+                                }}
+                                className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                              >
+                                <Icon icon="solar:trash-bin-trash-linear" width={12} height={12} />
+                              </Button>
+                            </div>
                           </div>
                           <span className="text-sm font-bold text-accent">
                             {formatCurrency(getAccountValue(account), displayCurrency)}
@@ -897,9 +973,10 @@ export default function App() {
         />
 
         <AccountForm
+          account={editingAccount}
           open={accountFormOpen}
-          onOpenChange={setAccountFormOpen}
-          onSubmit={handleAddAccount}
+          onOpenChange={handleAccountFormClose}
+          onSubmit={editingAccount ? handleUpdateAccount : handleAddAccount}
         />
 
         <CashFlowForm
@@ -928,6 +1005,16 @@ export default function App() {
             entityToDelete ? accounts.filter((a) => a.entityId === entityToDelete.id).length : 0
           }
           onConfirm={handleConfirmDeleteEntity}
+        />
+
+        <DeleteAccountDialog
+          open={deleteAccountDialogOpen}
+          onOpenChange={setDeleteAccountDialogOpen}
+          account={accountToDelete}
+          associatedCashFlowCount={
+            accountToDelete ? cashFlows.filter((f) => f.accountId === accountToDelete.id).length : 0
+          }
+          onConfirm={handleConfirmDeleteAccount}
         />
 
         <SettingsDialog
