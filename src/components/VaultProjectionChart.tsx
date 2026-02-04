@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  AreaChart,
+  ComposedChart,
   Area,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -20,10 +21,18 @@ interface VaultProjectionChartProps {
 }
 
 const PERIOD_OPTIONS = [
+  { label: '1M', value: 1 },
   { label: '3M', value: 3 },
   { label: '6M', value: 6 },
   { label: '12M', value: 12 },
 ] as const;
+
+function computeTickInterval(months: number): number {
+  if (months <= 1) return 7;
+  if (months <= 3) return 14;
+  if (months <= 6) return 30;
+  return 60;
+}
 
 export default function VaultProjectionChart({
   currentBalance,
@@ -35,6 +44,16 @@ export default function VaultProjectionChart({
   const data = useMemo(
     () => calculateProjection(currentBalance, cashFlows, months),
     [currentBalance, cashFlows, months],
+  );
+
+  const tickInterval = computeTickInterval(months);
+
+  const xAxisTickFormatter = useCallback(
+    (_value: string, index: number) => {
+      if (index % tickInterval !== 0) return '';
+      return _value;
+    },
+    [tickInterval],
   );
 
   const hasFlows = cashFlows.filter((f) => f.isActive).length > 0;
@@ -74,20 +93,23 @@ export default function VaultProjectionChart({
 
       <div className="h-48 rounded-lg border border-slate-800/50 bg-slate-900/20 p-2">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={[...data]} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+          <ComposedChart data={[...data]} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
             <defs>
               <linearGradient id="balanceGradientPos" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#FFD700" stopOpacity={0.3} />
                 <stop offset="100%" stopColor="#FFD700" stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="balanceGradientNeg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity={0} />
-                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.3} />
-              </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D3D" />
-            <XAxis dataKey="month" stroke="#6B7280" fontSize={11} />
+            <XAxis
+              dataKey="date"
+              stroke="#6B7280"
+              fontSize={11}
+              tickFormatter={xAxisTickFormatter}
+              interval={0}
+            />
             <YAxis
+              yAxisId="balance"
               stroke="#6B7280"
               fontSize={11}
               tickFormatter={(value) =>
@@ -97,6 +119,7 @@ export default function VaultProjectionChart({
                 }).format(value)
               }
             />
+            <YAxis yAxisId="events" orientation="right" hide />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#1E1E2E',
@@ -108,42 +131,44 @@ export default function VaultProjectionChart({
               labelStyle={{ color: '#6B7280' }}
               formatter={(value, name) => {
                 const numValue = typeof value === 'number' ? value : 0;
+                if (numValue === 0 && name !== 'balance') return [null, null];
                 const formatted = formatCurrency(numValue, displayCurrency);
                 const labels: Record<string, string> = {
-                  balance: 'Projected Balance',
-                  totalInflow: 'Monthly Inflow',
-                  totalOutflow: 'Monthly Outflow',
+                  balance: 'Balance',
+                  inflow: 'Inflow',
+                  outflow: 'Outflow',
                 };
                 return [formatted, labels[name as string] ?? name];
               }}
+              itemSorter={() => 0}
             />
             {hasNegative && (
-              <ReferenceLine y={0} stroke="#6B7280" strokeDasharray="3 3" />
+              <ReferenceLine yAxisId="balance" y={0} stroke="#6B7280" strokeDasharray="3 3" />
             )}
+            <Bar
+              yAxisId="events"
+              dataKey="inflow"
+              fill="#22c55e"
+              fillOpacity={0.6}
+              isAnimationActive={false}
+            />
+            <Bar
+              yAxisId="events"
+              dataKey="outflow"
+              fill="#ef4444"
+              fillOpacity={0.6}
+              isAnimationActive={false}
+            />
             <Area
-              type="monotone"
+              yAxisId="balance"
+              type="stepAfter"
               dataKey="balance"
               stroke="#FFD700"
               strokeWidth={2}
               fill="url(#balanceGradientPos)"
+              isAnimationActive={false}
             />
-            <Area
-              type="monotone"
-              dataKey="totalInflow"
-              stroke="#22c55e"
-              strokeWidth={1}
-              strokeOpacity={0.5}
-              fill="none"
-            />
-            <Area
-              type="monotone"
-              dataKey="totalOutflow"
-              stroke="#ef4444"
-              strokeWidth={1}
-              strokeOpacity={0.5}
-              fill="none"
-            />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
