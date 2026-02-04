@@ -29,7 +29,6 @@ interface VaultFlowDiagramProps {
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
   onAddFlow: () => void;
-  onOpenProjection: () => void;
 }
 
 const nodeTypes: NodeTypes = {
@@ -58,7 +57,6 @@ export default function VaultFlowDiagram({
   onDelete,
   onToggle,
   onAddFlow,
-  onOpenProjection,
 }: VaultFlowDiagramProps) {
   const inflows = useMemo(
     () => cashFlows.filter((f) => f.flowType === 'inflow'),
@@ -89,7 +87,6 @@ export default function VaultFlowDiagram({
         countryCode: account.countryCode,
         displayCurrency,
         displayBalance,
-        onOpenProjection,
       },
       draggable: false,
     };
@@ -173,7 +170,7 @@ export default function VaultFlowDiagram({
         }];
 
     return [vaultNode, ...inflowNodes, ...outflowNodes];
-  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onAddFlow, onOpenProjection]);
+  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onAddFlow]);
 
   const buildEdges = useCallback((): Edge[] => {
     const inflowEdges: Edge[] = inflows.length > 0

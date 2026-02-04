@@ -1,5 +1,4 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { Icon } from '@iconify/react';
 import { getCountryFlag } from '@/lib/countries';
 import { formatCurrency, type SupportedCurrency } from '@/lib/currency';
 
@@ -10,7 +9,6 @@ interface VaultFlowNodeData {
   countryCode: string;
   displayCurrency: SupportedCurrency;
   displayBalance: number;
-  onOpenProjection?: () => void;
 }
 
 export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNodeData }) {
@@ -30,18 +28,6 @@ export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNod
       <p className="text-base font-bold text-accent text-center">
         {formatCurrency(data.displayBalance, data.displayCurrency)}
       </p>
-      {data.onOpenProjection && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            data.onOpenProjection?.();
-          }}
-          className="mt-1.5 flex items-center gap-1 mx-auto px-2 py-0.5 rounded-md text-[10px] text-muted-foreground hover:text-accent hover:bg-slate-700/40 transition-colors"
-        >
-          <Icon icon="solar:graph-up-linear" width={12} height={12} />
-          <span>Projection</span>
-        </button>
-      )}
     </div>
   );
 }

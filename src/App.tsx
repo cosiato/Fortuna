@@ -5,7 +5,7 @@ import NetWorthChart from "@/components/NetWorthChart"
 import AssetForm from "@/components/AssetForm"
 import AccountForm from "@/components/AccountForm"
 import VaultFlowDiagram from "@/components/VaultFlowDiagram"
-import VaultProjectionModal from "@/components/VaultProjectionModal"
+import VaultProjectionChart from "@/components/VaultProjectionChart"
 import CashFlowForm from "@/components/CashFlowForm"
 import type { Asset, Snapshot, Account, Entity, CashFlow, CreateCashFlowInput, UpdateCashFlowInput } from "@/types/database"
 import { api } from "@/lib/api"
@@ -25,6 +25,8 @@ import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
+import { getCountryFlag } from "@/lib/countries"
 import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
 
@@ -61,7 +63,6 @@ export default function App() {
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
-  const [projectionAccount, setProjectionAccount] = useState<Account | null>(null)
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
@@ -825,40 +826,66 @@ export default function App() {
                 <span className="text-xl leading-none">+</span>
               </Button>
             </div>
-            <div className="space-y-3">
-              {filteredAccounts.length === 0 ? (
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-muted-foreground text-sm text-center py-4">
-                      No vaults yet. Click + to add one.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                filteredAccounts.map((account) => {
+            {filteredAccounts.length === 0 ? (
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-muted-foreground text-sm text-center py-4">
+                    No vaults yet. Click + to add one.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Accordion type="multiple" className="space-y-3">
+                {filteredAccounts.map((account) => {
                   const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
                   const flowKey = accountFlows.map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`).join(",")
                   return (
-                    <VaultFlowDiagram
-                      key={`${account.id}-${flowKey}`}
-                      account={account}
-                      cashFlows={accountFlows}
-                      displayCurrency={displayCurrency}
-                      displayBalance={getAccountValue(account)}
-                      onEdit={handleEditCashFlow}
-                      onDelete={handleDeleteCashFlow}
-                      onToggle={handleToggleCashFlow}
-                      onAddFlow={() => {
-                        setCashFlowAccountId(account.id)
-                        setEditingCashFlow(null)
-                        setCashFlowFormOpen(true)
-                      }}
-                      onOpenProjection={() => setProjectionAccount(account)}
-                    />
+                    <AccordionItem
+                      key={account.id}
+                      value={account.id}
+                      className="border border-amber-900/20 rounded-lg bg-slate-900/20 overflow-hidden"
+                    >
+                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-amber-950/20">
+                        <div className="flex flex-1 items-center justify-between mr-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
+                            <span className="text-sm font-semibold text-foreground">{account.name}</span>
+                            <span className="text-xs text-muted-foreground">{account.currency}</span>
+                          </div>
+                          <span className="text-sm font-bold text-accent">
+                            {formatCurrency(getAccountValue(account), displayCurrency)}
+                          </span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4">
+                        <div className="space-y-4">
+                          <VaultFlowDiagram
+                            key={`${account.id}-${flowKey}`}
+                            account={account}
+                            cashFlows={accountFlows}
+                            displayCurrency={displayCurrency}
+                            displayBalance={getAccountValue(account)}
+                            onEdit={handleEditCashFlow}
+                            onDelete={handleDeleteCashFlow}
+                            onToggle={handleToggleCashFlow}
+                            onAddFlow={() => {
+                              setCashFlowAccountId(account.id)
+                              setEditingCashFlow(null)
+                              setCashFlowFormOpen(true)
+                            }}
+                          />
+                          <VaultProjectionChart
+                            currentBalance={getAccountValue(account)}
+                            cashFlows={accountFlows}
+                            displayCurrency={displayCurrency}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   )
-                })
-              )}
-            </div>
+                })}
+              </Accordion>
+            )}
           </div>
         </div>
 
@@ -881,15 +908,6 @@ export default function App() {
           open={cashFlowFormOpen}
           onOpenChange={handleCashFlowFormClose}
           onSubmit={handleAddCashFlow}
-        />
-
-        <VaultProjectionModal
-          open={projectionAccount !== null}
-          onOpenChange={(open) => { if (!open) setProjectionAccount(null) }}
-          accountName={projectionAccount?.name ?? ""}
-          currentBalance={projectionAccount ? getAccountValue(projectionAccount) : 0}
-          cashFlows={projectionAccount ? cashFlows.filter((f) => f.accountId === projectionAccount.id) : []}
-          displayCurrency={displayCurrency}
         />
 
         <EntityForm
