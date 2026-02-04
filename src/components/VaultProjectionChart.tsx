@@ -30,8 +30,8 @@ const PERIOD_OPTIONS = [
 function computeTickInterval(months: number): number {
   if (months <= 1) return 7;
   if (months <= 3) return 14;
-  if (months <= 6) return 30;
-  return 60;
+  if (months <= 6) return 4;
+  return 4;
 }
 
 export default function VaultProjectionChart({

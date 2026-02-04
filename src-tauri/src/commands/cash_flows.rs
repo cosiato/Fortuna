@@ -50,7 +50,7 @@ pub struct UpdateCashFlowInput {
 }
 
 const VALID_FLOW_TYPES: &[&str] = &["inflow", "outflow"];
-const VALID_FREQUENCIES: &[&str] = &["weekly", "monthly", "yearly"];
+const VALID_FREQUENCIES: &[&str] = &["daily", "weekly", "monthly", "yearly"];
 const VALID_CATEGORIES: &[&str] = &[
     "salary",
     "freelance",

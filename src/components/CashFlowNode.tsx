@@ -19,6 +19,7 @@ interface CashFlowNodeData {
 }
 
 const FREQUENCY_LABELS: Record<CashFlowFrequency, string> = {
+  daily: '/day',
   weekly: '/wk',
   monthly: '/mo',
   yearly: '/yr',

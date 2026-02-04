@@ -96,7 +96,7 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
             name TEXT NOT NULL,
             amount REAL NOT NULL CHECK(amount > 0),
             flow_type TEXT NOT NULL CHECK(flow_type IN ('inflow', 'outflow')),
-            frequency TEXT NOT NULL CHECK(frequency IN ('weekly', 'monthly', 'yearly')),
+            frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly', 'yearly')),
             category TEXT NOT NULL CHECK(category IN (
                 'salary', 'freelance', 'investment_income', 'rental_income', 'other_income',
                 'rent', 'mortgage', 'subscription', 'utilities', 'insurance',

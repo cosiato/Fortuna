@@ -80,6 +80,9 @@ export function getFlowOccurrences(
 
     iteration++;
     switch (flow.frequency) {
+      case 'daily':
+        current = addDays(flowStart, iteration);
+        break;
       case 'weekly':
         current = addDays(flowStart, iteration * 7);
         break;
@@ -94,6 +97,12 @@ export function getFlowOccurrences(
   }
 
   return occurrences;
+}
+
+function computeStepDays(months: number): number {
+  if (months <= 3) return 1;
+  if (months <= 6) return 7;
+  return 7;
 }
 
 export function calculateProjection(
@@ -121,27 +130,38 @@ export function calculateProjection(
     }
   }
 
+  const stepDays = computeStepDays(months);
   const points: ProjectionPoint[] = [];
   let balance = currentBalance;
   let cursor = new Date(today);
 
   while (cursor <= windowEnd) {
-    const key = toDateKey(cursor);
-    const events = eventMap.get(key);
-    const inflow = events?.inflow ?? 0;
-    const outflow = events?.outflow ?? 0;
+    let stepInflow = 0;
+    let stepOutflow = 0;
 
-    balance = balance + inflow - outflow;
+    const stepEnd = addDays(cursor, stepDays - 1);
+    const clampedEnd = stepEnd > windowEnd ? windowEnd : stepEnd;
+
+    let day = new Date(cursor);
+    while (day <= clampedEnd) {
+      const key = toDateKey(day);
+      const events = eventMap.get(key);
+      stepInflow += events?.inflow ?? 0;
+      stepOutflow += events?.outflow ?? 0;
+      day = addDays(day, 1);
+    }
+
+    balance = balance + stepInflow - stepOutflow;
 
     points.push({
       date: toLabel(cursor),
       timestamp: cursor.getTime(),
       balance,
-      inflow,
-      outflow,
+      inflow: stepInflow,
+      outflow: stepOutflow,
     });
 
-    cursor = addDays(cursor, 1);
+    cursor = addDays(cursor, stepDays);
   }
 
   return points;
@@ -149,6 +169,8 @@ export function calculateProjection(
 
 export function normalizeToMonthly(amount: number, frequency: CashFlowFrequency): number {
   switch (frequency) {
+    case 'daily':
+      return amount * (365 / 12);
     case 'weekly':
       return amount * (52 / 12);
     case 'monthly':
