@@ -179,6 +179,25 @@ pub fn create_asset(
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
+    if input.asset_type == "stock" || input.asset_type == "crypto" {
+        if let Some(ref symbol) = input.symbol {
+            let exists: bool = conn
+                .query_row(
+                    "SELECT EXISTS(SELECT 1 FROM assets WHERE symbol = ? AND type = ? AND entity_id = ?)",
+                    params![symbol, input.asset_type, input.entity_id.unwrap_or(0)],
+                    |row| row.get(0),
+                )
+                .map_err(|e| e.to_string())?;
+
+            if exists {
+                return Err(format!(
+                    "A {} asset with ticker '{}' already exists",
+                    input.asset_type, symbol
+                ));
+            }
+        }
+    }
+
     let id = Uuid::new_v4().to_string();
     let quantity = input.quantity.unwrap_or(0.0);
     let currency = input.currency.unwrap_or_else(|| "USD".to_string());
