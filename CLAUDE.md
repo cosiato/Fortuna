@@ -90,6 +90,8 @@ src/
 |   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
 |   |-- CurrencySelector.tsx      # Currency picker dropdown
+|   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
+|   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart
