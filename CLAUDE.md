@@ -97,8 +97,7 @@ src/
 |   |-- PlaceholderFlowNode.tsx   # "+Add inflow/outflow" placeholder node
 |   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows (inline per vault)
 |   |-- VaultFlowNode.tsx         # React Flow node for central vault (with projection button)
-|   |-- VaultProjectionChart.tsx  # Balance projection chart for vaults
-|   |-- VaultProjectionModal.tsx  # Modal wrapping VaultProjectionChart
+|   |-- VaultProjectionChart.tsx  # Balance projection chart for vaults (inline in accordion)
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
 |   |-- cashFlowCategories.ts     # Cash flow category definitions and helpers
