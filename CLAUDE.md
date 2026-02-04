@@ -79,6 +79,7 @@ src/
 |   |   |-- popover.tsx
 |   |   |-- select.tsx
 |   |   |-- table.tsx
+|   |   |-- sonner.tsx
 |   |   |-- tabs.tsx
 |   |-- AccountForm.tsx           # Form for adding/editing accounts
 |   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
@@ -105,6 +106,7 @@ src/
 |   |-- countries.ts              # Country data and utilities
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting and exchange rates
+|   |-- errorHandling.ts          # Toast-based error notification utility
 |   |-- prices.ts                 # Price fetching (Yahoo Finance, CoinGecko)
 |   |-- utils.ts                  # General utilities (cn helper)
 |-- types/                        # TypeScript definitions
