@@ -30,6 +30,8 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { getCountryFlag } from "@/lib/countries"
 import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
+import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
+import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
@@ -97,6 +99,7 @@ export default function App() {
       })
       setAssetFormOpen(false)
       await fetchDataOnly()
+      requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
         const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
@@ -132,6 +135,7 @@ export default function App() {
       setAssetFormOpen(false)
       setEditingAsset(null)
       await fetchDataOnly()
+      requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
         const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
@@ -152,6 +156,7 @@ export default function App() {
     try {
       await api.assets.delete(id)
       await fetchDataOnly()
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to delete asset")
     }
@@ -163,6 +168,7 @@ export default function App() {
       setAssets((prev) =>
         prev.map((asset) => (asset.id === id ? { ...asset, quantity: newQuantity } : asset)),
       )
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to update quantity")
     }
@@ -186,6 +192,7 @@ export default function App() {
       })
       setAccountFormOpen(false)
       await fetchDataOnly()
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to create vault")
     }
@@ -208,6 +215,7 @@ export default function App() {
       setAccountFormOpen(false)
       setEditingAccount(null)
       await fetchDataOnly()
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to update vault")
     }
@@ -232,6 +240,7 @@ export default function App() {
       setDeleteAccountDialogOpen(false)
       setAccountToDelete(null)
       await fetchDataOnly()
+      requestSnapshot()
       const updated = await api.cashFlows.getAll()
       setCashFlows(updated)
     } catch (error) {
@@ -302,6 +311,7 @@ export default function App() {
       setDeleteDialogOpen(false)
       setEntityToDelete(null)
       await fetchDataOnly()
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to delete entity")
     }
@@ -478,6 +488,7 @@ export default function App() {
           BTC: 0.000024,
         },
       )
+      requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to refresh prices")
     } finally {
@@ -517,7 +528,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isPinEnabled, isLocked])
 
-  const calculateNetWorth = () => {
+  const calculateNetWorthUsd = () => {
     let totalInUsd = 0
 
     for (const asset of assets) {
@@ -550,14 +561,30 @@ export default function App() {
       totalInUsd += value
     }
 
-    if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
-      return totalInUsd * exchangeRates[displayCurrency]
-    }
-
     return totalInUsd
   }
 
-  const netWorth = calculateNetWorth()
+  const netWorthUsd = calculateNetWorthUsd()
+  const netWorth =
+    displayCurrency !== "USD" && exchangeRates[displayCurrency]
+      ? netWorthUsd * exchangeRates[displayCurrency]
+      : netWorthUsd
+
+  const refreshSnapshots = useCallback(async () => {
+    try {
+      const updated = await api.snapshots.getAll()
+      setSnapshots(updated)
+    } catch {
+      // Snapshot refresh is best-effort
+    }
+  }, [])
+
+  const { requestSnapshot, recordSnapshotNow } = useSnapshotRecorder({
+    netWorth: netWorthUsd,
+    currency: "USD",
+    enabled: !loading,
+    onSnapshotsUpdated: refreshSnapshots,
+  })
 
   const ASSET_CATEGORIES = [
     {
@@ -655,21 +682,14 @@ export default function App() {
   }, {})
 
   useEffect(() => {
-    if (!loading && assets.length > 0) {
-      const recordSnapshot = async () => {
-        try {
-          await api.snapshots.create({
-            totalValue: netWorth,
-            currency: "USD",
-          })
-        } catch (error) {
-          showErrorToast(error, "Failed to record snapshot")
-        }
-      }
-      recordSnapshot()
+    if (!loading && (assets.length > 0 || accounts.length > 0)) {
+      recordSnapshotNow()
+      api.snapshots.prune().catch(() => {
+        // Pruning is best-effort; failures do not affect user experience
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, assets.length])
+  }, [loading])
 
   if (loading) {
     return (
@@ -891,6 +911,45 @@ export default function App() {
                 {filteredAccounts.map((account) => {
                   const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
                   const flowKey = accountFlows.map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`).join(",")
+                  const hasActiveFlows = accountFlows.some((f) => f.isActive)
+
+                  const convertToDisplay = (amount: number): number => {
+                    let value = amount
+                    if (account.currency !== "USD" && exchangeRates[account.currency]) {
+                      value = value / exchangeRates[account.currency]
+                    }
+                    if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
+                      return value * exchangeRates[displayCurrency]
+                    }
+                    return value
+                  }
+
+                  const monthlyTotals = calculateMonthlyTotals(accountFlows)
+                  const monthlyNetDisplay = convertToDisplay(monthlyTotals.net)
+
+                  const currentBalanceDisplay = getAccountValue(account)
+                  const projection1M = calculateProjection(account.balance, accountFlows, 1)
+                  const projectedBalance = projection1M.length > 0
+                    ? projection1M[projection1M.length - 1].balance
+                    : account.balance
+                  const projectedBalanceDisplay = convertToDisplay(projectedBalance)
+                  const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
+                  const projectedChangePct = currentBalanceDisplay !== 0
+                    ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
+                    : 0
+
+                  const netColorClass = monthlyTotals.net > 0
+                    ? "text-emerald-400"
+                    : monthlyTotals.net < 0
+                      ? "text-red-400"
+                      : "text-muted-foreground"
+
+                  const projColorClass = projectedChange > 0
+                    ? "text-emerald-400"
+                    : projectedChange < 0
+                      ? "text-red-400"
+                      : "text-muted-foreground"
+
                   return (
                     <AccordionItem
                       key={account.id}
@@ -928,9 +987,31 @@ export default function App() {
                               </Button>
                             </div>
                           </div>
-                          <span className="text-sm font-bold text-accent">
-                            {formatCurrency(getAccountValue(account), displayCurrency)}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            {hasActiveFlows && (
+                              <span className={`text-xs font-medium ${netColorClass}`}>
+                                {monthlyTotals.net >= 0 ? "+" : ""}
+                                {formatCurrency(monthlyNetDisplay, displayCurrency)}
+                                <span className="text-muted-foreground">/mo</span>
+                              </span>
+                            )}
+                            <span className="text-sm font-bold text-accent">
+                              {formatCurrency(currentBalanceDisplay, displayCurrency)}
+                            </span>
+                            {hasActiveFlows && (
+                              <span className={`text-xs font-medium flex items-center gap-0.5 ${projColorClass}`}>
+                                <Icon
+                                  icon={projectedChange >= 0
+                                    ? "solar:arrow-up-linear"
+                                    : "solar:arrow-down-linear"}
+                                  width={10}
+                                  height={10}
+                                />
+                                {projectedChange >= 0 ? "+" : ""}
+                                {projectedChangePct.toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4">
