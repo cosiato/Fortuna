@@ -120,20 +120,27 @@ pub fn create_snapshot(
 ) -> Result<Snapshot, String> {
     let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let currency = input.currency.unwrap_or_else(|| "USD".to_string());
 
-    let existing: Option<String> = conn
+    let recent: Option<String> = conn
         .query_row(
-            "SELECT id FROM snapshots WHERE date(recorded_at) = date('now') LIMIT 1",
+            "SELECT id FROM snapshots WHERE recorded_at >= datetime('now', '-5 minutes') ORDER BY recorded_at DESC LIMIT 1",
             [],
             |row| row.get(0),
         )
         .ok();
 
-    if let Some(existing_id) = existing {
+    if let Some(recent_id) = recent {
+        conn.execute(
+            "UPDATE snapshots SET total_value = ?, currency = ?, recorded_at = datetime('now') WHERE id = ?",
+            params![input.total_value, currency, recent_id],
+        )
+        .map_err(|e| e.to_string())?;
+
         return conn
             .query_row(
                 "SELECT id, total_value, currency, recorded_at FROM snapshots WHERE id = ?",
-                [&existing_id],
+                [&recent_id],
                 |row| {
                     Ok(Snapshot {
                         id: row.get(0)?,
@@ -147,7 +154,6 @@ pub fn create_snapshot(
     }
 
     let id = Uuid::new_v4().to_string();
-    let currency = input.currency.unwrap_or_else(|| "USD".to_string());
 
     conn.execute(
         "INSERT INTO snapshots (id, total_value, currency, recorded_at)
@@ -169,4 +175,32 @@ pub fn create_snapshot(
         },
     )
     .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn prune_old_snapshots(
+    app: AppHandle,
+    db: State<DbConnection>,
+) -> Result<u64, String> {
+    let _ = app;
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let deleted = conn
+        .execute(
+            "DELETE FROM snapshots WHERE id IN (
+                SELECT id FROM (
+                    SELECT id, ROW_NUMBER() OVER (
+                        PARTITION BY date(recorded_at)
+                        ORDER BY recorded_at DESC
+                    ) AS rn
+                    FROM snapshots
+                    WHERE recorded_at < datetime('now', '-30 days')
+                )
+                WHERE rn > 1
+            )",
+            [],
+        )
+        .map_err(|e| e.to_string())?;
+
+    Ok(deleted as u64)
 }

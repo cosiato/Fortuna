@@ -43,6 +43,7 @@ pub fn run() {
             commands::get_today_snapshot,
             commands::get_latest_snapshot,
             commands::create_snapshot,
+            commands::prune_old_snapshots,
             commands::set_pin,
             commands::verify_pin,
             commands::remove_pin,

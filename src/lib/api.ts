@@ -53,6 +53,7 @@ export const api = {
     getToday: () => invoke<Snapshot | null>('get_today_snapshot'),
     getLatest: () => invoke<Snapshot | null>('get_latest_snapshot'),
     create: (input: CreateSnapshotInput) => invoke<Snapshot>('create_snapshot', { input }),
+    prune: () => invoke<number>('prune_old_snapshots'),
   },
 
   cashFlows: {
