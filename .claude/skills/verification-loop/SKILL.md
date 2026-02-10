@@ -124,8 +124,3 @@ Set a mental checkpoint:
 
 Run: /verify
 ```
-
-## Integration with Hooks
-
-This skill complements PostToolUse hooks but provides deeper verification.
-Hooks catch issues immediately; this skill provides comprehensive review.
