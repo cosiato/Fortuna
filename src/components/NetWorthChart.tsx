@@ -46,7 +46,17 @@ export default function NetWorthChart({
   displayCurrency,
   exchangeRates,
 }: NetWorthChartProps) {
-  const data = snapshots.map((snapshot) => ({
+  const latestPerDay = new Map<string, Snapshot>()
+  for (const snapshot of snapshots) {
+    const dayKey = new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    latestPerDay.set(dayKey, snapshot)
+  }
+
+  const data = Array.from(latestPerDay.values()).map((snapshot) => ({
     date: new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
