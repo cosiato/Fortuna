@@ -92,6 +92,7 @@ src/
 |   |-- CurrencySelector.tsx      # Currency picker dropdown
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
+|   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- NetWorthChart.tsx         # Net worth over time chart

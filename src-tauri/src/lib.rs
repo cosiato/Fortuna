@@ -57,6 +57,7 @@ pub fn run() {
             commands::create_cash_flow,
             commands::update_cash_flow,
             commands::delete_cash_flow,
+            commands::reset_all_data,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

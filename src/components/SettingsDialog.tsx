@@ -15,6 +15,7 @@ interface SettingsDialogProps {
   isPinEnabled: boolean
   onPinStatusChange: (enabled: boolean) => void
   onLock: () => void
+  onResetAccount: () => void
 }
 
 export default function SettingsDialog({
@@ -23,6 +24,7 @@ export default function SettingsDialog({
   isPinEnabled,
   onPinStatusChange,
   onLock,
+  onResetAccount,
 }: SettingsDialogProps) {
   const [view, setView] = useState<SettingsView>("menu")
   const [newPin, setNewPin] = useState("")
@@ -260,6 +262,18 @@ export default function SettingsDialog({
                 </div>
               </>
             )}
+
+            <div className="border-t border-border pt-4">
+              <p className="text-xs text-muted-foreground mb-3">Danger Zone</p>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+                onClick={onResetAccount}
+              >
+                <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
+                Reset All Data
+              </Button>
+            </div>
           </div>
         )
     }

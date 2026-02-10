@@ -216,3 +216,24 @@ pub fn is_pin_enabled(db: State<DbConnection>) -> Result<bool, String> {
 
     Ok(exists)
 }
+
+#[tauri::command]
+pub fn reset_all_data(db: State<DbConnection>) -> Result<(), String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    conn.execute_batch(
+        "BEGIN TRANSACTION;
+         DELETE FROM cash_flows;
+         DELETE FROM activity_log;
+         DELETE FROM snapshots;
+         DELETE FROM accounts;
+         DELETE FROM assets;
+         DELETE FROM entities WHERE id != 0;
+         DELETE FROM settings;
+         UPDATE entities SET name = 'Individual', updated_at = datetime('now') WHERE id = 0;
+         COMMIT;",
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}

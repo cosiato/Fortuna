@@ -80,5 +80,6 @@ export const api = {
     verifyPin: (pin: string) => invoke<boolean>('verify_pin', { pin }),
     removePin: (currentPin: string) => invoke<void>('remove_pin', { currentPin }),
     isPinEnabled: () => invoke<boolean>('is_pin_enabled'),
+    resetAllData: () => invoke<void>('reset_all_data'),
   },
 };

@@ -24,6 +24,7 @@ import EntitySelector from "@/components/EntitySelector"
 import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import DeleteAccountDialog from "@/components/DeleteAccountDialog"
+import ResetAccountDialog from "@/components/ResetAccountDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
@@ -68,6 +69,7 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
@@ -368,6 +370,21 @@ export default function App() {
     setCashFlowFormOpen(open)
     if (!open) {
       setEditingCashFlow(null)
+    }
+  }
+
+  const handleResetAccount = async () => {
+    try {
+      await api.settings.resetAllData()
+      setPrices({})
+      setIsPinEnabled(false)
+      setIsLocked(false)
+      setSelectedEntityId(0)
+      setResetDialogOpen(false)
+      setSettingsOpen(false)
+      await fetchDataOnly()
+    } catch (error) {
+      showErrorToast(error, "Failed to reset data")
     }
   }
 
@@ -1104,6 +1121,13 @@ export default function App() {
           isPinEnabled={isPinEnabled}
           onPinStatusChange={setIsPinEnabled}
           onLock={() => setIsLocked(true)}
+          onResetAccount={() => setResetDialogOpen(true)}
+        />
+
+        <ResetAccountDialog
+          open={resetDialogOpen}
+          onOpenChange={setResetDialogOpen}
+          onConfirm={handleResetAccount}
         />
       </main>
 
