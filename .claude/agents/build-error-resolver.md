@@ -51,6 +51,9 @@ npm run build
 
 # Vite.js build with debug
 npm run build -- --debug
+
+# Build for production
+npm run tauri build
 ```
 
 ## Error Resolution Workflow

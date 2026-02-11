@@ -20,7 +20,7 @@ Invoke this skill:
 # Check if project builds
 npm run build 2>&1 | tail -20
 # OR
-pnpm build 2>&1 | tail -20
+npm run tauri build 2>&1 | tail -20
 ```
 
 If build fails, STOP and fix before continuing.

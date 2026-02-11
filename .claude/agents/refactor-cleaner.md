@@ -283,6 +283,7 @@ If something breaks after removal:
    npm install
    npm run build
    npm test
+   npm run tauri build
    ```
 
 2. **Investigate:**
