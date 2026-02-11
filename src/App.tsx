@@ -34,6 +34,7 @@ import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import DeleteAccountDialog from "@/components/DeleteAccountDialog"
 import ResetAccountDialog from "@/components/ResetAccountDialog"
 import LockScreen from "@/components/LockScreen"
+import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
 import SettingsDialog from "@/components/SettingsDialog"
 import {
   Accordion,
@@ -87,6 +88,7 @@ export default function App() {
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
 
   useEffect(() => {
@@ -398,6 +400,8 @@ export default function App() {
       setSelectedEntityId(0)
       setResetDialogOpen(false)
       setSettingsOpen(false)
+      localStorage.removeItem("fortuna_onboarding_completed")
+      setShowOnboarding(true)
       await fetchDataOnly()
     } catch (error) {
       showErrorToast(error, "Failed to reset data")
@@ -423,10 +427,10 @@ export default function App() {
       setEntities(entitiesData)
       setCashFlows(cashFlowsData)
 
-      return assetsData
+      return { assetsData, accountsData }
     } catch (error) {
       showErrorToast(error, "Failed to load data")
-      return []
+      return { assetsData: [] as Asset[], accountsData: [] as Account[] }
     }
   }, [])
 
@@ -532,7 +536,7 @@ export default function App() {
 
   useEffect(() => {
     const initializeApp = async () => {
-      const assetsData = await fetchDataOnly()
+      const { assetsData, accountsData } = await fetchDataOnly()
       await refreshPrices(assetsData)
 
       try {
@@ -543,6 +547,11 @@ export default function App() {
         }
       } catch {
         // PIN check failed, continue without lock
+      }
+
+      const onboardingCompleted = localStorage.getItem("fortuna_onboarding_completed")
+      if (!onboardingCompleted && assetsData.length === 0 && accountsData.length === 0) {
+        setShowOnboarding(true)
       }
 
       setLoading(false)
@@ -1163,6 +1172,15 @@ export default function App() {
       </main>
 
       <LockScreen isLocked={isLocked} onUnlock={() => setIsLocked(false)} />
+      {!isLocked && (
+        <OnboardingOverlay
+          show={showOnboarding}
+          onComplete={() => {
+            localStorage.setItem("fortuna_onboarding_completed", "true")
+            setShowOnboarding(false)
+          }}
+        />
+      )}
     </div>
   )
 }
