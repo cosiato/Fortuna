@@ -27,7 +27,7 @@ Use the following tech stack:
 
 - No console.log or console.error in production code
 - Proper error handling with try/catch
-- Input validation in Rust commands
+- Input validation with Zod or similar
 
 ### 3. Testing
 
@@ -38,8 +38,11 @@ Use the following tech stack:
 
 ### 4. Security
 
+- No hardcoded secrets
+- Environment variables for sensitive data
 - Validate all user inputs
 - Parameterized queries only (Rust handles this)
+- CSRF protection enabled
 
 ## File Structure
 

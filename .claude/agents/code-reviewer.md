@@ -95,3 +95,14 @@ const apiKey = process.env.API_KEY;  // ✓ Good
 - ✅ Approve: No CRITICAL or HIGH issues
 - ⚠️ Warning: MEDIUM issues only (can merge with caution)
 - ❌ Block: CRITICAL or HIGH issues found
+
+<!-- ## Project-Specific Guidelines (Example)
+
+Add your project-specific checks here. Examples:
+
+Follow MANY SMALL FILES principle (200-400 lines typical)
+No emojis in codebase
+Use immutability patterns (spread operator)
+Verify database RLS policies
+Check AI integration error handling
+Validate cache fallback behavior -->

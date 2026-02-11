@@ -7,7 +7,15 @@ import AccountForm from "@/components/AccountForm"
 import VaultFlowDiagram from "@/components/VaultFlowDiagram"
 import VaultProjectionChart from "@/components/VaultProjectionChart"
 import CashFlowForm from "@/components/CashFlowForm"
-import type { Asset, Snapshot, Account, Entity, CashFlow, CreateCashFlowInput, UpdateCashFlowInput } from "@/types/database"
+import type {
+  Asset,
+  Snapshot,
+  Account,
+  Entity,
+  CashFlow,
+  CreateCashFlowInput,
+  UpdateCashFlowInput,
+} from "@/types/database"
 import { api } from "@/lib/api"
 import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
 import {
@@ -27,7 +35,12 @@ import DeleteAccountDialog from "@/components/DeleteAccountDialog"
 import ResetAccountDialog from "@/components/ResetAccountDialog"
 import LockScreen from "@/components/LockScreen"
 import SettingsDialog from "@/components/SettingsDialog"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion"
 import { getCountryFlag } from "@/lib/countries"
 import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
@@ -319,7 +332,10 @@ export default function App() {
     }
   }
 
-  const handleAddCashFlow = async (data: CreateCashFlowInput | UpdateCashFlowInput, isEdit: boolean) => {
+  const handleAddCashFlow = async (
+    data: CreateCashFlowInput | UpdateCashFlowInput,
+    isEdit: boolean,
+  ) => {
     try {
       if (isEdit && editingCashFlow) {
         await api.cashFlows.update(editingCashFlow.id, data as UpdateCashFlowInput)
@@ -392,13 +408,14 @@ export default function App() {
     try {
       await api.entities.ensureIndividual()
 
-      const [assetsData, snapshotsData, accountsData, entitiesData, cashFlowsData] = await Promise.all([
-        api.assets.getAll(),
-        api.snapshots.getAll(),
-        api.accounts.getAll(),
-        api.entities.getAll(),
-        api.cashFlows.getAll(),
-      ])
+      const [assetsData, snapshotsData, accountsData, entitiesData, cashFlowsData] =
+        await Promise.all([
+          api.assets.getAll(),
+          api.snapshots.getAll(),
+          api.accounts.getAll(),
+          api.entities.getAll(),
+          api.cashFlows.getAll(),
+        ])
 
       setAssets(assetsData)
       setSnapshots(snapshotsData)
@@ -918,7 +935,7 @@ export default function App() {
             {filteredAccounts.length === 0 ? (
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-muted-foreground text-sm text-center py-4">
+                  <p className="text-muted-foreground text-center py-4">
                     No vaults yet. Click + to add one.
                   </p>
                 </CardContent>
@@ -927,7 +944,9 @@ export default function App() {
               <Accordion type="multiple" className="space-y-3">
                 {filteredAccounts.map((account) => {
                   const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
-                  const flowKey = accountFlows.map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`).join(",")
+                  const flowKey = accountFlows
+                    .map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`)
+                    .join(",")
                   const hasActiveFlows = accountFlows.some((f) => f.isActive)
 
                   const convertToDisplay = (amount: number): number => {
@@ -946,26 +965,30 @@ export default function App() {
 
                   const currentBalanceDisplay = getAccountValue(account)
                   const projection1M = calculateProjection(account.balance, accountFlows, 1)
-                  const projectedBalance = projection1M.length > 0
-                    ? projection1M[projection1M.length - 1].balance
-                    : account.balance
+                  const projectedBalance =
+                    projection1M.length > 0
+                      ? projection1M[projection1M.length - 1].balance
+                      : account.balance
                   const projectedBalanceDisplay = convertToDisplay(projectedBalance)
                   const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
-                  const projectedChangePct = currentBalanceDisplay !== 0
-                    ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
-                    : 0
+                  const projectedChangePct =
+                    currentBalanceDisplay !== 0
+                      ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
+                      : 0
 
-                  const netColorClass = monthlyTotals.net > 0
-                    ? "text-emerald-400"
-                    : monthlyTotals.net < 0
-                      ? "text-red-400"
-                      : "text-muted-foreground"
+                  const netColorClass =
+                    monthlyTotals.net > 0
+                      ? "text-emerald-400"
+                      : monthlyTotals.net < 0
+                        ? "text-red-400"
+                        : "text-muted-foreground"
 
-                  const projColorClass = projectedChange > 0
-                    ? "text-emerald-400"
-                    : projectedChange < 0
-                      ? "text-red-400"
-                      : "text-muted-foreground"
+                  const projColorClass =
+                    projectedChange > 0
+                      ? "text-emerald-400"
+                      : projectedChange < 0
+                        ? "text-red-400"
+                        : "text-muted-foreground"
 
                   return (
                     <AccordionItem
@@ -977,8 +1000,12 @@ export default function App() {
                         <div className="flex flex-1 items-center justify-between mr-2">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
-                            <span className="text-sm font-semibold text-foreground">{account.name}</span>
-                            <span className="text-xs text-muted-foreground">{account.currency}</span>
+                            <span className="text-sm font-semibold text-foreground">
+                              {account.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {account.currency}
+                            </span>
                             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost"
@@ -1016,11 +1043,15 @@ export default function App() {
                               {formatCurrency(currentBalanceDisplay, displayCurrency)}
                             </span>
                             {hasActiveFlows && (
-                              <span className={`text-xs font-medium flex items-center gap-0.5 ${projColorClass}`}>
+                              <span
+                                className={`text-xs font-medium flex items-center gap-0.5 ${projColorClass}`}
+                              >
                                 <Icon
-                                  icon={projectedChange >= 0
-                                    ? "solar:arrow-up-linear"
-                                    : "solar:arrow-down-linear"}
+                                  icon={
+                                    projectedChange >= 0
+                                      ? "solar:arrow-up-linear"
+                                      : "solar:arrow-down-linear"
+                                  }
                                   width={10}
                                   height={10}
                                 />
