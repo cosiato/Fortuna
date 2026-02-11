@@ -104,6 +104,13 @@ src/
 |   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows (inline per vault)
 |   |-- VaultFlowNode.tsx         # React Flow node for central vault (with projection button)
 |   |-- VaultProjectionChart.tsx  # Balance projection chart for vaults (inline in accordion)
+|   |-- onboarding/              # First-time user onboarding flow
+|       |-- OnboardingOverlay.tsx         # Root overlay with step navigation
+|       |-- OnboardingStepLayout.tsx      # Shared layout for each step
+|       |-- OnboardingStepAssets.tsx      # Step 1: Assets intro
+|       |-- OnboardingStepVaults.tsx      # Step 2: Vaults intro
+|       |-- OnboardingStepEntities.tsx    # Step 3: Entities intro
+|       |-- OnboardingStepIndicator.tsx   # Progress dots + XP bar
 |-- hooks/                        # Custom React hooks
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
 |-- lib/                          # Utility libraries
