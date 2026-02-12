@@ -94,8 +94,6 @@ export default function OnboardingOverlay({ show, onComplete }: OnboardingOverla
           aria-label="Welcome to Fortuna"
           aria-modal="true"
         >
-          <div className="absolute inset-0 bg-vignette pointer-events-none" />
-
           <div className="relative flex flex-col items-center gap-6 w-full max-w-3xl px-6">
             <div className="flex flex-col items-center gap-2 mb-2">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shadow-lg">
@@ -123,32 +121,37 @@ export default function OnboardingOverlay({ show, onComplete }: OnboardingOverla
             </div>
 
             <div className="flex items-center justify-between w-full mt-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBack}
-                className="text-muted-foreground hover:text-foreground"
-                disabled={currentStep === 1}
-              >
-                Back
-              </Button>
+              {currentStep > 1 ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBack}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Back
+                </Button>
+              ) : (
+                <div />
+              )}
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSkip}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Skip
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSkip}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Skip
+                </Button>
 
-              <Button
-                size="sm"
-                onClick={handleNext}
-                className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold px-6"
-              >
-                {currentStep === TOTAL_STEPS ? "Begin Your Journey" : "Next"}
-              </Button>
+                <Button
+                  size="sm"
+                  onClick={handleNext}
+                  className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold px-6"
+                >
+                  {currentStep === TOTAL_STEPS ? "Begin Your Journey" : "Next"}
+                </Button>
+              </div>
             </div>
           </div>
         </motion.div>
