@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { getCategoriesByType } from '@/lib/cashFlowCategories';
+import { cashFlowSchema, validateSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 interface CashFlowFormProps {
   cashFlow?: CashFlow | null;
@@ -80,11 +82,21 @@ export default function CashFlowForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
     const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) return;
-    if (!startDate) return;
-    if (endDate && endDate < startDate) return;
+
+    const validation = validateSchema(cashFlowSchema, {
+      name: name.trim(),
+      amount: isNaN(parsedAmount) ? 0 : parsedAmount,
+      flowType,
+      frequency,
+      category,
+      startDate,
+      endDate: endDate || null,
+    });
+    if (!validation.success) {
+      toast.error(validation.error);
+      return;
+    }
 
     if (isEditing) {
       const updateData: UpdateCashFlowInput = {

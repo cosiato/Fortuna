@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select';
 import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
 import CountrySelector from '@/components/CountrySelector';
+import { accountSchema, validateSchema } from '@/lib/validation';
+import { toast } from 'sonner';
 
 interface AccountFormProps {
   account?: Account | null;
@@ -55,12 +57,18 @@ export default function AccountForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
+    const data = {
       name,
       balance: parseFloat(balance) || 0,
       currency,
       countryCode,
-    });
+    };
+    const result = validateSchema(accountSchema, data);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    onSubmit(data);
   };
 
   return (

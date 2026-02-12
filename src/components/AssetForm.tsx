@@ -15,6 +15,8 @@ import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/cu
 import CryptoSelector from "@/components/CryptoSelector"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { getStockInfo } from "@/lib/prices"
+import { assetSchema, validateSchema } from "@/lib/validation"
+import { toast } from "sonner"
 
 interface AssetFormProps {
   asset?: Asset | null
@@ -154,14 +156,20 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
+    const data = {
       name: getEffectiveName(),
       type,
       symbol: requiresSymbol ? symbol : null,
       quantity: parseFloat(quantity) || 0,
       manualPrice: requiresManualPrice ? parseFloat(manualPrice) || null : null,
       currency,
-    })
+    }
+    const result = validateSchema(assetSchema, data)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    onSubmit(data)
   }
 
   return (

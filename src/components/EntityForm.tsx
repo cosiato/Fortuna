@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { entitySchema, validateSchema } from "@/lib/validation"
+import { toast } from "sonner"
 
 interface EntityFormProps {
   entity?: Entity | null
@@ -35,7 +37,13 @@ export default function EntityForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({ name: name.trim() })
+    const data = { name: name.trim() }
+    const result = validateSchema(entitySchema, data)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    onSubmit(data)
   }
 
   const handleDelete = () => {
