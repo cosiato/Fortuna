@@ -19,6 +19,7 @@ import type {
 import { api } from "@/lib/api"
 import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
 import {
+  SUPPORTED_CURRENCIES,
   SupportedCurrency,
   formatCurrency,
   getExchangeRates,
@@ -148,16 +149,14 @@ export default function App() {
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
   const [defaultFlowType, setDefaultFlowType] = useState<"inflow" | "outflow" | undefined>(undefined)
   const [showOnboarding, setShowOnboarding] = useState(false)
-  useEffect(() => {
-    const saved = localStorage.getItem("displayCurrency")
-    if (saved && ["USD", "EUR", "BTC"].includes(saved)) {
-      setDisplayCurrency(saved as SupportedCurrency)
-    }
-  }, [])
 
-  const handleCurrencyChange = (currency: SupportedCurrency) => {
+  const handleCurrencyChange = async (currency: SupportedCurrency) => {
     setDisplayCurrency(currency)
-    localStorage.setItem("displayCurrency", currency)
+    try {
+      await api.settings.setCurrencyPreference(currency)
+    } catch (error) {
+      showErrorToast(error, "Failed to save currency preference")
+    }
   }
 
   const handleAddAsset = async (data: Partial<Asset>) => {
@@ -597,6 +596,15 @@ export default function App() {
     const initializeApp = async () => {
       const { assetsData, accountsData } = await fetchDataOnly()
       await refreshPrices(assetsData)
+
+      try {
+        const savedCurrency = await api.settings.getCurrencyPreference()
+        if (SUPPORTED_CURRENCIES.includes(savedCurrency as SupportedCurrency)) {
+          setDisplayCurrency(savedCurrency as SupportedCurrency)
+        }
+      } catch {
+        // Currency preference load failed, keep default USD
+      }
 
       try {
         const pinEnabled = await api.settings.isPinEnabled()

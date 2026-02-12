@@ -320,3 +320,41 @@ pub fn unlock_app(
         Err(e) => Err(e.to_string()),
     }
 }
+
+const ALLOWED_CURRENCIES: &[&str] = &[
+    "USD", "EUR", "GBP", "JPY", "CHF", "HKD", "SGD", "AED", "BTC",
+];
+
+#[tauri::command]
+pub fn get_currency_preference(db: State<DbConnection>) -> Result<String, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT value FROM settings WHERE key = 'display_currency'",
+        [],
+        |row| row.get::<_, String>(0),
+    );
+
+    match result {
+        Ok(currency) => Ok(currency),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok("USD".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn set_currency_preference(db: State<DbConnection>, currency: String) -> Result<(), String> {
+    if !ALLOWED_CURRENCIES.contains(&currency.as_str()) {
+        return Err(format!("Unsupported currency: {}", currency));
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('display_currency', ?1)",
+        [&currency],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}

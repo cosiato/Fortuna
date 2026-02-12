@@ -83,5 +83,7 @@ export const api = {
     resetAllData: (pin?: string) => invoke<void>('reset_all_data', { pin: pin || null }),
     lockApp: () => invoke<void>('lock_app'),
     unlockApp: (pin: string) => invoke<boolean>('unlock_app', { pin }),
+    getCurrencyPreference: () => invoke<string>('get_currency_preference'),
+    setCurrencyPreference: (currency: string) => invoke<void>('set_currency_preference', { currency }),
   },
 };
