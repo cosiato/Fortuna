@@ -37,8 +37,9 @@
     --chart-5: 220 9% 46%;
 
     /* Font families - loaded from Google Fonts */
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: 'Cinzel', ui-serif, Georgia, serif;
+    --font-sans:
+      "Exo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Cinzel", ui-serif, Georgia, serif;
   }
 }
 
@@ -79,15 +80,12 @@
   }
   .gradient-border {
     border: 1px solid transparent;
-    background: linear-gradient(hsl(240 24% 15%), hsl(240 24% 15%)) padding-box,
+    background:
+      linear-gradient(hsl(240 24% 15%), hsl(240 24% 15%)) padding-box,
       linear-gradient(135deg, #ffd700, #a855f7) border-box;
   }
   .bg-vignette {
-    background: radial-gradient(
-      ellipse at center,
-      transparent 0%,
-      rgba(15, 15, 26, 0.4) 100%
-    );
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 15, 26, 0.4) 100%);
   }
   .font-sans {
     font-family: var(--font-sans);
