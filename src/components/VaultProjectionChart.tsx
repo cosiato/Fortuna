@@ -18,6 +18,8 @@ interface VaultProjectionChartProps {
   currentBalance: number;
   cashFlows: readonly CashFlow[];
   displayCurrency: SupportedCurrency;
+  accountCurrency: string;
+  exchangeRates: { [currency: string]: number };
 }
 
 const PERIOD_OPTIONS = [
@@ -38,12 +40,24 @@ export default function VaultProjectionChart({
   currentBalance,
   cashFlows,
   displayCurrency,
+  accountCurrency,
+  exchangeRates,
 }: VaultProjectionChartProps) {
   const [months, setMonths] = useState<number>(6);
 
+  const convertedCashFlows = useMemo(() => {
+    const accountRate = exchangeRates[accountCurrency] ?? 1;
+    const displayRate = exchangeRates[displayCurrency] ?? 1;
+    const factor = displayRate / accountRate;
+    return cashFlows.map((flow) => ({
+      ...flow,
+      amount: flow.amount * factor,
+    }));
+  }, [cashFlows, exchangeRates, accountCurrency, displayCurrency]);
+
   const data = useMemo(
-    () => calculateProjection(currentBalance, cashFlows, months),
-    [currentBalance, cashFlows, months],
+    () => calculateProjection(currentBalance, convertedCashFlows, months),
+    [currentBalance, convertedCashFlows, months],
   );
 
   const tickInterval = computeTickInterval(months);

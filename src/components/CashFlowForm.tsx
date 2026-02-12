@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 interface CashFlowFormProps {
   cashFlow?: CashFlow | null;
   accountId: string;
+  accountCurrency?: string;
   defaultFlowType?: CashFlowType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -39,6 +40,7 @@ interface CashFlowFormProps {
 export default function CashFlowForm({
   cashFlow,
   accountId,
+  accountCurrency,
   defaultFlowType,
   open,
   onOpenChange,
@@ -151,16 +153,24 @@ export default function CashFlowForm({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="cf-amount">Amount</Label>
-              <Input
-                id="cf-amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                step="any"
-                min="0.01"
-                placeholder="0.00"
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="cf-amount"
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  step="any"
+                  min="0.01"
+                  placeholder="0.00"
+                  className={accountCurrency ? 'pr-14' : ''}
+                  required
+                />
+                {accountCurrency && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground select-none">
+                    {accountCurrency}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

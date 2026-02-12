@@ -138,7 +138,9 @@ export default function App() {
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
-  const [defaultFlowType, setDefaultFlowType] = useState<"inflow" | "outflow" | undefined>(undefined)
+  const [defaultFlowType, setDefaultFlowType] = useState<"inflow" | "outflow" | undefined>(
+    undefined,
+  )
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const handleCurrencyChange = async (currency: SupportedCurrency) => {
@@ -896,7 +898,7 @@ export default function App() {
         <div className="space-y-6 mb-8">
           <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">My Assets</h2>
+              <h2 className="text-lg font-semibold text-foreground">Assets</h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -927,9 +929,7 @@ export default function App() {
                         <span className="text-current">{category.icon}</span>
                         <span>{category.label}</span>
                         {hasAssets && (
-                          <span className="text-muted-foreground">
-                            {categoryAssets.length}
-                          </span>
+                          <span className="text-muted-foreground">{categoryAssets.length}</span>
                         )}
                       </TabsTrigger>
                     )
@@ -1122,6 +1122,7 @@ export default function App() {
                             cashFlows={accountFlows}
                             displayCurrency={displayCurrency}
                             displayBalance={getAccountValue(account)}
+                            exchangeRates={exchangeRates}
                             onEdit={handleEditCashFlow}
                             onDelete={handleDeleteCashFlow}
                             onToggle={handleToggleCashFlow}
@@ -1136,6 +1137,8 @@ export default function App() {
                             currentBalance={getAccountValue(account)}
                             cashFlows={accountFlows}
                             displayCurrency={displayCurrency}
+                            accountCurrency={account.currency}
+                            exchangeRates={exchangeRates}
                           />
                         </div>
                       </AccordionContent>
@@ -1164,6 +1167,7 @@ export default function App() {
         <CashFlowForm
           cashFlow={editingCashFlow}
           accountId={cashFlowAccountId}
+          accountCurrency={accounts.find((a) => a.id === cashFlowAccountId)?.currency}
           defaultFlowType={defaultFlowType}
           open={cashFlowFormOpen}
           onOpenChange={handleCashFlowFormClose}

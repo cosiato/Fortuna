@@ -25,6 +25,7 @@ interface VaultFlowDiagramProps {
   cashFlows: readonly CashFlow[];
   displayCurrency: SupportedCurrency;
   displayBalance: number;
+  exchangeRates: { [currency: string]: number };
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
@@ -53,6 +54,7 @@ export default function VaultFlowDiagram({
   cashFlows,
   displayCurrency,
   displayBalance,
+  exchangeRates,
   onEdit,
   onDelete,
   onToggle,
@@ -66,6 +68,12 @@ export default function VaultFlowDiagram({
     () => cashFlows.filter((f) => f.flowType === 'outflow'),
     [cashFlows],
   );
+
+  const convertAmount = useCallback((amount: number): number => {
+    const accountRate = exchangeRates[account.currency] ?? 1;
+    const displayRate = exchangeRates[displayCurrency] ?? 1;
+    return amount * (displayRate / accountRate);
+  }, [exchangeRates, account.currency, displayCurrency]);
 
   const buildNodes = useCallback((): Node[] => {
     const inflowCount = Math.max(inflows.length, 1);
@@ -104,7 +112,7 @@ export default function VaultFlowDiagram({
             data: {
               flowId: flow.id,
               name: flow.name,
-              amount: flow.amount,
+              amount: convertAmount(flow.amount),
               frequency: flow.frequency,
               flowType: flow.flowType,
               category: flow.category,
@@ -143,7 +151,7 @@ export default function VaultFlowDiagram({
             data: {
               flowId: flow.id,
               name: flow.name,
-              amount: flow.amount,
+              amount: convertAmount(flow.amount),
               frequency: flow.frequency,
               flowType: flow.flowType,
               category: flow.category,
@@ -170,7 +178,7 @@ export default function VaultFlowDiagram({
         }];
 
     return [vaultNode, ...inflowNodes, ...outflowNodes];
-  }, [account, inflows, outflows, displayCurrency, displayBalance, onEdit, onDelete, onToggle, onAddFlow]);
+  }, [account, inflows, outflows, displayCurrency, displayBalance, convertAmount, onEdit, onDelete, onToggle, onAddFlow]);
 
   const buildEdges = useCallback((): Edge[] => {
     const inflowEdges: Edge[] = inflows.length > 0
