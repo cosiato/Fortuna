@@ -136,7 +136,9 @@ export default function EntitySelector({
                     width={16}
                     height={16}
                   />
-                  <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
+                  <span className="font-medium text-sm whitespace-nowrap">
+                    {entity.type === "individual" ? "Personal" : entity.name}
+                  </span>
                 </div>
                 <SlotMachineNumber
                   value={formatCurrency(total, displayCurrency)}
