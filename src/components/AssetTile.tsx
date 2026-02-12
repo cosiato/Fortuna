@@ -143,26 +143,32 @@ export default function AssetTile({
 
           <div className="flex flex-col gap-2">
             <div className="flex items-start gap-2">
-              {asset.type === "crypto" && asset.symbol ? (
+              {asset.type === "crypto" && asset.symbol && (
                 <CryptoAvatar symbol={asset.symbol} />
-              ) : (
-                <div className="w-6 h-6 rounded bg-accent/20 flex items-center justify-center shrink-0">
-                  <span className="text-accent font-bold text-[10px]">
-                    {asset.symbol?.slice(0, 2).toUpperCase() ||
-                      asset.name.slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
               )}
               <div className="min-w-0 flex-1">
-                <h3
-                  className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
-                >
-                  {asset.type === "crypto" && asset.symbol
-                    ? getCryptoBySymbol(asset.symbol)?.name || asset.name
-                    : asset.name}
-                </h3>
-                {asset.symbol && (
-                  <p className="text-[10px] text-muted-foreground uppercase">{asset.symbol}</p>
+                {asset.type === "stock" && asset.symbol ? (
+                  <>
+                    <h3
+                      className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
+                    >
+                      {asset.symbol.toUpperCase()}
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground truncate">{asset.name}</p>
+                  </>
+                ) : (
+                  <>
+                    <h3
+                      className={`font-semibold text-sm text-foreground truncate ${showActions ? "pr-8" : ""}`}
+                    >
+                      {asset.type === "crypto" && asset.symbol
+                        ? getCryptoBySymbol(asset.symbol)?.name || asset.name
+                        : asset.name}
+                    </h3>
+                    {asset.symbol && (
+                      <p className="text-[10px] text-muted-foreground uppercase">{asset.symbol}</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
