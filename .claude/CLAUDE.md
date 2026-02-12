@@ -101,6 +101,7 @@ src/
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
+|   |-- SlotMachineNumber.tsx     # Animated digit roller for currency values
 |   |-- NetWorthChart.tsx         # Net worth over time chart
 |   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
 |   |-- PlaceholderFlowNode.tsx   # "+Add inflow/outflow" placeholder node

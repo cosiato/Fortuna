@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
 import EntitySelector from "@/components/EntitySelector"
+import SlotMachineNumber from "@/components/SlotMachineNumber"
 import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import DeleteAccountDialog from "@/components/DeleteAccountDialog"
@@ -796,9 +797,11 @@ export default function App() {
           <CardContent className="p-6 lg:grid lg:grid-cols-2 gap-8">
             <div>
               <p className="text-muted-foreground text-sm font-medium mb-1">Power Level</p>
-              <p className="text-4xl font-bold text-accent font-serif animate-pulse-slow">
-                {formatCurrency(netWorth, displayCurrency)}
-              </p>
+              <SlotMachineNumber
+                value={formatCurrency(netWorth, displayCurrency)}
+                className="text-4xl font-bold text-accent font-serif"
+                duration={700}
+              />
               <p className="text-muted-foreground text-sm mt-2">
                 {assets.length} asset{assets.length !== 1 ? "s" : ""} in inventory
               </p>
@@ -838,11 +841,9 @@ export default function App() {
               </Button>
             </div>
             {filteredAssets.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
-                </CardContent>
-              </Card>
+              <div className="p-8 text-center">
+                <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+              </div>
             ) : (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full h-auto p-1 bg-slate-800/40 border border-slate-800/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
@@ -942,13 +943,11 @@ export default function App() {
               </Button>
             </div>
             {filteredAccounts.length === 0 ? (
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-muted-foreground text-center py-4">
-                    No vaults yet. Click + to add one.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="p-4">
+                <p className="text-muted-foreground text-center py-4">
+                  No vaults yet. Click + to add one.
+                </p>
+              </div>
             ) : (
               <Accordion type="multiple" className="space-y-3">
                 {filteredAccounts.map((account) => {

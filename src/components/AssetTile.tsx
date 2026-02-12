@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { Icon } from "@iconify/react"
 import type { Asset } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import SlotMachineNumber from "@/components/SlotMachineNumber"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { Button } from "@/components/ui/button"
 
@@ -209,7 +210,15 @@ export default function AssetTile({
                   Value
                 </span>
                 <span className="text-sm font-bold text-accent">
-                  {displayValue > 0 ? formatCurrency(displayValue, displayCurrency) : "-"}
+                  {displayValue > 0 ? (
+                    <SlotMachineNumber
+                      value={formatCurrency(displayValue, displayCurrency)}
+                      duration={500}
+                      staggerMs={20}
+                    />
+                  ) : (
+                    "-"
+                  )}
                 </span>
               </div>
             </div>

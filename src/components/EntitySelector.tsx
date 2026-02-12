@@ -2,6 +2,7 @@ import { Icon } from "@iconify/react"
 import { useRef, useState, useEffect, useCallback } from "react"
 import type { Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import SlotMachineNumber from "@/components/SlotMachineNumber"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { motion } from "framer-motion"
@@ -112,14 +113,14 @@ export default function EntitySelector({
                   ${
                     isSelected
                       ? "text-accent"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/10 hover:border-accent"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }
                 `}
               >
                 {isSelected && (
                   <motion.div
                     layoutId="activeEntityBackground"
-                    className="absolute inset-0 bg-accent/10 rounded-lg border border-accent"
+                    className="absolute inset-0 bg-accent/10 rounded-lg"
                     transition={{
                       type: "spring",
                       stiffness: 400,
@@ -137,11 +138,12 @@ export default function EntitySelector({
                   />
                   <span className="font-medium text-sm whitespace-nowrap">{entity.name}</span>
                 </div>
-                <span
+                <SlotMachineNumber
+                  value={formatCurrency(total, displayCurrency)}
                   className={`relative text-xs ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
-                >
-                  {formatCurrency(total, displayCurrency)}
-                </span>
+                  duration={500}
+                  staggerMs={20}
+                />
               </button>
 
               {isCompany && (
