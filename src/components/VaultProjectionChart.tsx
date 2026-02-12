@@ -93,7 +93,7 @@ export default function VaultProjectionChart({
 
       <div className="h-48 rounded-lg border border-slate-800/50 bg-slate-900/20 p-2">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={[...data]} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+          <ComposedChart data={[...data]} margin={{ top: 5, right: 10, left: 30, bottom: 5 }}>
             <defs>
               <linearGradient id="balanceGradientPos" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#FFD700" stopOpacity={0.3} />
