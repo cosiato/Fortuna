@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input"
 interface ResetAccountDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => void
+  onConfirm: (pin?: string) => void
+  pinEnabled: boolean
 }
 
 const CONFIRMATION_WORD = "RESET"
@@ -22,24 +23,28 @@ export default function ResetAccountDialog({
   open,
   onOpenChange,
   onConfirm,
+  pinEnabled,
 }: ResetAccountDialogProps) {
   const [confirmText, setConfirmText] = useState("")
+  const [pin, setPin] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (open) {
       setConfirmText("")
+      setPin("")
       setIsLoading(false)
     }
   }, [open])
 
   const isConfirmed = confirmText === CONFIRMATION_WORD
+  const isPinValid = !pinEnabled || pin.length === 4
 
   const handleConfirm = async () => {
-    if (!isConfirmed) return
+    if (!isConfirmed || !isPinValid) return
     setIsLoading(true)
     try {
-      await onConfirm()
+      await onConfirm(pinEnabled ? pin : undefined)
     } finally {
       setIsLoading(false)
     }
@@ -106,6 +111,24 @@ export default function ResetAccountDialog({
             </div>
           </div>
 
+          {pinEnabled && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Enter your PIN to authorize this action
+              </p>
+              <Input
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="Enter 4-digit PIN"
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                className="font-mono"
+                disabled={isLoading}
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
               Type <span className="font-mono font-bold text-foreground">{CONFIRMATION_WORD}</span> to confirm
@@ -116,7 +139,7 @@ export default function ResetAccountDialog({
               placeholder={CONFIRMATION_WORD}
               className="font-mono"
               disabled={isLoading}
-              autoFocus
+              autoFocus={!pinEnabled}
             />
           </div>
 
@@ -135,7 +158,7 @@ export default function ResetAccountDialog({
               variant="destructive"
               className="flex-1"
               onClick={handleConfirm}
-              disabled={!isConfirmed || isLoading}
+              disabled={!isConfirmed || !isPinValid || isLoading}
             >
               {isLoading ? "Resetting..." : "Reset All Data"}
             </Button>

@@ -49,6 +49,8 @@ import { showErrorToast } from "@/lib/errorHandling"
 import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
 import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 
+const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
+
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -83,6 +85,19 @@ export default function App() {
   const [refreshCooldown, setRefreshCooldown] = useState(false)
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
+
+  const handleLock = async () => {
+    try {
+      await api.settings.lockApp()
+    } catch {
+      // Lock frontend even if backend call fails
+    }
+    setIsLocked(true)
+  }
+
+  const handleUnlock = async () => {
+    setIsLocked(false)
+  }
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
@@ -90,8 +105,6 @@ export default function App() {
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
-
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
     if (saved && ["USD", "EUR", "BTC"].includes(saved)) {
@@ -392,9 +405,9 @@ export default function App() {
     }
   }
 
-  const handleResetAccount = async () => {
+  const handleResetAccount = async (pin?: string) => {
     try {
-      await api.settings.resetAllData()
+      await api.settings.resetAllData(pin)
       setPrices({})
       setIsPinEnabled(false)
       setIsLocked(false)
@@ -533,6 +546,7 @@ export default function App() {
     } finally {
       setIsRefreshing(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assets, refreshCooldown])
 
   useEffect(() => {
@@ -544,7 +558,7 @@ export default function App() {
         const pinEnabled = await api.settings.isPinEnabled()
         setIsPinEnabled(pinEnabled)
         if (pinEnabled) {
-          setIsLocked(true)
+          handleLock()
         }
       } catch {
         // PIN check failed, continue without lock
@@ -564,7 +578,7 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "l" && isPinEnabled && !isLocked) {
         e.preventDefault()
-        setIsLocked(true)
+        handleLock()
       }
     }
 
@@ -673,10 +687,6 @@ export default function App() {
       setActiveTab(nonEmptyCategories[0].key)
     }
   }, [nonEmptyCategories, activeTab])
-
-  const getCategoryTotal = (categoryKey: string): number => {
-    return assetsByType[categoryKey].reduce((sum, asset) => sum + getAssetValue(asset), 0)
-  }
 
   const getAssetValue = (asset: Asset): number => {
     let value = 0
@@ -846,45 +856,23 @@ export default function App() {
               </div>
             ) : (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full h-auto p-1 bg-slate-800/40 border border-slate-800/50 rounded-lg grid grid-cols-4 gap-1 mb-4">
+                <TabsList className="h-auto bg-transparent p-0 flex justify-start gap-1 mb-4">
                   {ASSET_CATEGORIES.map((category) => {
                     const categoryAssets = assetsByType[category.key]
                     const hasAssets = categoryAssets.length > 0
-                    const categoryTotal = getCategoryTotal(category.key)
-                    const isActive = activeTab === category.key
 
                     return (
                       <TabsTrigger
                         key={category.key}
                         value={category.key}
                         disabled={!hasAssets}
-                        className="relative flex flex-col items-center gap-0.5 py-2 px-1.5 rounded-md border border-transparent transition-all duration-200 ease-out hover:bg-slate-700/30 hover:border-slate-600/50 data-[state=active]:hover:bg-transparent data-[state=active]:hover:border-transparent data-[state=active]:text-foreground disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-transparent"
+                        className="flex items-center gap-1.5 py-1 px-2.5 rounded-md text-xs font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                       >
-                        {isActive && (
-                          <motion.div
-                            layoutId="activeTabBackground"
-                            className="absolute inset-0 bg-slate-700/30 rounded-md border border-slate-600/50"
-                            transition={{
-                              type: "spring",
-                              stiffness: 400,
-                              damping: 30,
-                            }}
-                          />
-                        )}
-                        <div className="relative flex items-center gap-1.5">
-                          <span className="text-current">{category.icon}</span>
-                          <span className="font-medium text-xs">
-                            {category.label}
-                            {hasAssets && (
-                              <span className="ml-1 text-muted-foreground">
-                                ({categoryAssets.length})
-                              </span>
-                            )}
-                          </span>
-                        </div>
+                        <span className="text-current">{category.icon}</span>
+                        <span>{category.label}</span>
                         {hasAssets && (
-                          <span className="relative text-[10px] text-muted-foreground data-[state=active]:text-accent/80">
-                            {formatCurrency(categoryTotal, displayCurrency)}
+                          <span className="text-muted-foreground">
+                            {categoryAssets.length}
                           </span>
                         )}
                       </TabsTrigger>
@@ -1159,7 +1147,7 @@ export default function App() {
           onOpenChange={setSettingsOpen}
           isPinEnabled={isPinEnabled}
           onPinStatusChange={setIsPinEnabled}
-          onLock={() => setIsLocked(true)}
+          onLock={handleLock}
           onResetAccount={() => setResetDialogOpen(true)}
         />
 
@@ -1167,10 +1155,11 @@ export default function App() {
           open={resetDialogOpen}
           onOpenChange={setResetDialogOpen}
           onConfirm={handleResetAccount}
+          pinEnabled={isPinEnabled}
         />
       </main>
 
-      <LockScreen isLocked={isLocked} onUnlock={() => setIsLocked(false)} />
+      <LockScreen isLocked={isLocked} onUnlock={handleUnlock} />
       {!isLocked && (
         <OnboardingOverlay
           show={showOnboarding}

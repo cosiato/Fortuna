@@ -41,6 +41,7 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
     try {
       const isValid = await api.settings.verifyPin(completedPin)
       if (isValid) {
+        await api.settings.unlockApp(completedPin)
         onUnlock()
       } else {
         setError(true)
