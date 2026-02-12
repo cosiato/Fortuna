@@ -38,8 +38,8 @@ export default function EntitySelector({
     if (!container) return
 
     const { scrollLeft, scrollWidth, clientWidth } = container
-    setCanScrollLeft(scrollLeft > 0)
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
+    setCanScrollLeft(scrollLeft > 2)
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 2)
   }, [])
 
   useEffect(() => {
