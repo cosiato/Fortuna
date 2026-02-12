@@ -21,6 +21,7 @@ import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } 
 import {
   SUPPORTED_CURRENCIES,
   SupportedCurrency,
+  FALLBACK_RATES,
   formatCurrency,
   getExchangeRates,
   forceRefreshExchangeRates,
@@ -101,17 +102,7 @@ export default function App() {
   const [entities, setEntities] = useState<Entity[]>([])
   const [selectedEntityId, setSelectedEntityId] = useState<number>(0)
   const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({})
-  const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>({
-    USD: 1,
-    EUR: 0.92,
-    GBP: 0.79,
-    JPY: 149.5,
-    CHF: 0.88,
-    HKD: 7.82,
-    SGD: 1.34,
-    AED: 3.67,
-    BTC: 0.000024,
-  })
+  const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>(FALLBACK_RATES)
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [loading, setLoading] = useState(true)
   const [assetFormOpen, setAssetFormOpen] = useState(false)
@@ -494,19 +485,7 @@ export default function App() {
   const refreshPrices = useCallback(async (assetsData: Asset[]) => {
     try {
       const ratesData = await getExchangeRates()
-      setExchangeRates(
-        ratesData.rates || {
-          USD: 1,
-          EUR: 0.92,
-          GBP: 0.79,
-          JPY: 149.5,
-          CHF: 0.88,
-          HKD: 7.82,
-          SGD: 1.34,
-          AED: 3.67,
-          BTC: 0.000024,
-        },
-      )
+      setExchangeRates(ratesData.rates || FALLBACK_RATES)
 
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
@@ -570,19 +549,7 @@ export default function App() {
           : Promise.resolve(),
       ])
 
-      setExchangeRates(
-        ratesData.rates || {
-          USD: 1,
-          EUR: 0.92,
-          GBP: 0.79,
-          JPY: 149.5,
-          CHF: 0.88,
-          HKD: 7.82,
-          SGD: 1.34,
-          AED: 3.67,
-          BTC: 0.000024,
-        },
-      )
+      setExchangeRates(ratesData.rates || FALLBACK_RATES)
       requestSnapshot()
     } catch (error) {
       showErrorToast(error, "Failed to refresh prices")
