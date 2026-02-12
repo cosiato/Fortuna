@@ -82,8 +82,30 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
+          <div
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              top: "-20%",
+              right: "-10%",
+              width: "60%",
+              height: "70%",
+              background: "radial-gradient(ellipse, rgba(255, 215, 0, 0.15) 0%, transparent 70%)",
+              animation: "lockscreen-glow-gold 12s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              bottom: "-15%",
+              left: "-10%",
+              width: "50%",
+              height: "60%",
+              background: "radial-gradient(ellipse, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
+              animation: "lockscreen-glow-purple 15s ease-in-out infinite",
+            }}
+          />
           <div className="absolute inset-0 bg-vignette pointer-events-none" />
 
           <motion.div
