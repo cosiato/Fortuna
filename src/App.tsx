@@ -866,7 +866,7 @@ export default function App() {
                         key={category.key}
                         value={category.key}
                         disabled={!hasAssets}
-                        className="flex items-center gap-1.5 py-1 px-2.5 rounded-md text-xs font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                        className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                       >
                         <span className="text-current">{category.icon}</span>
                         <span>{category.label}</span>
