@@ -147,7 +147,7 @@ export default function OnboardingOverlay({ show, onComplete }: OnboardingOverla
                 <Button
                   size="sm"
                   onClick={handleNext}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 font-semibold px-6"
+                  className="font-semibold px-6"
                 >
                   {currentStep === TOTAL_STEPS ? "Begin Your Journey" : "Next"}
                 </Button>

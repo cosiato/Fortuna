@@ -303,7 +303,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={isSubmitDisabled}>
+            <Button type="submit" variant="secondary" className="flex-1" disabled={isSubmitDisabled}>
               {isLoadingName ? "Loading..." : isEditing ? "Update" : "Add Asset"}
             </Button>
           </div>

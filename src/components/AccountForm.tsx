@@ -136,7 +136,7 @@ export default function AccountForm({
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={!countryCode}>
+            <Button type="submit" variant="secondary" className="flex-1" disabled={!countryCode}>
               {isEditing ? 'Update' : 'Add Vault'}
             </Button>
           </div>

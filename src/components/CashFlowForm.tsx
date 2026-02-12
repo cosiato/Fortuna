@@ -237,7 +237,7 @@ export default function CashFlowForm({
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit" variant="secondary" className="flex-1">
               {isEditing ? 'Update' : 'Add Flow'}
             </Button>
           </div>
