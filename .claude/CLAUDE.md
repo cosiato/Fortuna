@@ -99,7 +99,8 @@ src/
 |   |-- CashFlowNode.tsx          # React Flow node for cash flow entries
 |   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
-|   |-- CurrencySelector.tsx      # Currency picker dropdown
+|   |-- CurrencyPickerOverlay.tsx  # Fullscreen currency picker grouped by continent
+|   |-- CurrencySelector.tsx      # Currency picker button (opens overlay)
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
