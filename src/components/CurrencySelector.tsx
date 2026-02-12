@@ -1,38 +1,36 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
+import { useState, useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import CurrencyPickerOverlay from "@/components/CurrencyPickerOverlay"
+import { CURRENCY_INFO, type SupportedCurrency } from "@/lib/currency"
 
 interface CurrencySelectorProps {
-  value: SupportedCurrency;
-  onChange: (currency: SupportedCurrency) => void;
+  value: SupportedCurrency
+  onChange: (currency: SupportedCurrency) => void
 }
 
 export default function CurrencySelector({ value, onChange }: CurrencySelectorProps) {
+  const [open, setOpen] = useState(false)
+  const handleClose = useCallback(() => setOpen(false), [])
+
   return (
-    <Select value={value} onValueChange={(val) => onChange(val as SupportedCurrency)}>
-      <SelectTrigger className="w-28">
-        <SelectValue>
-          <span className="flex items-center gap-1.5">
-            <span>{CURRENCY_INFO[value].flag}</span>
-            <span>{value}</span>
-          </span>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {SUPPORTED_CURRENCIES.map((currency) => (
-          <SelectItem key={currency} value={currency}>
-            <span className="flex items-center gap-2">
-              <span>{CURRENCY_INFO[currency].flag}</span>
-              <span>{currency}</span>
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-auto px-2 py-1.5 text-muted-foreground hover:text-foreground"
+        onClick={() => setOpen(true)}
+      >
+        <span className="flex items-center gap-1.5">
+          <span>{CURRENCY_INFO[value].flag}</span>
+          <span className="text-sm font-medium">{value}</span>
+        </span>
+      </Button>
+      <CurrencyPickerOverlay
+        open={open}
+        value={value}
+        onSelect={onChange}
+        onClose={handleClose}
+      />
+    </>
+  )
 }
