@@ -33,10 +33,9 @@ export default function PinInput({
   }, [autoFocus])
 
   useEffect(() => {
-    if (value === "" && inputRefs.current[0]) {
-      inputRefs.current[0].focus()
-    }
-  }, [value])
+    const nextIndex = Math.min(inputDigits.length, PIN_LENGTH - 1)
+    inputRefs.current[nextIndex]?.focus()
+  }, [inputDigits.length])
 
   const focusInput = useCallback((index: number) => {
     const clampedIndex = Math.max(0, Math.min(index, PIN_LENGTH - 1))
@@ -45,6 +44,7 @@ export default function PinInput({
 
   const handleChange = (index: number, inputValue: string) => {
     if (disabled) return
+    if (index > inputDigits.length) return
 
     const digit = inputValue.replace(/\D/g, "").slice(-1)
     if (!digit && inputValue !== "") return
@@ -54,10 +54,6 @@ export default function PinInput({
 
     const newValue = newDigits.join("")
     onChange(newValue)
-
-    if (digit && index < PIN_LENGTH - 1) {
-      focusInput(index + 1)
-    }
 
     if (newValue.length === PIN_LENGTH && onComplete) {
       onComplete(newValue)
@@ -78,7 +74,7 @@ export default function PinInput({
     } else if (e.key === "ArrowLeft" && index > 0) {
       e.preventDefault()
       focusInput(index - 1)
-    } else if (e.key === "ArrowRight" && index < PIN_LENGTH - 1) {
+    } else if (e.key === "ArrowRight" && index < PIN_LENGTH - 1 && index < inputDigits.length) {
       e.preventDefault()
       focusInput(index + 1)
     }
@@ -91,7 +87,6 @@ export default function PinInput({
     const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, PIN_LENGTH)
     if (pastedData) {
       onChange(pastedData)
-      focusInput(Math.min(pastedData.length, PIN_LENGTH - 1))
       if (pastedData.length === PIN_LENGTH && onComplete) {
         onComplete(pastedData)
       }
@@ -113,7 +108,14 @@ export default function PinInput({
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
-          onFocus={(e) => e.target.select()}
+          onFocus={(e) => {
+            const nextIndex = Math.min(inputDigits.length, PIN_LENGTH - 1)
+            if (index > nextIndex) {
+              focusInput(nextIndex)
+              return
+            }
+            e.target.select()
+          }}
           disabled={disabled}
           className={cn(
             "w-14 h-16 text-center text-2xl font-bold rounded-lg",
