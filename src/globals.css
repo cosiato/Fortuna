@@ -84,6 +84,38 @@
       linear-gradient(hsl(240 24% 15%), hsl(240 24% 15%)) padding-box,
       linear-gradient(135deg, #ffd700, #a855f7) border-box;
   }
+  .gradient-border-treasury {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(160deg, hsl(240 28% 12%) 0%, hsl(240 33% 7%) 100%) padding-box,
+      linear-gradient(135deg, #ffd700, #a855f7) border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  .gradient-border-treasury::before,
+  .gradient-border-treasury::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  .gradient-border-treasury::before {
+    top: -30%;
+    right: -15%;
+    width: 65%;
+    height: 90%;
+    background: radial-gradient(ellipse, rgba(255, 215, 0, 0.09) 0%, transparent 70%);
+    animation: treasury-glow-gold 8s ease-in-out infinite alternate;
+  }
+  .gradient-border-treasury::after {
+    bottom: -25%;
+    left: -10%;
+    width: 55%;
+    height: 80%;
+    background: radial-gradient(ellipse, rgba(168, 85, 247, 0.07) 0%, transparent 70%);
+    animation: treasury-glow-purple 10s ease-in-out infinite alternate;
+  }
   .bg-vignette {
     background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 15, 26, 0.4) 100%);
   }
@@ -99,5 +131,73 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@keyframes lockscreen-glow-gold {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translate(-5%, 10%) scale(1.15);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(8%, -5%) scale(0.95);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes lockscreen-glow-purple {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(10%, -8%) scale(1.1);
+    opacity: 0.9;
+  }
+  66% {
+    transform: translate(-6%, 6%) scale(1.05);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes treasury-glow-gold {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-8%, 15%) scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(5%, -5%) scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+@keyframes treasury-glow-purple {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(12%, -10%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-5%, 8%) scale(1.05);
+    opacity: 0.6;
   }
 }

@@ -28,7 +28,7 @@ interface VaultFlowDiagramProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
-  onAddFlow: () => void;
+  onAddFlow: (flowType?: 'inflow' | 'outflow') => void;
 }
 
 const nodeTypes: NodeTypes = {
@@ -125,7 +125,7 @@ export default function VaultFlowDiagram({
             x: CENTER_X - SIDE_OFFSET - NODE_WIDTH,
             y: vaultY,
           },
-          data: { flowType: 'inflow' as const, onAdd: onAddFlow },
+          data: { flowType: 'inflow' as const, onAdd: () => onAddFlow('inflow') },
           sourcePosition: Position.Right,
           draggable: false,
         }];
@@ -164,7 +164,7 @@ export default function VaultFlowDiagram({
             x: CENTER_X + SIDE_OFFSET,
             y: vaultY,
           },
-          data: { flowType: 'outflow' as const, onAdd: onAddFlow },
+          data: { flowType: 'outflow' as const, onAdd: () => onAddFlow('outflow') },
           targetPosition: Position.Left,
           draggable: false,
         }];
@@ -249,6 +249,9 @@ export default function VaultFlowDiagram({
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        nodesConnectable={false}
+        nodesFocusable={false}
+        edgesFocusable={false}
         panOnDrag={false}
         zoomOnScroll={false}
         zoomOnPinch={false}

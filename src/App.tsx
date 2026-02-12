@@ -51,6 +51,48 @@ import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 
 const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
 
+const CATEGORY_BADGE_CONFIG: Record<
+  string,
+  { bg: string; text: string; border: string; icon: string }
+> = {
+  stock: {
+    bg: "bg-amber-500/15",
+    text: "text-amber-400",
+    border: "border-amber-500/25",
+    icon: "solar:chart-linear",
+  },
+  crypto: {
+    bg: "bg-purple-500/15",
+    text: "text-purple-400",
+    border: "border-purple-500/25",
+    icon: "solar:money-bag-linear",
+  },
+  real_estate: {
+    bg: "bg-emerald-500/15",
+    text: "text-emerald-400",
+    border: "border-emerald-500/25",
+    icon: "solar:home-linear",
+  },
+  other: {
+    bg: "bg-slate-400/15",
+    text: "text-slate-400",
+    border: "border-slate-400/25",
+    icon: "solar:box-linear",
+  },
+}
+
+function formatCompactValue(value: number, currency: SupportedCurrency): string {
+  if (currency === "BTC") {
+    return value >= 1 ? `${value.toFixed(2)} BTC` : `${value.toFixed(4)} BTC`
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value)
+}
+
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -104,6 +146,7 @@ export default function App() {
   const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
   const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
   const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
+  const [defaultFlowType, setDefaultFlowType] = useState<"inflow" | "outflow" | undefined>(undefined)
   const [showOnboarding, setShowOnboarding] = useState(false)
   useEffect(() => {
     const saved = localStorage.getItem("displayCurrency")
@@ -402,6 +445,7 @@ export default function App() {
     setCashFlowFormOpen(open)
     if (!open) {
       setEditingCashFlow(null)
+      setDefaultFlowType(undefined)
     }
   }
 
@@ -653,7 +697,7 @@ export default function App() {
     {
       key: "crypto",
       label: "Crypto",
-      icon: <Icon icon="solar:bitcoin-linear" width={12} height={12} />,
+      icon: <Icon icon="solar:money-bag-linear" width={12} height={12} />,
     },
     {
       key: "real_estate",
@@ -735,6 +779,14 @@ export default function App() {
     return acc
   }, {})
 
+  const categoryBadgeData = ASSET_CATEGORIES.map((cat) => {
+    const catAssets = assets.filter((a) => a.type === cat.key)
+    const total = catAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
+    return { key: cat.key, label: cat.label, count: catAssets.length, total }
+  }).filter((c) => c.count > 0)
+
+  const vaultBadgeTotal = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
+
   useEffect(() => {
     if (!loading && (assets.length > 0 || accounts.length > 0)) {
       recordSnapshotNow()
@@ -803,20 +855,49 @@ export default function App() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 relative">
-        <Card className="gradient-border bg-primary mb-8 hover:shadow-glow-gold/30">
-          <CardContent className="p-6 lg:grid lg:grid-cols-2 gap-8">
-            <div>
-              <p className="text-muted-foreground text-sm font-medium mb-1">Power Level</p>
-              <SlotMachineNumber
-                value={formatCurrency(netWorth, displayCurrency)}
-                className="text-4xl font-bold text-accent font-serif"
-                duration={700}
-              />
-              <p className="text-muted-foreground text-sm mt-2">
-                {assets.length} asset{assets.length !== 1 ? "s" : ""} in inventory
-              </p>
+        <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
+          <CardContent className="relative z-10 px-6 pt-6 pb-3">
+            <SlotMachineNumber
+              value={formatCurrency(netWorth, displayCurrency)}
+              className="text-4xl font-bold text-accent font-serif"
+              duration={700}
+            />
+            <div className="flex flex-wrap items-center gap-2 mt-3 mb-8">
+              {categoryBadgeData.map((cat) => {
+                const colors = CATEGORY_BADGE_CONFIG[cat.key]
+                return (
+                  <div
+                    key={cat.key}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${colors.bg} border ${colors.border}`}
+                  >
+                    <Icon icon={colors.icon} className={colors.text} width={14} height={14} />
+                    <span className={`text-xs font-medium ${colors.text}`}>{cat.label}</span>
+                    <span className="text-xs text-muted-foreground/60">|</span>
+                    <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatCompactValue(cat.total, displayCurrency)}
+                    </span>
+                  </div>
+                )
+              })}
+              {accounts.length > 0 && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/15 border border-sky-500/25">
+                  <Icon
+                    icon="solar:safe-2-linear"
+                    className="text-sky-400"
+                    width={14}
+                    height={14}
+                  />
+                  <span className="text-xs font-medium text-sky-400">Vaults</span>
+                  <span className="text-xs text-muted-foreground/60">|</span>
+                  <span className="text-xs font-bold text-sky-400">{accounts.length}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatCompactValue(vaultBadgeTotal, displayCurrency)}
+                  </span>
+                </div>
+              )}
             </div>
-            <div>
+            <div className="h-36 -mx-2">
               <NetWorthChart
                 snapshots={snapshots}
                 displayCurrency={displayCurrency}
@@ -838,7 +919,7 @@ export default function App() {
         />
 
         <div className="space-y-6 mb-8">
-          <div className="rounded-xl bg-slate-800/40 border border-slate-800/50 p-5">
+          <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">My Assets</h2>
               <Button
@@ -918,7 +999,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="rounded-xl bg-slate-800/40 border border-slate-800/50 p-5">
+          <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
               <Button
@@ -992,7 +1073,7 @@ export default function App() {
                       value={account.id}
                       className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
                     >
-                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-800/40">
+                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
                         <div className="flex flex-1 items-center justify-between mr-2">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
@@ -1069,9 +1150,10 @@ export default function App() {
                             onEdit={handleEditCashFlow}
                             onDelete={handleDeleteCashFlow}
                             onToggle={handleToggleCashFlow}
-                            onAddFlow={() => {
+                            onAddFlow={(flowType) => {
                               setCashFlowAccountId(account.id)
                               setEditingCashFlow(null)
+                              setDefaultFlowType(flowType)
                               setCashFlowFormOpen(true)
                             }}
                           />
@@ -1107,6 +1189,7 @@ export default function App() {
         <CashFlowForm
           cashFlow={editingCashFlow}
           accountId={cashFlowAccountId}
+          defaultFlowType={defaultFlowType}
           open={cashFlowFormOpen}
           onOpenChange={handleCashFlowFormClose}
           onSubmit={handleAddCashFlow}

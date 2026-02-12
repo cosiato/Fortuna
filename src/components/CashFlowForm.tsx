@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 interface CashFlowFormProps {
   cashFlow?: CashFlow | null;
   accountId: string;
+  defaultFlowType?: CashFlowType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: CreateCashFlowInput | UpdateCashFlowInput, isEdit: boolean) => void;
@@ -38,6 +39,7 @@ interface CashFlowFormProps {
 export default function CashFlowForm({
   cashFlow,
   accountId,
+  defaultFlowType,
   open,
   onOpenChange,
   onSubmit,
@@ -60,15 +62,16 @@ export default function CashFlowForm({
       setStartDate(cashFlow.startDate);
       setEndDate(cashFlow.endDate ?? '');
     } else {
+      const initialType = defaultFlowType ?? 'inflow';
       setName('');
       setAmount('');
-      setFlowType('inflow');
+      setFlowType(initialType);
       setFrequency('monthly');
-      setCategory('salary');
+      setCategory(getCategoriesByType(initialType)[0]?.key ?? 'salary');
       setStartDate(new Date().toISOString().split('T')[0]);
       setEndDate('');
     }
-  }, [cashFlow, open]);
+  }, [cashFlow, open, defaultFlowType]);
 
   const isEditing = !!cashFlow;
   const categories = getCategoriesByType(flowType);
