@@ -1,8 +1,11 @@
 use rand::Rng;
 use sha2::{Digest, Sha256};
+use std::sync::Mutex;
 use tauri::State;
 
 use super::entities::DbConnection;
+
+pub struct LockState(pub Mutex<bool>);
 
 const SALT_LENGTH: usize = 16;
 const MAX_FAILED_ATTEMPTS: i32 = 5;
@@ -88,7 +91,7 @@ fn clear_lockout_data(conn: &rusqlite::Connection) -> Result<(), String> {
 fn current_timestamp() -> i64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("System clock is before UNIX epoch")
         .as_secs() as i64
 }
 
@@ -218,8 +221,36 @@ pub fn is_pin_enabled(db: State<DbConnection>) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn reset_all_data(db: State<DbConnection>) -> Result<(), String> {
+pub fn reset_all_data(db: State<DbConnection>, lock: State<LockState>, pin: Option<String>) -> Result<(), String> {
+    check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let pin_enabled: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM settings WHERE key = 'pin_hash')",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+
+    if pin_enabled {
+        let pin = pin.ok_or("PIN required to reset data")?;
+        let stored_data: String = conn
+            .query_row(
+                "SELECT value FROM settings WHERE key = 'pin_hash'",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let (salt, stored_hash) =
+            decode_pin_data(&stored_data).ok_or("Invalid stored PIN data")?;
+        let input_hash = hash_pin_with_salt(&pin, &salt);
+
+        if stored_hash != input_hash {
+            return Err("Invalid PIN".to_string());
+        }
+    }
 
     conn.execute_batch(
         "BEGIN TRANSACTION;
@@ -236,4 +267,56 @@ pub fn reset_all_data(db: State<DbConnection>) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+pub fn check_not_locked(lock: &State<LockState>) -> Result<(), String> {
+    let locked = lock.0.lock().map_err(|e| e.to_string())?;
+    if *locked {
+        return Err("App is locked".to_string());
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn lock_app(lock: State<LockState>) -> Result<(), String> {
+    let mut locked = lock.0.lock().map_err(|e| e.to_string())?;
+    *locked = true;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn unlock_app(
+    db: State<DbConnection>,
+    lock: State<LockState>,
+    pin: String,
+) -> Result<bool, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT value FROM settings WHERE key = 'pin_hash'",
+        [],
+        |row| row.get::<_, String>(0),
+    );
+
+    match result {
+        Ok(stored_data) => {
+            let (salt, stored_hash) = decode_pin_data(&stored_data)
+                .ok_or_else(|| "Invalid stored PIN data".to_string())?;
+
+            let input_hash = hash_pin_with_salt(&pin, &salt);
+            if stored_hash == input_hash {
+                let mut locked = lock.0.lock().map_err(|e| e.to_string())?;
+                *locked = false;
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(rusqlite::Error::QueryReturnedNoRows) => {
+            let mut locked = lock.0.lock().map_err(|e| e.to_string())?;
+            *locked = false;
+            Ok(true)
+        }
+        Err(e) => Err(e.to_string()),
+    }
 }

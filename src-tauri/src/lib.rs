@@ -2,6 +2,7 @@ mod commands;
 mod database;
 
 use commands::entities::DbConnection;
+use commands::settings::LockState;
 use rusqlite::Connection;
 use std::sync::Mutex;
 use tauri::Manager;
@@ -17,6 +18,7 @@ pub fn run() {
 
             let conn = Connection::open(&db_path).expect("Failed to open database connection");
             app.manage(DbConnection(Mutex::new(conn)));
+            app.manage(LockState(Mutex::new(false)));
 
             Ok(())
         })
@@ -58,6 +60,8 @@ pub fn run() {
             commands::update_cash_flow,
             commands::delete_cash_flow,
             commands::reset_all_data,
+            commands::lock_app,
+            commands::unlock_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

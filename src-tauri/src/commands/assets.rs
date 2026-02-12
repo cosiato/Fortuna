@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use super::activity_log::log_activity;
 use super::entities::DbConnection;
+use super::settings::{check_not_locked, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -46,6 +47,17 @@ pub struct UpdateAssetInput {
     pub manual_price: Option<f64>,
     pub currency: Option<String>,
     pub entity_id: Option<i64>,
+}
+
+fn validate_name(name: &str) -> Result<(), String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() {
+        return Err("Name cannot be empty".to_string());
+    }
+    if trimmed.len() > 255 {
+        return Err("Name is too long (max 255 characters)".to_string());
+    }
+    Ok(())
 }
 
 const VALID_ASSET_TYPES: [&str; 5] = ["stock", "crypto", "real_estate", "cash", "other"];
@@ -172,9 +184,12 @@ pub fn get_asset_by_id(
 pub fn create_asset(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     input: CreateAssetInput,
 ) -> Result<Asset, String> {
     let _ = app;
+    check_not_locked(&lock)?;
+    validate_name(&input.name)?;
     validate_asset_type(&input.asset_type)?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
@@ -260,10 +275,15 @@ pub fn create_asset(
 pub fn update_asset(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     id: String,
     input: UpdateAssetInput,
 ) -> Result<Asset, String> {
     let _ = app;
+    check_not_locked(&lock)?;
+    if let Some(ref name) = input.name {
+        validate_name(name)?;
+    }
     if let Some(ref asset_type) = input.asset_type {
         validate_asset_type(asset_type)?;
     }
@@ -387,8 +407,9 @@ pub fn update_asset(
 }
 
 #[tauri::command]
-pub fn delete_asset(app: AppHandle, db: State<DbConnection>, id: String) -> Result<(), String> {
+pub fn delete_asset(app: AppHandle, db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
     let _ = app;
+    check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let asset = conn

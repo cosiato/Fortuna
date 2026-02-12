@@ -4,6 +4,7 @@ use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use super::entities::DbConnection;
+use super::settings::{check_not_locked, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -36,6 +37,17 @@ pub struct UpdateAccountInput {
     pub currency: Option<String>,
     pub country_code: Option<String>,
     pub entity_id: Option<i64>,
+}
+
+fn validate_name(name: &str) -> Result<(), String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty() {
+        return Err("Name cannot be empty".to_string());
+    }
+    if trimmed.len() > 255 {
+        return Err("Name is too long (max 255 characters)".to_string());
+    }
+    Ok(())
 }
 
 fn validate_country_code(code: &str) -> Result<(), String> {
@@ -154,9 +166,12 @@ pub fn get_account_by_id(
 pub fn create_account(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     input: CreateAccountInput,
 ) -> Result<Account, String> {
     let _ = app;
+    check_not_locked(&lock)?;
+    validate_name(&input.name)?;
     validate_country_code(&input.country_code)?;
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
@@ -197,10 +212,15 @@ pub fn create_account(
 pub fn update_account(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     id: String,
     input: UpdateAccountInput,
 ) -> Result<Account, String> {
     let _ = app;
+    check_not_locked(&lock)?;
+    if let Some(ref name) = input.name {
+        validate_name(name)?;
+    }
     if let Some(ref code) = input.country_code {
         validate_country_code(code)?;
     }
@@ -276,8 +296,9 @@ pub fn update_account(
 }
 
 #[tauri::command]
-pub fn delete_account(app: AppHandle, db: State<DbConnection>, id: String) -> Result<(), String> {
+pub fn delete_account(app: AppHandle, db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
     let _ = app;
+    check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let affected = conn

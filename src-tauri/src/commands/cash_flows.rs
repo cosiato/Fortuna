@@ -4,6 +4,7 @@ use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use super::entities::DbConnection;
+use super::settings::{check_not_locked, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -240,9 +241,11 @@ pub fn get_cash_flow_by_id(
 pub fn create_cash_flow(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     input: CreateCashFlowInput,
 ) -> Result<CashFlow, String> {
     let _ = app;
+    check_not_locked(&lock)?;
     validate_name(&input.name)?;
     validate_amount(input.amount)?;
     validate_flow_type(&input.flow_type)?;
@@ -288,10 +291,12 @@ pub fn create_cash_flow(
 pub fn update_cash_flow(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     id: String,
     input: UpdateCashFlowInput,
 ) -> Result<CashFlow, String> {
     let _ = app;
+    check_not_locked(&lock)?;
 
     if let Some(ref name) = input.name {
         validate_name(name)?;
@@ -393,9 +398,11 @@ pub fn update_cash_flow(
 pub fn delete_cash_flow(
     app: AppHandle,
     db: State<DbConnection>,
+    lock: State<LockState>,
     id: String,
 ) -> Result<(), String> {
     let _ = app;
+    check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let affected = conn
