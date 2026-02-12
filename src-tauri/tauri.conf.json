@@ -28,14 +28,34 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["dmg", "nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Finance",
+    "shortDescription": "Offline personal wealth management with a gamified twist",
+    "longDescription": "Fortuna is an offline-first personal wealth management desktop app. Track assets, bank accounts, cash flows, and net worth with an RPG-inspired interface. All data stays on your machine.",
+    "copyright": "Copyright 2025-2026 Thomas Cosialls",
+    "publisher": "Thomas Cosialls",
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "dmg": {
+        "appPosition": { "x": 180, "y": 170 },
+        "applicationFolderPosition": { "x": 480, "y": 170 }
+      }
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   },
   "plugins": {
     "sql": {
