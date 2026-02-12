@@ -31,18 +31,22 @@ Use the following tech stack:
 
 ### 3. Testing
 
-- TDD: Write tests first
-- 80% minimum coverage
-- Unit tests for utilities, APIs wrapper
-- Integration tests for Tauri commands
+- Apply TDD: Write tests first
+- Always achieve 80% minimum coverage
+- Always do unit tests for utilities, APIs wrapper
+- Always do integration tests for Tauri commands
 
 ### 4. Security
 
-- No hardcoded secrets
-- Environment variables for sensitive data
+- Do not use hardcoded secrets
+- Use environment variables for sensitive data
 - Validate all user inputs
 - Parameterized queries only (Rust handles this)
 - CSRF protection enabled
+
+### Post-Change Verification
+
+- **Always run `npm run lint`** after every code change, no matter how small
 
 ## File Structure
 
@@ -127,6 +131,7 @@ src/
 |   |-- errorHandling.ts          # Toast-based error notification utility
 |   |-- prices.ts                 # Price fetching (Yahoo Finance, CoinGecko)
 |   |-- utils.ts                  # General utilities (cn helper)
+|   |-- validation.ts             # Zod schemas for form validation
 |-- types/                        # TypeScript definitions
 |   |-- database.ts               # Database entity types
 |-- config/                       # Configuration files
@@ -188,35 +193,3 @@ npm run build
 # Lint
 npm run lint
 ```
-
-## Inspecting the Database
-
-```bash
-# Open the SQLite database in DB Browser
-open -a "DB Browser for SQLite" ~/Library/Application\ Support/com.fortuna.app/fortuna.db
-```
-
-## General Style
-
-- Dark theme by default
-- Border radius: 12px for cards, 8px for buttons (slightly rounder, more game-like)
-- Cards should have subtle gradient borders or glow effects on hover
-- Use gold sparingly but impactfully: progress bars, key metrics, CTAs
-- Progress bars should look chunky and segmented (like XP bars)
-- Add subtle animations: pulse on positive numbers, glow on achievements
-- Consider adding a slight vignette or gradient overlay on the main background
-
-## Gamification Concepts to Keep in Mind
-
-- The UI should feel rewarding and progression-oriented.
-
-| Finance Concept      | Game Equivalent        |
-| -------------------- | ---------------------- |
-| Net worth            | Power Level / Total XP |
-| Assets               | Inventory items        |
-| Bank Accounts        | Vaults                 |
-| Savings goals        | Quests                 |
-| Monthly budget       | Daily challenges       |
-| Reaching a milestone | Achievement unlocked   |
-| Portfolio diversity  | Skill tree             |
-| Income streams       | Passive buffs          |
