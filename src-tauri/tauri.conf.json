@@ -57,9 +57,5 @@
       }
     }
   },
-  "plugins": {
-    "sql": {
-      "preload": ["sqlite:fortuna.db"]
-    }
-  }
+  "plugins": {}
 }
