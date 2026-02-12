@@ -322,7 +322,21 @@ pub fn unlock_app(
 }
 
 const ALLOWED_CURRENCIES: &[&str] = &[
-    "USD", "EUR", "GBP", "JPY", "CHF", "HKD", "SGD", "AED", "BTC",
+    // North America
+    "USD", "CAD", "MXN",
+    // South America
+    "BRL", "ARS", "CLP", "COP", "PEN",
+    // Europe
+    "EUR", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "RUB", "ISK",
+    // Asia
+    "JPY", "CNY", "HKD", "SGD", "KRW", "INR", "IDR", "MYR", "THB", "PHP", "VND", "TWD",
+    "TRY", "AED", "SAR", "QAR", "KWD", "ILS", "PKR",
+    // Africa
+    "ZAR", "NGN", "EGP", "KES", "MAD", "GHS", "TZS",
+    // Oceania
+    "AUD", "NZD", "FJD",
+    // Digital
+    "BTC",
 ];
 
 #[tauri::command]
