@@ -251,7 +251,7 @@ export default function AssetTile({
               variant="ghost"
               size="sm"
               onClick={handleConfirmDelete}
-              className="h-7 px-3 text-xs bg-red-700 text-white hover:bg-red-600"
+              className="h-7 px-3 text-xs bg-red-700 text-white hover:bg-red-600 hover:text-white"
             >
               Confirm
             </Button>
