@@ -114,7 +114,7 @@ export default function AssetTile({
       >
         <div
           className={`absolute inset-0 group p-2.5 rounded-lg bg-gradient-to-br ${style.gradient} border border-border/40`}
-          style={{ backfaceVisibility: "hidden" }}
+          style={{ backfaceVisibility: "hidden", pointerEvents: isFlipped ? "none" : "auto" }}
         >
           {showActions && (
             <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
