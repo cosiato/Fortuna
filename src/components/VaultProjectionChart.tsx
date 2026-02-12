@@ -82,7 +82,7 @@ export default function VaultProjectionChart({
               className={`px-2 py-0.5 text-xs rounded-md transition-colors ${
                 months === opt.value
                   ? 'bg-accent/20 text-accent border border-accent/30'
-                  : 'bg-slate-800/40 text-muted-foreground border border-slate-700/30 hover:bg-slate-700/40'
+                  : 'bg-[rgba(23,20,43,0.4)] text-muted-foreground border border-slate-700/30 hover:bg-slate-700/40'
               }`}
             >
               {opt.label}
