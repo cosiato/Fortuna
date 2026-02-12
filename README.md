@@ -1,5 +1,13 @@
 # Fortuna
 
+[![Release](https://img.shields.io/github/v/release/cosiato/Fortuna?style=flat-square)](https://github.com/cosiato/Fortuna/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/cosiato/Fortuna/release.yml?style=flat-square&label=build)](https://github.com/cosiato/Fortuna/actions/workflows/release.yml)
+[![Tauri](https://img.shields.io/badge/tauri-v2-24C8D8?style=flat-square&logo=tauri&logoColor=white)](https://v2.tauri.app)
+[![React](https://img.shields.io/badge/react-19-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/typescript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Rust](https://img.shields.io/badge/rust-2021-DEA584?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-858585?style=flat-square)]()
+
 Offline-first personal wealth management desktop app with a gamified, RPG-inspired visual identity.
 
 Track assets, bank accounts, cash flows, and net worth -- all data stays on your machine.
