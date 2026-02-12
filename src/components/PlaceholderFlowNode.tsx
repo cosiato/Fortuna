@@ -18,9 +18,9 @@ export default function PlaceholderFlowNode({ data }: NodeProps & { data: Placeh
       className="group relative flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-dashed border-slate-700/60 bg-slate-900/30 min-w-[140px] transition-all hover:border-slate-500/60 hover:bg-slate-800/30 cursor-pointer"
     >
       {isInflow ? (
-        <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-0 !h-0" />
+        <Handle type="source" position={Position.Right} className="!opacity-0 !w-0 !h-0 !min-w-0 !min-h-0 !border-none !pointer-events-none" />
       ) : (
-        <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-0 !h-0" />
+        <Handle type="target" position={Position.Left} className="!opacity-0 !w-0 !h-0 !min-w-0 !min-h-0 !border-none !pointer-events-none" />
       )}
 
       <Icon

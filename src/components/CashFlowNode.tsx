@@ -40,9 +40,9 @@ export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeD
       className={`group relative px-3 py-2.5 rounded-lg bg-gradient-to-br ${bgClass} border min-w-[140px] transition-all ${!data.isActive ? 'opacity-40' : ''}`}
     >
       {isInflow ? (
-        <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-0 !h-0" />
+        <Handle type="source" position={Position.Right} className="!opacity-0 !w-0 !h-0 !min-w-0 !min-h-0 !border-none !pointer-events-none" />
       ) : (
-        <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-0 !h-0" />
+        <Handle type="target" position={Position.Left} className="!opacity-0 !w-0 !h-0 !min-w-0 !min-h-0 !border-none !pointer-events-none" />
       )}
 
       <div className="flex items-center gap-2 mb-1">
