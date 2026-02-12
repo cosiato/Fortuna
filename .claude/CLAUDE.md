@@ -47,6 +47,9 @@ Use the following tech stack:
 ## File Structure
 
 ```
+.github/
+|-- workflows/
+|   |-- release.yml               # CI/CD: cross-platform build + GitHub Release
 src-tauri/                        # Tauri backend (Rust)
 |-- Cargo.toml                    # Rust dependencies
 |-- tauri.conf.json               # Tauri configuration
