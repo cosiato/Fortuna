@@ -7,7 +7,7 @@ import SlotMachineNumber from "@/components/SlotMachineNumber"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { Button } from "@/components/ui/button"
 
-export interface CategoryStyle {
+interface CategoryStyle {
   gradient: string
   glowColor: string
 }

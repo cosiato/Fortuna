@@ -137,7 +137,7 @@ export default function EntitySelector({
                     height={16}
                   />
                   <span className="font-medium text-sm whitespace-nowrap">
-                    {entity.type === "individual" ? "Personal" : entity.name}
+                    {entity.type == "individual" ? "Personal" : entity.name}
                   </span>
                 </div>
                 <SlotMachineNumber
@@ -165,7 +165,10 @@ export default function EntitySelector({
                       <Icon icon="solar:menu-dots-bold" width={14} height={14} />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="w-36 p-1 bg-slate-800 border-slate-700">
+                  <PopoverContent
+                    align="start"
+                    className="w-36 p-1 bg-[rgba(23,20,43,0.4)] backdrop-blur-xl border-slate-800/50"
+                  >
                     <button
                       onClick={(e) => {
                         e.stopPropagation()

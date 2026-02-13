@@ -81,7 +81,7 @@ describe("Semantic Search", () => {
 ### Step 3: Run Tests (They Should Fail)
 
 ```bash
-npm test
+npm run test
 # Tests should fail - we haven't implemented yet
 ```
 
@@ -99,7 +99,7 @@ export async function searchMarkets(query: string) {
 ### Step 5: Run Tests Again
 
 ```bash
-npm test
+npm run test
 # Tests should now pass
 ```
 

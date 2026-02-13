@@ -1,6 +1,6 @@
 import cryptoData from '@/config/cryptocurrencies.json';
 
-export interface Cryptocurrency {
+interface Cryptocurrency {
   id: string;
   symbol: string;
   name: string;

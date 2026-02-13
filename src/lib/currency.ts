@@ -54,7 +54,7 @@ export const SUPPORTED_CURRENCIES = [
 
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
 
-export type CurrencyContinent =
+type CurrencyContinent =
   | 'North America'
   | 'South America'
   | 'Europe'
@@ -63,7 +63,7 @@ export type CurrencyContinent =
   | 'Oceania'
   | 'Digital';
 
-export interface CurrencyGroup {
+interface CurrencyGroup {
   continent: CurrencyContinent;
   currencies: readonly SupportedCurrency[];
 }

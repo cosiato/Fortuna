@@ -1,3 +1,5 @@
+# Tauri Application - Project CLAUDE.md
+
 ## Project Overview
 
 We are building Fortuna, an offline personal wealth management desktop app with a gamified, RPG-inspired visual identity. Think "Hades meets fintech" - dark, atmospheric, with progression systems.
@@ -9,6 +11,7 @@ Use the following tech stack:
 - TailwindCSS
 - SQLite for local database (via rusqlite in Rust)
 - Recharts library for charts
+- React Flow for nodes and flows
 - Shadcn for UI components
 - Framer Motion for animations
 - Iconify with Solar icon set (linear variant)
@@ -44,10 +47,6 @@ Use the following tech stack:
 - Parameterized queries only (Rust handles this)
 - CSRF protection enabled
 
-### Post-Change Verification
-
-- **Always run `npm run lint`** after every code change, no matter how small
-
 ## File Structure
 
 ```
@@ -79,7 +78,6 @@ src/
 |-- components/                   # Reusable UI components
 |   |-- ui/                       # Shadcn UI primitives
 |   |   |-- accordion.tsx
-|   |   |-- badge.tsx
 |   |   |-- button.tsx
 |   |   |-- card.tsx
 |   |   |-- command.tsx
@@ -88,8 +86,8 @@ src/
 |   |   |-- label.tsx
 |   |   |-- popover.tsx
 |   |   |-- select.tsx
-|   |   |-- table.tsx
 |   |   |-- sonner.tsx
+|   |   |-- switch.tsx
 |   |   |-- tabs.tsx
 |   |-- AccountForm.tsx           # Form for adding/editing accounts
 |   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
@@ -104,10 +102,13 @@ src/
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
+|   |-- SettingsDialog.tsx        # Settings dialog with PIN management
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
+|   |-- LockScreen.tsx            # Full-screen PIN lock overlay
 |   |-- SlotMachineNumber.tsx     # Animated digit roller for currency values
 |   |-- NetWorthChart.tsx         # Net worth over time chart
+|   |-- PinInput.tsx              # 4-digit PIN input component
 |   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
 |   |-- PlaceholderFlowNode.tsx   # "+Add inflow/outflow" placeholder node
 |   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows (inline per vault)
@@ -187,6 +188,9 @@ npm run tauri dev
 
 # Build for production
 npm run tauri build
+
+#Vitest
+npm run test
 
 # Type check
 npm run build

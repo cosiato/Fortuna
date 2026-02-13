@@ -46,6 +46,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion"
 import { getCountryFlag } from "@/lib/countries"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
 import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
@@ -102,7 +103,9 @@ export default function App() {
   const [entities, setEntities] = useState<Entity[]>([])
   const [selectedEntityId, setSelectedEntityId] = useState<number>(0)
   const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({})
-  const [exchangeRates, setExchangeRates] = useState<{ [currency: string]: number }>(FALLBACK_RATES)
+  const [exchangeRates, setExchangeRates] = useState<{
+    [currency: string]: number
+  }>(FALLBACK_RATES)
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [loading, setLoading] = useState(true)
   const [assetFormOpen, setAssetFormOpen] = useState(false)
@@ -776,8 +779,9 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Loading...</div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <img src="/logo.png" alt="Fortuna" className="w-24 h-24" />
+        <div className="text-foreground text-2xl">Loading</div>
       </div>
     )
   }
@@ -787,7 +791,10 @@ export default function App() {
       <div className="absolute inset-0 bg-vignette pointer-events-none" />
       <header className="border-b border-border px-6 py-4 relative">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-accent">Fortuna</h1>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Fortuna" className="w-7 h-7 logo-hover" />
+            <h1 className="text-2xl font-bold text-accent leading-none pt-0.5">Fortuna</h1>
+          </div>
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -1035,13 +1042,6 @@ export default function App() {
                         ? "text-red-400"
                         : "text-muted-foreground"
 
-                  const projColorClass =
-                    projectedChange > 0
-                      ? "text-emerald-400"
-                      : projectedChange < 0
-                        ? "text-red-400"
-                        : "text-muted-foreground"
-
                   return (
                     <AccordionItem
                       key={account.id}
@@ -1083,35 +1083,49 @@ export default function App() {
                               </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {hasActiveFlows && (
-                              <span className={`text-xs font-medium ${netColorClass}`}>
-                                {monthlyTotals.net >= 0 ? "+" : ""}
-                                {formatCurrency(monthlyNetDisplay, displayCurrency)}
-                                <span className="text-muted-foreground">/mo</span>
-                              </span>
-                            )}
-                            <span className="text-sm font-bold text-accent">
-                              {formatCurrency(currentBalanceDisplay, displayCurrency)}
-                            </span>
-                            {hasActiveFlows && (
-                              <span
-                                className={`text-xs font-medium flex items-center gap-0.5 ${projColorClass}`}
-                              >
-                                <Icon
-                                  icon={
-                                    projectedChange >= 0
-                                      ? "solar:arrow-up-linear"
-                                      : "solar:arrow-down-linear"
-                                  }
-                                  width={10}
-                                  height={10}
-                                />
-                                {projectedChange >= 0 ? "+" : ""}
-                                {projectedChangePct.toFixed(1)}%
-                              </span>
-                            )}
-                          </div>
+                          <TooltipProvider delayDuration={300}>
+                            <div className="flex items-center gap-3">
+                              {hasActiveFlows && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="flex items-center gap-1.5 cursor-default">
+                                      <span className={`text-xs font-medium ${netColorClass}`}>
+                                        {monthlyTotals.net >= 0 ? "+" : ""}
+                                        {formatCurrency(monthlyNetDisplay, displayCurrency)}
+                                        <span className="text-muted-foreground">/mo</span>
+                                      </span>
+                                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
+                                        <Icon
+                                          icon={
+                                            projectedChange >= 0
+                                              ? "solar:arrow-up-linear"
+                                              : "solar:arrow-down-linear"
+                                          }
+                                          width={10}
+                                          height={10}
+                                        />
+                                        {projectedChange >= 0 ? "+" : ""}
+                                        {projectedChangePct.toFixed(1)}%
+                                      </span>
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    <p>Projected monthly gain and % change</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="text-sm font-bold text-accent cursor-default">
+                                    {formatCurrency(currentBalanceDisplay, displayCurrency)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                  <p>Current balance</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </TooltipProvider>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4">
@@ -1223,8 +1237,8 @@ export default function App() {
 
       <footer className="border-t border-border/30 py-3 relative">
         <p className="text-center text-xs text-muted-foreground/40">
-          v{__APP_VERSION__} &middot; &copy; {new Date().getFullYear()} All rights reserved &middot; Made
-          with love by{" "}
+          v{__APP_VERSION__} &middot; &copy; {new Date().getFullYear()} All rights reserved &middot;
+          Made with love by{" "}
           <a
             href="https://github.com/cosiato"
             target="_blank"

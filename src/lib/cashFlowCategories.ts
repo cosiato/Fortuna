@@ -1,6 +1,6 @@
 import type { CashFlowCategory, CashFlowType } from '@/types/database';
 
-export interface CategoryInfo {
+interface CategoryInfo {
   label: string;
   icon: string;
   type: CashFlowType;

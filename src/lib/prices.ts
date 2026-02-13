@@ -43,7 +43,7 @@ export interface PriceResult {
   error?: string;
 }
 
-export interface StockInfo {
+interface StockInfo {
   symbol: string;
   name: string;
   price: number;

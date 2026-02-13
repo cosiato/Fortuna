@@ -1,6 +1,6 @@
 import type { CashFlow, CashFlowFrequency } from '@/types/database';
 
-export interface ProjectionPoint {
+interface ProjectionPoint {
   date: string;
   timestamp: number;
   balance: number;
