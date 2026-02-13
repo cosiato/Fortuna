@@ -117,11 +117,11 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
             className="relative flex flex-col items-center gap-8"
           >
             <div className="flex flex-col items-center gap-4">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shadow-lg">
-                <span className="text-4xl font-bold text-accent font-serif">
-                  F
-                </span>
-              </div>
+              <img
+                src="/logo.png"
+                alt="Fortuna"
+                className="w-20 h-20 drop-shadow-lg"
+              />
               <h1 className="text-3xl font-bold text-accent font-serif">
                 Fortuna
               </h1>
