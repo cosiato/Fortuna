@@ -40,7 +40,7 @@ npx depcheck
 npx ts-prune
 
 # Check for unused disable-directives
-npx eslint . --report-unused-disable-directives
+npx eslint --report-unused-disable-directives
 ```
 
 ## Refactoring Workflow
