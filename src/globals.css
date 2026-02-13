@@ -101,16 +101,16 @@
     will-change: transform, opacity;
   }
   .gradient-border-treasury::before {
-    top: -30%;
-    right: -15%;
+    bottom: -25%;
+    left: -10%;
     width: 65%;
     height: 90%;
     background: radial-gradient(ellipse, rgba(255, 215, 0, 0.09) 0%, transparent 70%);
     animation: treasury-glow-gold 8s ease-in-out infinite alternate;
   }
   .gradient-border-treasury::after {
-    bottom: -25%;
-    left: -10%;
+    top: -30%;
+    right: -15%;
     width: 55%;
     height: 80%;
     background: radial-gradient(ellipse, rgba(168, 85, 247, 0.07) 0%, transparent 70%);

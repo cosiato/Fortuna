@@ -1,78 +1,78 @@
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import PinInput from "@/components/PinInput"
-import { api } from "@/lib/api"
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import PinInput from "@/components/PinInput";
+import { api } from "@/lib/api";
 
 interface LockScreenProps {
-  isLocked: boolean
-  onUnlock: () => void
+  isLocked: boolean;
+  onUnlock: () => void;
 }
 
 export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
-  const [pin, setPin] = useState("")
-  const [error, setError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
-  const [isVerifying, setIsVerifying] = useState(false)
-  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
       if (errorTimeoutRef.current) {
-        clearTimeout(errorTimeoutRef.current)
+        clearTimeout(errorTimeoutRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   useEffect(() => {
     if (isLocked) {
-      setPin("")
-      setError(false)
-      setErrorMessage("")
+      setPin("");
+      setError(false);
+      setErrorMessage("");
     }
-  }, [isLocked])
+  }, [isLocked]);
 
   const handlePinComplete = async (completedPin: string) => {
-    if (isVerifying) return
+    if (isVerifying) return;
 
-    setIsVerifying(true)
-    setError(false)
-    setErrorMessage("")
+    setIsVerifying(true);
+    setError(false);
+    setErrorMessage("");
 
     try {
-      const isValid = await api.settings.verifyPin(completedPin)
+      const isValid = await api.settings.verifyPin(completedPin);
       if (isValid) {
-        await api.settings.unlockApp(completedPin)
-        onUnlock()
+        await api.settings.unlockApp(completedPin);
+        onUnlock();
       } else {
-        setError(true)
-        setErrorMessage("Incorrect PIN")
-        setPin("")
+        setError(true);
+        setErrorMessage("Incorrect PIN");
+        setPin("");
         if (errorTimeoutRef.current) {
-          clearTimeout(errorTimeoutRef.current)
+          clearTimeout(errorTimeoutRef.current);
         }
-        errorTimeoutRef.current = setTimeout(() => setError(false), 600)
+        errorTimeoutRef.current = setTimeout(() => setError(false), 600);
       }
     } catch (err) {
-      setError(true)
-      const message = err instanceof Error ? err.message : String(err)
+      setError(true);
+      const message = err instanceof Error ? err.message : String(err);
       if (message.includes("Too many failed attempts")) {
-        setErrorMessage(message)
+        setErrorMessage(message);
       } else {
-        setErrorMessage("Incorrect PIN")
+        setErrorMessage("Incorrect PIN");
       }
-      setPin("")
+      setPin("");
     } finally {
-      setIsVerifying(false)
+      setIsVerifying(false);
     }
-  }
+  };
 
   const handlePinChange = (newPin: string) => {
-    setPin(newPin)
+    setPin(newPin);
     if (error) {
-      setError(false)
-      setErrorMessage("")
+      setError(false);
+      setErrorMessage("");
     }
-  }
+  };
 
   return (
     <AnimatePresence>
@@ -87,22 +87,24 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
           <div
             className="absolute pointer-events-none rounded-full"
             style={{
-              top: "-20%",
-              right: "-10%",
+              bottom: "-15%",
+              left: "-10%",
               width: "60%",
               height: "70%",
-              background: "radial-gradient(ellipse, rgba(255, 215, 0, 0.15) 0%, transparent 70%)",
+              background:
+                "radial-gradient(ellipse, rgba(255, 215, 0, 0.15) 0%, transparent 70%)",
               animation: "lockscreen-glow-gold 12s ease-in-out infinite",
             }}
           />
           <div
             className="absolute pointer-events-none rounded-full"
             style={{
-              bottom: "-15%",
-              left: "-10%",
+              top: "-20%",
+              right: "-10%",
               width: "50%",
               height: "60%",
-              background: "radial-gradient(ellipse, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
+              background:
+                "radial-gradient(ellipse, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
               animation: "lockscreen-glow-purple 15s ease-in-out infinite",
             }}
           />
@@ -116,13 +118,19 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
           >
             <div className="flex flex-col items-center gap-4">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shadow-lg">
-                <span className="text-4xl font-bold text-accent font-serif">F</span>
+                <span className="text-4xl font-bold text-accent font-serif">
+                  F
+                </span>
               </div>
-              <h1 className="text-3xl font-bold text-accent font-serif">Fortuna</h1>
+              <h1 className="text-3xl font-bold text-accent font-serif">
+                Fortuna
+              </h1>
             </div>
 
             <div className="flex flex-col items-center gap-4">
-              <p className="text-muted-foreground text-sm">Enter your PIN to unlock</p>
+              <p className="text-muted-foreground text-sm">
+                Enter your PIN to unlock
+              </p>
 
               <motion.div
                 animate={error ? { x: [-10, 10, -10, 10, 0] } : {}}
@@ -154,5 +162,5 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }
