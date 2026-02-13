@@ -1,4 +1,5 @@
-import OnboardingStepLayout from "./OnboardingStepLayout"
+import OnboardingStepLayout from "./OnboardingStepLayout";
+import step1Src from "@/assets/step1.png";
 
 export default function OnboardingStepAssets() {
   return (
@@ -7,7 +8,8 @@ export default function OnboardingStepAssets() {
       title="Build Your Inventory"
       subtitle="Every fortune starts with what you own."
       description="Track stocks, crypto, real estate and more. Fortuna fetches live prices automatically -- your power level stays current without lifting a finger."
-      screenshotAlt="Assets screenshot"
+      screenshotSrc={step1Src}
+      screenshotAlt="Assets overview screenshot"
     />
-  )
+  );
 }
