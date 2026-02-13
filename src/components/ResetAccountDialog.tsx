@@ -100,7 +100,7 @@ export default function ResetAccountDialog({
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:buildings-linear" width={14} height={14} />
-                    <span>All entities (except Individual)</span>
+                    <span>All entities (except Personal)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:settings-linear" width={14} height={14} />
@@ -131,7 +131,8 @@ export default function ResetAccountDialog({
 
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              Type <span className="font-mono font-bold text-foreground">{CONFIRMATION_WORD}</span> to confirm
+              Type <span className="font-mono font-bold text-foreground">{CONFIRMATION_WORD}</span>{" "}
+              to confirm
             </p>
             <Input
               value={confirmText}
