@@ -132,6 +132,12 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  .logo-hover {
+    transition: transform 0.4s ease-in-out;
+  }
+  .logo-hover:hover {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes lockscreen-glow-gold {
