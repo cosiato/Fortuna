@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="coinFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="40%" stop-color="#FFC000"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <linearGradient id="coinEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#DAA520"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+    <radialGradient id="coinShine" cx="35%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFF8DC" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="purpleAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Coin edge (3D effect) -->
+  <ellipse cx="260" cy="262" rx="210" ry="210" fill="#8B6914"/>
+
+  <!-- Coin face -->
+  <circle cx="256" cy="256" r="210" fill="url(#coinFace)"/>
+
+  <!-- Shine overlay -->
+  <circle cx="256" cy="256" r="210" fill="url(#coinShine)"/>
+
+  <!-- Outer beaded border -->
+  <circle cx="256" cy="256" r="195" stroke="#B8860B" stroke-width="3" fill="none"/>
+  <g fill="#B8860B">
+    <!-- Beads around the edge -->
+    <circle cx="256" cy="64" r="4"/>
+    <circle cx="304" cy="67" r="4"/>
+    <circle cx="349" cy="78" r="4"/>
+    <circle cx="389" cy="97" r="4"/>
+    <circle cx="422" cy="123" r="4"/>
+    <circle cx="446" cy="155" r="4"/>
+    <circle cx="461" cy="192" r="4"/>
+    <circle cx="467" cy="232" r="4"/>
+    <circle cx="464" cy="272" r="4"/>
+    <circle cx="453" cy="310" r="4"/>
+    <circle cx="434" cy="344" r="4"/>
+    <circle cx="409" cy="373" r="4"/>
+    <circle cx="378" cy="396" r="4"/>
+    <circle cx="344" cy="411" r="4"/>
+    <circle cx="306" cy="418" r="4"/>
+    <circle cx="268" cy="418" r="4"/>
+    <circle cx="208" cy="67" r="4"/>
+    <circle cx="163" cy="78" r="4"/>
+    <circle cx="123" cy="97" r="4"/>
+    <circle cx="90" cy="123" r="4"/>
+    <circle cx="66" cy="155" r="4"/>
+    <circle cx="51" cy="192" r="4"/>
+    <circle cx="45" cy="232" r="4"/>
+    <circle cx="48" cy="272" r="4"/>
+    <circle cx="59" cy="310" r="4"/>
+    <circle cx="78" cy="344" r="4"/>
+    <circle cx="103" cy="373" r="4"/>
+    <circle cx="134" cy="396" r="4"/>
+    <circle cx="168" cy="411" r="4"/>
+    <circle cx="206" cy="418" r="4"/>
+    <circle cx="230" cy="418" r="4"/>
+  </g>
+
+  <!-- Inner border -->
+  <circle cx="256" cy="256" r="172" stroke="#B8860B" stroke-width="2" fill="none"/>
+
+  <!-- Fortuna profile silhouette (facing right, like a Roman coin) -->
+  <g transform="translate(235, 240)" fill="#B8860B">
+    <!-- Head profile -->
+    <path d="
+      M 10,-90
+      Q 5,-100 0,-95
+      Q -15,-92 -22,-80
+      Q -28,-68 -28,-55
+      Q -28,-42 -22,-32
+      Q -18,-26 -12,-22
+      L -10,-18
+      Q -8,-12 -6,-8
+      L -8,-4
+      Q -12,0 -10,6
+      L 0,8
+      Q 5,6 8,2
+      Q 12,-2 14,-8
+      Q 18,-14 20,-22
+      Q 24,-32 24,-45
+      Q 24,-60 20,-72
+      Q 16,-84 10,-90
+      Z
+    "/>
+    <!-- Eye indent -->
+    <ellipse cx="-6" cy="-50" rx="4" ry="3" fill="#DAA520" opacity="0.5"/>
+    <!-- Hair flowing back -->
+    <path d="
+      M 10,-90
+      Q 20,-95 30,-88
+      Q 42,-78 48,-62
+      Q 52,-48 50,-32
+      Q 48,-22 42,-16
+      Q 36,-10 30,-8
+      Q 24,-6 20,-10
+      Q 24,-20 24,-35
+      Q 24,-55 18,-72
+      Q 14,-84 10,-90
+      Z
+    " fill="#B8860B"/>
+    <!-- Hair details -->
+    <path d="M18,-85 Q28,-75 35,-60" stroke="#DAA520" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M22,-82 Q32,-70 38,-55" stroke="#DAA520" stroke-width="1" fill="none" opacity="0.4"/>
+    <path d="M15,-88 Q24,-80 30,-65" stroke="#DAA520" stroke-width="1" fill="none" opacity="0.4"/>
+    <!-- Laurel crown -->
+    <g fill="none" stroke="#B8860B" stroke-width="2.5">
+      <path d="M-15,-82 Q-25,-90 -20,-100 Q-12,-95 -10,-85"/>
+      <path d="M-8,-88 Q-18,-98 -12,-108 Q-4,-102 -2,-92"/>
+      <path d="M2,-92 Q-4,-104 2,-112 Q10,-105 10,-94"/>
+      <path d="M12,-90 Q10,-102 18,-108 Q22,-100 18,-88"/>
+      <path d="M20,-86 Q22,-98 30,-100 Q30,-90 26,-82"/>
+    </g>
+    <!-- Neck -->
+    <path d="
+      M -10,6 L -14,30 Q -12,34 0,36 Q 12,34 14,30 L 8,2
+    " fill="#B8860B"/>
+    <!-- Shoulder / draping -->
+    <path d="
+      M -14,30
+      Q -30,36 -45,48
+      Q -55,56 -58,68
+      L -50,70
+      Q -42,58 -28,48
+      Q -14,40 0,36
+    " fill="#B8860B"/>
+    <path d="
+      M 14,30
+      Q 30,36 48,48
+      Q 58,58 62,70
+      L 54,72
+      Q 48,60 36,50
+      Q 22,42 0,36
+    " fill="#B8860B"/>
+    <!-- Drape detail lines -->
+    <path d="M-20,38 Q-30,45 -40,55" stroke="#DAA520" stroke-width="1" fill="none" opacity="0.3"/>
+    <path d="M20,38 Q32,46 42,56" stroke="#DAA520" stroke-width="1" fill="none" opacity="0.3"/>
+  </g>
+
+  <!-- Text arc: FORTUNA at top -->
+  <path id="topArc" d="M 100,256 A 156,156 0 0,1 412,256" fill="none"/>
+  <text font-family="serif" font-size="28" fill="#B8860B" letter-spacing="8">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">FORTUNA</textPath>
+  </text>
+
+  <!-- Decorative stars/dots at sides -->
+  <g fill="#B8860B">
+    <circle cx="100" cy="256" r="5"/>
+    <circle cx="412" cy="256" r="5"/>
+  </g>
+
+  <!-- Text arc: MMXXVI at bottom -->
+  <path id="bottomArc" d="M 412,280 A 156,156 0 0,1 100,280" fill="none"/>
+  <text font-family="serif" font-size="20" fill="#B8860B" letter-spacing="6">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">MMXXVI</textPath>
+  </text>
+</svg>

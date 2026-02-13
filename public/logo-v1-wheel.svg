@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="50%" stop-color="#FFC000"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Subtle glow behind wheel -->
+  <circle cx="256" cy="256" r="240" fill="url(#glowGrad)"/>
+
+  <!-- Outer wheel rim -->
+  <circle cx="256" cy="256" r="200" stroke="url(#goldGrad)" stroke-width="8" fill="none"/>
+  <circle cx="256" cy="256" r="188" stroke="url(#goldGrad)" stroke-width="2" fill="none" opacity="0.4"/>
+
+  <!-- Wheel spokes (8 spokes) -->
+  <g stroke="url(#goldGrad)" stroke-width="4" opacity="0.7">
+    <line x1="256" y1="56" x2="256" y2="456"/>
+    <line x1="56" y1="256" x2="456" y2="256"/>
+    <line x1="114.6" y1="114.6" x2="397.4" y2="397.4"/>
+    <line x1="397.4" y1="114.6" x2="114.6" y2="397.4"/>
+  </g>
+
+  <!-- Inner hub circle -->
+  <circle cx="256" cy="256" r="50" stroke="url(#goldGrad)" stroke-width="6" fill="none"/>
+  <circle cx="256" cy="256" r="35" stroke="url(#goldGrad)" stroke-width="2" fill="none" opacity="0.5"/>
+
+  <!-- Decorative dots at spoke ends (on the rim) -->
+  <g fill="url(#goldGrad)">
+    <circle cx="256" cy="60" r="8"/>
+    <circle cx="256" cy="452" r="8"/>
+    <circle cx="60" cy="256" r="8"/>
+    <circle cx="452" cy="256" r="8"/>
+    <circle cx="117" cy="117" r="7"/>
+    <circle cx="395" cy="117" r="7"/>
+    <circle cx="117" cy="395" r="7"/>
+    <circle cx="395" cy="395" r="7"/>
+  </g>
+
+  <!-- Goddess silhouette in center -->
+  <g transform="translate(256, 256) scale(0.55)" fill="url(#goldGrad)">
+    <!-- Head -->
+    <ellipse cx="0" cy="-72" rx="18" ry="22"/>
+    <!-- Crown / diadem -->
+    <path d="M-16,-95 L-12,-105 L-6,-97 L0,-108 L6,-97 L12,-105 L16,-95"
+          stroke="url(#goldGrad)" stroke-width="2.5" fill="none"/>
+    <!-- Neck -->
+    <rect x="-6" y="-52" width="12" height="12" rx="3"/>
+    <!-- Torso (draped robe) -->
+    <path d="M-30,-40 Q-35,0 -28,40 L-20,80 Q0,90 20,80 L28,40 Q35,0 30,-40 Q15,-45 0,-42 Q-15,-45 -30,-40Z"/>
+    <!-- Left arm (holding cornucopia) -->
+    <path d="M-30,-35 Q-55,-20 -65,10 Q-70,25 -60,35 L-50,30 Q-48,15 -40,5 Q-35,-5 -30,-10"
+          fill="url(#goldGrad)"/>
+    <!-- Cornucopia -->
+    <path d="M-65,10 Q-80,5 -90,-5 Q-85,10 -78,20 Q-72,28 -60,35Z" fill="url(#goldGrad)"/>
+    <!-- Fruits from cornucopia -->
+    <circle cx="-88" cy="-2" r="5" fill="url(#purpleGrad)"/>
+    <circle cx="-82" cy="-8" r="4" fill="url(#goldGrad)" opacity="0.8"/>
+    <circle cx="-92" cy="5" r="3.5" fill="url(#purpleGrad)" opacity="0.8"/>
+    <!-- Right arm (holding rudder/staff) -->
+    <path d="M30,-35 Q50,-25 55,-10 Q58,0 55,15 L48,12 Q50,0 48,-8 Q45,-18 35,-25"
+          fill="url(#goldGrad)"/>
+    <!-- Rudder/staff -->
+    <line x1="55" y1="-10" x2="60" y2="80" stroke="url(#goldGrad)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M54,65 Q60,75 66,65 L68,80 Q60,90 52,80Z" fill="url(#goldGrad)"/>
+    <!-- Robe draping detail -->
+    <path d="M-10,-20 Q0,10 10,-20" stroke="#B8860B" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M-18,10 Q0,30 18,10" stroke="#B8860B" stroke-width="1.5" fill="none" opacity="0.4"/>
+  </g>
+
+  <!-- Small decorative Roman numerals around the wheel -->
+  <g fill="url(#goldGrad)" font-family="serif" font-size="16" text-anchor="middle" opacity="0.5">
+    <text x="256" y="82">I</text>
+    <text x="380" y="138">II</text>
+    <text x="434" y="262">III</text>
+    <text x="380" y="386">IV</text>
+    <text x="256" y="440">V</text>
+    <text x="132" y="386">VI</text>
+    <text x="78" y="262">VII</text>
+    <text x="132" y="138">VIII</text>
+  </g>
+</svg>
