@@ -10,6 +10,29 @@ import {
 import type { Snapshot } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 
+// --- TEMPORARY: fake yearly data for chart preview ---
+function generateFakeSnapshots(currency: string): Snapshot[] {
+  const now = new Date()
+  const snapshots: Snapshot[] = []
+  let value = 50000
+  for (let i = 365; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    const trend = 95 * (365 - i) / 365
+    const noise = (Math.sin(i * 0.3) * 1500) + (Math.cos(i * 0.07) * 3000)
+    value = 50000 + trend * 400 + noise
+    snapshots.push({
+      id: `fake-${i}`,
+      totalValue: Math.max(value, 10000),
+      currency,
+      recordedAt: date.toISOString(),
+    })
+  }
+  return snapshots
+}
+const USE_FAKE_DATA = true
+// --- END TEMPORARY ---
+
 interface NetWorthChartProps {
   snapshots: Snapshot[]
   displayCurrency: SupportedCurrency
@@ -45,8 +68,13 @@ export default function NetWorthChart({
   displayCurrency,
   exchangeRates,
 }: NetWorthChartProps) {
+  // TEMPORARY: use fake data when flag is on
+  const sourceSnapshots = USE_FAKE_DATA
+    ? generateFakeSnapshots(displayCurrency)
+    : snapshots
+
   const latestPerDay = new Map<string, Snapshot>()
-  for (const snapshot of snapshots) {
+  for (const snapshot of sourceSnapshots) {
     const dayKey = new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
