@@ -92,8 +92,8 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
               width: "60%",
               height: "70%",
               background:
-                "radial-gradient(ellipse, rgba(255, 215, 0, 0.15) 0%, transparent 70%)",
-              animation: "lockscreen-glow-gold 12s ease-in-out infinite",
+                "radial-gradient(ellipse, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
+              animation: "lockscreen-glow-purple 15s ease-in-out infinite",
             }}
           />
           <div
@@ -104,8 +104,8 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
               width: "50%",
               height: "60%",
               background:
-                "radial-gradient(ellipse, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
-              animation: "lockscreen-glow-purple 15s ease-in-out infinite",
+                "radial-gradient(ellipse, rgba(255, 215, 0, 0.15) 0%, transparent 70%)",
+              animation: "lockscreen-glow-gold 12s ease-in-out infinite",
             }}
           />
           <div className="absolute inset-0 bg-vignette pointer-events-none" />
