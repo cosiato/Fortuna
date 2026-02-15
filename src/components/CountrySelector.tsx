@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -10,32 +10,21 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { COUNTRIES } from "@/lib/countries";
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { COUNTRIES } from "@/lib/countries"
 
-const sortedCountries = [...COUNTRIES].sort((a, b) =>
-  a.name.localeCompare(b.name),
-);
+const sortedCountries = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name))
 
 interface CountrySelectorProps {
-  value: string;
-  onChange: (countryCode: string) => void;
+  value: string
+  onChange: (countryCode: string) => void
 }
 
-export default function CountrySelector({
-  value,
-  onChange,
-}: CountrySelectorProps) {
-  const { t } = useTranslation("common");
-  const [open, setOpen] = useState(false);
-  const selectedCountry = sortedCountries.find(
-    (country) => country.code === value,
-  );
+export default function CountrySelector({ value, onChange }: CountrySelectorProps) {
+  const { t } = useTranslation("common")
+  const [open, setOpen] = useState(false)
+  const selectedCountry = sortedCountries.find((country) => country.code === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,8 +57,8 @@ export default function CountrySelector({
                   key={country.code}
                   value={`${country.name} ${country.code}`}
                   onSelect={() => {
-                    onChange(country.code);
-                    setOpen(false);
+                    onChange(country.code)
+                    setOpen(false)
                   }}
                 >
                   <Check
@@ -89,5 +78,5 @@ export default function CountrySelector({
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

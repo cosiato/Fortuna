@@ -257,9 +257,7 @@ export default function SettingsDialog({
                   <Label htmlFor="pin-toggle" className="text-sm font-medium">
                     {t("pinLock")}
                   </Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("pinDescription")}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t("pinDescription")}</p>
                 </div>
                 <Switch
                   id="pin-toggle"

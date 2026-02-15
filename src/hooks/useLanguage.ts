@@ -1,7 +1,7 @@
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { api } from '@/lib/api'
-import type { SupportedLanguage } from '@/lib/i18n'
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+import { api } from "@/lib/api"
+import type { SupportedLanguage } from "@/lib/i18n"
 
 export function useLanguage() {
   const { i18n } = useTranslation()

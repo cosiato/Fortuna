@@ -1,38 +1,38 @@
-import { fetch } from "@tauri-apps/plugin-http";
+import { fetch } from "@tauri-apps/plugin-http"
 
 interface ExchangeRates {
-  base: string;
-  rates: { [currency: string]: number };
-  timestamp: number;
+  base: string
+  rates: { [currency: string]: number }
+  timestamp: number
 }
 
-const RATES_STORAGE_KEY = "fortuna_exchange_rates";
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+const RATES_STORAGE_KEY = "fortuna_exchange_rates"
+const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
 function loadRatesFromStorage(): ExchangeRates | null {
   try {
-    const stored = localStorage.getItem(RATES_STORAGE_KEY);
+    const stored = localStorage.getItem(RATES_STORAGE_KEY)
     if (stored) {
-      const parsed = JSON.parse(stored) as ExchangeRates;
+      const parsed = JSON.parse(stored) as ExchangeRates
       if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL) {
-        return parsed;
+        return parsed
       }
     }
   } catch {
     // Ignore parse errors
   }
-  return null;
+  return null
 }
 
 function saveRatesToStorage(rates: ExchangeRates): void {
   try {
-    localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates));
+    localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates))
   } catch {
     // Ignore storage errors
   }
 }
 
-let cachedRates: ExchangeRates | null = loadRatesFromStorage();
+let cachedRates: ExchangeRates | null = loadRatesFromStorage()
 
 export const SUPPORTED_CURRENCIES = [
   // North America
@@ -92,9 +92,9 @@ export const SUPPORTED_CURRENCIES = [
   "FJD",
   // Digital
   "BTC",
-] as const;
+] as const
 
-export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
+export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number]
 
 type CurrencyContinent =
   | "North America"
@@ -103,11 +103,11 @@ type CurrencyContinent =
   | "Asia"
   | "Africa"
   | "Oceania"
-  | "Digital";
+  | "Digital"
 
 interface CurrencyGroup {
-  continent: CurrencyContinent;
-  currencies: readonly SupportedCurrency[];
+  continent: CurrencyContinent
+  currencies: readonly SupportedCurrency[]
 }
 
 export const CURRENCY_GROUPS: readonly CurrencyGroup[] = [
@@ -163,12 +163,9 @@ export const CURRENCY_GROUPS: readonly CurrencyGroup[] = [
   },
   { continent: "Oceania", currencies: ["AUD", "NZD", "FJD"] },
   { continent: "Digital", currencies: ["BTC"] },
-] as const;
+] as const
 
-export const CURRENCY_INFO: Record<
-  SupportedCurrency,
-  { flag: string; name: string }
-> = {
+export const CURRENCY_INFO: Record<SupportedCurrency, { flag: string; name: string }> = {
   // North America
   USD: { flag: "\u{1F1FA}\u{1F1F8}", name: "US Dollar" },
   CAD: { flag: "\u{1F1E8}\u{1F1E6}", name: "Canadian Dollar" },
@@ -226,7 +223,7 @@ export const CURRENCY_INFO: Record<
   FJD: { flag: "\u{1F1EB}\u{1F1EF}", name: "Fijian Dollar" },
   // Digital
   BTC: { flag: "\u20BF", name: "Bitcoin" },
-};
+}
 
 export const FALLBACK_RATES: Record<SupportedCurrency, number> = {
   USD: 1,
@@ -279,66 +276,64 @@ export const FALLBACK_RATES: Record<SupportedCurrency, number> = {
   NZD: 1.63,
   FJD: 2.24,
   BTC: 0.000024,
-};
+}
 
 /** Fiat currency codes (all supported except BTC) */
 const FIAT_CURRENCIES = SUPPORTED_CURRENCIES.filter(
   (c): c is Exclude<SupportedCurrency, "BTC"> => c !== "BTC",
-);
+)
 
 export async function getExchangeRates(): Promise<ExchangeRates> {
   if (cachedRates && Date.now() - cachedRates.timestamp < CACHE_TTL) {
-    return cachedRates;
+    return cachedRates
   }
 
   try {
     // Fetch USD-based rates from exchangerate-api (free tier)
-    const response = await fetch(
-      "https://api.exchangerate-api.com/v4/latest/USD",
-    );
+    const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD")
 
     if (!response.ok) {
-      throw new Error(`Exchange rate API error: ${response.status}`);
+      throw new Error(`Exchange rate API error: ${response.status}`)
     }
 
-    const data = await response.json();
+    const data = await response.json()
 
     // Get BTC price to add BTC as a currency option
     const btcResponse = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
-    );
+    )
 
-    let btcRate = 0;
+    let btcRate = 0
     if (btcResponse.ok) {
-      const btcData = await btcResponse.json();
-      const btcPriceInUsd = btcData.bitcoin?.usd || 0;
+      const btcData = await btcResponse.json()
+      const btcPriceInUsd = btcData.bitcoin?.usd || 0
       if (btcPriceInUsd > 0) {
-        btcRate = 1 / btcPriceInUsd; // How many BTC per 1 USD
+        btcRate = 1 / btcPriceInUsd // How many BTC per 1 USD
       }
     }
 
     // Build rates dynamically from all fiat currencies
-    const rates: Record<string, number> = { USD: 1 };
+    const rates: Record<string, number> = { USD: 1 }
     for (const code of FIAT_CURRENCIES) {
-      rates[code] = data.rates[code] ?? FALLBACK_RATES[code] ?? 1;
+      rates[code] = data.rates[code] ?? FALLBACK_RATES[code] ?? 1
     }
-    rates.BTC = btcRate;
+    rates.BTC = btcRate
 
     cachedRates = {
       base: "USD",
       rates,
       timestamp: Date.now(),
-    };
-    saveRatesToStorage(cachedRates);
+    }
+    saveRatesToStorage(cachedRates)
 
-    return cachedRates;
+    return cachedRates
   } catch {
     // Return fallback rates
     return {
       base: "USD",
       rates: { ...FALLBACK_RATES },
       timestamp: Date.now(),
-    };
+    }
   }
 }
 
@@ -347,46 +342,43 @@ export async function convertCurrency(
   fromCurrency: string,
   toCurrency: string,
 ): Promise<number> {
-  if (fromCurrency === toCurrency) return amount;
+  if (fromCurrency === toCurrency) return amount
 
-  const rates = await getExchangeRates();
+  const rates = await getExchangeRates()
 
   // Convert to USD first, then to target currency
-  let amountInUsd = amount;
+  let amountInUsd = amount
   if (fromCurrency !== "USD") {
-    const fromRate = rates.rates[fromCurrency];
+    const fromRate = rates.rates[fromCurrency]
     if (fromRate && fromRate > 0) {
-      amountInUsd = amount / fromRate;
+      amountInUsd = amount / fromRate
     }
   }
 
-  const toRate = rates.rates[toCurrency];
+  const toRate = rates.rates[toCurrency]
   if (toRate && toRate > 0) {
-    return amountInUsd * toRate;
+    return amountInUsd * toRate
   }
 
-  return amountInUsd;
+  return amountInUsd
 }
 
-import i18n from "@/lib/i18n";
+import i18n from "@/lib/i18n"
 
 const LOCALE_MAP: Record<string, string> = {
   en: "en-US",
   fr: "fr-FR",
   es: "es-ES",
   pt: "pt-BR",
-};
-
-export function getIntlLocale(): string {
-  return LOCALE_MAP[i18n.language] ?? "en-US";
 }
 
-export function formatCurrency(
-  amount: number,
-  currency: SupportedCurrency,
-): string {
+export function getIntlLocale(): string {
+  return LOCALE_MAP[i18n.language] ?? "en-US"
+}
+
+export function formatCurrency(amount: number, currency: SupportedCurrency): string {
   if (currency === "BTC") {
-    return `\u20BF${amount.toFixed(8)}`;
+    return `\u20BF${amount.toFixed(8)}`
   }
 
   return new Intl.NumberFormat(getIntlLocale(), {
@@ -394,10 +386,10 @@ export function formatCurrency(
     currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(amount)
 }
 
 export async function forceRefreshExchangeRates(): Promise<ExchangeRates> {
-  cachedRates = null;
-  return getExchangeRates();
+  cachedRates = null
+  return getExchangeRates()
 }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import type {
   CashFlow,
   CashFlowType,
@@ -7,26 +7,21 @@ import type {
   CashFlowCategory,
   CreateCashFlowInput,
   UpdateCashFlowInput,
-} from '@/types/database'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/types/database"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { getCategoriesByType } from '@/lib/cashFlowCategories'
-import { createCashFlowSchema, validateSchema } from '@/lib/validation'
-import { toast } from 'sonner'
+} from "@/components/ui/select"
+import { getCategoriesByType } from "@/lib/cashFlowCategories"
+import { createCashFlowSchema, validateSchema } from "@/lib/validation"
+import { toast } from "sonner"
 
 interface CashFlowFormProps {
   cashFlow?: CashFlow | null
@@ -47,14 +42,14 @@ export default function CashFlowForm({
   onOpenChange,
   onSubmit,
 }: CashFlowFormProps) {
-  const { t } = useTranslation(['vaults', 'common'])
-  const [name, setName] = useState('')
-  const [amount, setAmount] = useState('')
-  const [flowType, setFlowType] = useState<CashFlowType>('inflow')
-  const [frequency, setFrequency] = useState<CashFlowFrequency>('monthly')
-  const [category, setCategory] = useState<CashFlowCategory>('salary')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const { t } = useTranslation(["vaults", "common"])
+  const [name, setName] = useState("")
+  const [amount, setAmount] = useState("")
+  const [flowType, setFlowType] = useState<CashFlowType>("inflow")
+  const [frequency, setFrequency] = useState<CashFlowFrequency>("monthly")
+  const [category, setCategory] = useState<CashFlowCategory>("salary")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
 
   useEffect(() => {
     if (cashFlow) {
@@ -64,16 +59,16 @@ export default function CashFlowForm({
       setFrequency(cashFlow.frequency)
       setCategory(cashFlow.category)
       setStartDate(cashFlow.startDate)
-      setEndDate(cashFlow.endDate ?? '')
+      setEndDate(cashFlow.endDate ?? "")
     } else {
-      const initialType = defaultFlowType ?? 'inflow'
-      setName('')
-      setAmount('')
+      const initialType = defaultFlowType ?? "inflow"
+      setName("")
+      setAmount("")
       setFlowType(initialType)
-      setFrequency('monthly')
-      setCategory(getCategoriesByType(initialType)[0]?.key ?? 'salary')
-      setStartDate(new Date().toISOString().split('T')[0])
-      setEndDate('')
+      setFrequency("monthly")
+      setCategory(getCategoriesByType(initialType)[0]?.key ?? "salary")
+      setStartDate(new Date().toISOString().split("T")[0])
+      setEndDate("")
     }
   }, [cashFlow, open, defaultFlowType])
 
@@ -83,7 +78,7 @@ export default function CashFlowForm({
   useEffect(() => {
     const validKeys = categories.map((c) => c.key)
     if (!validKeys.includes(category)) {
-      setCategory(categories[0]?.key ?? 'salary')
+      setCategory(categories[0]?.key ?? "salary")
     }
   }, [flowType, categories, category])
 
@@ -136,25 +131,25 @@ export default function CashFlowForm({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? t('vaults:cashFlow.editTitle') : t('vaults:cashFlow.title')}
+            {isEditing ? t("vaults:cashFlow.editTitle") : t("vaults:cashFlow.title")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cf-name">{t('common:name')}</Label>
+            <Label htmlFor="cf-name">{t("common:name")}</Label>
             <Input
               id="cf-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t('vaults:cashFlow.namePlaceholder')}
+              placeholder={t("vaults:cashFlow.namePlaceholder")}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-amount">{t('vaults:cashFlow.amount')}</Label>
+              <Label htmlFor="cf-amount">{t("vaults:cashFlow.amount")}</Label>
               <div className="relative">
                 <Input
                   id="cf-amount"
@@ -164,7 +159,7 @@ export default function CashFlowForm({
                   step="any"
                   min="0.01"
                   placeholder="0.00"
-                  className={accountCurrency ? 'pr-14' : ''}
+                  className={accountCurrency ? "pr-14" : ""}
                   required
                 />
                 {accountCurrency && (
@@ -176,16 +171,16 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-frequency">{t('vaults:cashFlow.frequency')}</Label>
+              <Label htmlFor="cf-frequency">{t("vaults:cashFlow.frequency")}</Label>
               <Select value={frequency} onValueChange={(v) => setFrequency(v as CashFlowFrequency)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">{t('common:frequency.daily')}</SelectItem>
-                  <SelectItem value="weekly">{t('common:frequency.weekly')}</SelectItem>
-                  <SelectItem value="monthly">{t('common:frequency.monthly')}</SelectItem>
-                  <SelectItem value="yearly">{t('common:frequency.yearly')}</SelectItem>
+                  <SelectItem value="daily">{t("common:frequency.daily")}</SelectItem>
+                  <SelectItem value="weekly">{t("common:frequency.weekly")}</SelectItem>
+                  <SelectItem value="monthly">{t("common:frequency.monthly")}</SelectItem>
+                  <SelectItem value="yearly">{t("common:frequency.yearly")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,7 +188,7 @@ export default function CashFlowForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-flow-type">{t('vaults:cashFlow.type')}</Label>
+              <Label htmlFor="cf-flow-type">{t("vaults:cashFlow.type")}</Label>
               <Select value={flowType} onValueChange={(v) => setFlowType(v as CashFlowType)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -202,13 +197,13 @@ export default function CashFlowForm({
                   <SelectItem value="inflow">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-green-500" />
-                      {t('common:flowType.inflow')}
+                      {t("common:flowType.inflow")}
                     </span>
                   </SelectItem>
                   <SelectItem value="outflow">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-500" />
-                      {t('common:flowType.outflow')}
+                      {t("common:flowType.outflow")}
                     </span>
                   </SelectItem>
                 </SelectContent>
@@ -216,7 +211,7 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-category">{t('vaults:cashFlow.category')}</Label>
+              <Label htmlFor="cf-category">{t("vaults:cashFlow.category")}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as CashFlowCategory)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -234,7 +229,7 @@ export default function CashFlowForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-start-date">{t('vaults:cashFlow.startDate')}</Label>
+              <Label htmlFor="cf-start-date">{t("vaults:cashFlow.startDate")}</Label>
               <Input
                 id="cf-start-date"
                 type="date"
@@ -245,7 +240,7 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-end-date">{t('vaults:cashFlow.endDate')}</Label>
+              <Label htmlFor="cf-end-date">{t("vaults:cashFlow.endDate")}</Label>
               <Input
                 id="cf-end-date"
                 type="date"
@@ -262,10 +257,10 @@ export default function CashFlowForm({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              {t('common:cancel')}
+              {t("common:cancel")}
             </Button>
             <Button type="submit" variant="default" className="flex-1">
-              {isEditing ? t('common:update') : t('vaults:cashFlow.addBtn')}
+              {isEditing ? t("common:update") : t("vaults:cashFlow.addBtn")}
             </Button>
           </div>
         </form>

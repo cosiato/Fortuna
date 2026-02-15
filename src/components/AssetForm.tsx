@@ -122,17 +122,20 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
     [fetchStockName],
   )
 
-  const handleCryptoChange = useCallback((cryptoSymbol: string) => {
-    setSymbol(cryptoSymbol)
-    const crypto = getCryptoBySymbol(cryptoSymbol)
-    if (crypto) {
-      setResolvedName(crypto.name)
-      setNameError(null)
-    } else {
-      setResolvedName("")
-      setNameError(t("cryptoNotFound"))
-    }
-  }, [t])
+  const handleCryptoChange = useCallback(
+    (cryptoSymbol: string) => {
+      setSymbol(cryptoSymbol)
+      const crypto = getCryptoBySymbol(cryptoSymbol)
+      if (crypto) {
+        setResolvedName(crypto.name)
+        setNameError(null)
+      } else {
+        setResolvedName("")
+        setNameError(t("cryptoNotFound"))
+      }
+    },
+    [t],
+  )
 
   useEffect(() => {
     return () => {
@@ -314,7 +317,11 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               {t("cancel", { ns: "common" })}
             </Button>
             <Button type="submit" variant="default" className="flex-1" disabled={isSubmitDisabled}>
-              {isLoadingName ? t("loadingBtn") : isEditing ? t("update", { ns: "common" }) : t("addBtn")}
+              {isLoadingName
+                ? t("loadingBtn")
+                : isEditing
+                  ? t("update", { ns: "common" })
+                  : t("addBtn")}
             </Button>
           </div>
         </form>

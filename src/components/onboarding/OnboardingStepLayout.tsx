@@ -1,12 +1,12 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "@iconify/react"
 
 interface OnboardingStepLayoutProps {
-  icon: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  screenshotSrc: string;
-  screenshotAlt: string;
+  icon: string
+  title: string
+  subtitle: string
+  description: string
+  screenshotSrc: string
+  screenshotAlt: string
 }
 
 export default function OnboardingStepLayout({
@@ -29,9 +29,7 @@ export default function OnboardingStepLayout({
           <p className="text-sm text-muted-foreground italic">{subtitle}</p>
         </div>
 
-        <p className="text-[15px] text-foreground leading-relaxed">
-          {description}
-        </p>
+        <p className="text-[15px] text-foreground leading-relaxed">{description}</p>
       </div>
 
       <div className="flex-1 min-w-0 aspect-video rounded-xl overflow-hidden border border-slate-700/40">
@@ -44,5 +42,5 @@ export default function OnboardingStepLayout({
         />
       </div>
     </div>
-  );
+  )
 }

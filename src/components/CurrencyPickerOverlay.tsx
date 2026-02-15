@@ -1,18 +1,14 @@
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@iconify/react";
-import {
-  CURRENCY_GROUPS,
-  CURRENCY_INFO,
-  type SupportedCurrency,
-} from "@/lib/currency";
+import { useState, useEffect, useRef, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { motion, AnimatePresence } from "framer-motion"
+import { Icon } from "@iconify/react"
+import { CURRENCY_GROUPS, CURRENCY_INFO, type SupportedCurrency } from "@/lib/currency"
 
 interface CurrencyPickerOverlayProps {
-  open: boolean;
-  value: SupportedCurrency;
-  onSelect: (currency: SupportedCurrency) => void;
-  onClose: () => void;
+  open: boolean
+  value: SupportedCurrency
+  onSelect: (currency: SupportedCurrency) => void
+  onClose: () => void
 }
 
 export default function CurrencyPickerOverlay({
@@ -21,9 +17,9 @@ export default function CurrencyPickerOverlay({
   onSelect,
   onClose,
 }: CurrencyPickerOverlayProps) {
-  const [search, setSearch] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { t } = useTranslation("common");
+  const [search, setSearch] = useState("")
+  const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation("common")
 
   const CONTINENT_KEY_MAP: Record<string, string> = {
     "North America": "continent.northAmerica",
@@ -33,52 +29,49 @@ export default function CurrencyPickerOverlay({
     Africa: "continent.africa",
     Oceania: "continent.oceania",
     Digital: "continent.digital",
-  };
+  }
 
   useEffect(() => {
     if (open) {
-      setSearch("");
+      setSearch("")
       // Small delay to ensure the overlay is mounted before focusing
-      const timer = setTimeout(() => inputRef.current?.focus(), 50);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50)
+      return () => clearTimeout(timer)
     }
-  }, [open]);
+  }, [open])
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
+        e.preventDefault()
+        onClose()
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [open, onClose])
 
-  const query = search.trim().toLowerCase();
+  const query = search.trim().toLowerCase()
 
   const filteredGroups = useMemo(() => {
-    if (!query) return CURRENCY_GROUPS;
+    if (!query) return CURRENCY_GROUPS
 
     return CURRENCY_GROUPS.map((group) => ({
       ...group,
       currencies: group.currencies.filter((code) => {
-        const info = CURRENCY_INFO[code];
-        return (
-          code.toLowerCase().includes(query) ||
-          info.name.toLowerCase().includes(query)
-        );
+        const info = CURRENCY_INFO[code]
+        return code.toLowerCase().includes(query) || info.name.toLowerCase().includes(query)
       }),
-    })).filter((group) => group.currencies.length > 0);
-  }, [query]);
+    })).filter((group) => group.currencies.length > 0)
+  }, [query])
 
   const handleSelect = (currency: SupportedCurrency) => {
-    onSelect(currency);
-    onClose();
-  };
+    onSelect(currency)
+    onClose()
+  }
 
   return (
     <AnimatePresence>
@@ -95,9 +88,7 @@ export default function CurrencyPickerOverlay({
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h2 className="text-lg font-semibold text-foreground">
-              {t("selectCurrency")}
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("selectCurrency")}</h2>
             <button
               onClick={onClose}
               className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-800/50 transition-colors"
@@ -138,15 +129,12 @@ export default function CurrencyPickerOverlay({
                 {filteredGroups.map((group) => (
                   <section key={group.continent}>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                      {t(
-                        (CONTINENT_KEY_MAP[group.continent] ??
-                          group.continent) as any,
-                      )}
+                      {t((CONTINENT_KEY_MAP[group.continent] ?? group.continent) as any)}
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                       {group.currencies.map((code) => {
-                        const info = CURRENCY_INFO[code];
-                        const isSelected = code === value;
+                        const info = CURRENCY_INFO[code]
+                        const isSelected = code === value
 
                         return (
                           <button
@@ -158,9 +146,7 @@ export default function CurrencyPickerOverlay({
                                 : "border-slate-800/50 bg-slate-900/20 hover:bg-slate-800/40 hover:border-slate-700/50"
                             }`}
                           >
-                            <span className="text-lg leading-none shrink-0">
-                              {info.flag}
-                            </span>
+                            <span className="text-lg leading-none shrink-0">{info.flag}</span>
                             <div className="min-w-0">
                               <span
                                 className={`text-sm font-semibold block ${
@@ -174,7 +160,7 @@ export default function CurrencyPickerOverlay({
                               </span>
                             </div>
                           </button>
-                        );
+                        )
                       })}
                     </div>
                   </section>
@@ -185,5 +171,5 @@ export default function CurrencyPickerOverlay({
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

@@ -1,23 +1,23 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Icon } from "@iconify/react";
-import { useTranslation } from "react-i18next";
+import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Icon } from "@iconify/react"
+import { useTranslation } from "react-i18next"
 
 interface PlaceholderFlowNodeData {
-  flowType: "inflow" | "outflow";
-  onAdd: () => void;
+  flowType: "inflow" | "outflow"
+  onAdd: () => void
 }
 
 export default function PlaceholderFlowNode({
   data,
 }: NodeProps & { data: PlaceholderFlowNodeData }) {
-  const { t } = useTranslation("vaults");
-  const isInflow = data.flowType === "inflow";
+  const { t } = useTranslation("vaults")
+  const isInflow = data.flowType === "inflow"
 
   return (
     <button
       onClick={(e) => {
-        e.stopPropagation();
-        data.onAdd();
+        e.stopPropagation()
+        data.onAdd()
       }}
       className="group relative flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-dashed border-slate-700/60 bg-slate-900/30 min-w-[140px] transition-all hover:border-slate-500/60 hover:bg-slate-800/30 cursor-pointer"
     >
@@ -45,5 +45,5 @@ export default function PlaceholderFlowNode({
         {isInflow ? t("cashFlow.addInflow") : t("cashFlow.addOutflow")}
       </span>
     </button>
-  );
+  )
 }

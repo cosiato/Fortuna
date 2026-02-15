@@ -1,10 +1,9 @@
-import { z } from "zod";
-import i18n from "@/lib/i18n";
+import { z } from "zod"
+import i18n from "@/lib/i18n"
 
-const t = (key: string) => i18n.t(key as any, { ns: "validation" });
+const t = (key: string) => i18n.t(key as any, { ns: "validation" })
 
-const nameField = () =>
-  z.string().min(1, t("nameRequired")).max(255, t("nameTooLong"));
+const nameField = () => z.string().min(1, t("nameRequired")).max(255, t("nameTooLong"))
 
 export const createAssetSchema = () =>
   z.object({
@@ -14,7 +13,7 @@ export const createAssetSchema = () =>
     quantity: z.number().min(0, t("quantityMin")),
     manualPrice: z.number().min(0, t("priceMin")).nullable().optional(),
     currency: z.string().length(3, t("currencyCode")),
-  });
+  })
 
 export const createAccountSchema = () =>
   z.object({
@@ -25,12 +24,12 @@ export const createAccountSchema = () =>
       .string()
       .length(2, t("countryCodeLength"))
       .regex(/^[A-Z]{2}$/, t("countryCodeFormat")),
-  });
+  })
 
 export const createEntitySchema = () =>
   z.object({
     name: nameField(),
-  });
+  })
 
 export const createCashFlowSchema = () =>
   z
@@ -46,19 +45,19 @@ export const createCashFlowSchema = () =>
     .refine((data) => !data.endDate || data.endDate >= data.startDate, {
       message: t("endDateAfterStart"),
       path: ["endDate"],
-    });
+    })
 
 export function validateSchema<T>(
   schema: z.ZodType<T>,
   data: unknown,
 ): { success: true; data: T } | { success: false; error: string } {
-  const result = schema.safeParse(data);
+  const result = schema.safeParse(data)
   if (result.success) {
-    return { success: true, data: result.data };
+    return { success: true, data: result.data }
   }
-  const firstIssue = result.error.issues[0];
+  const firstIssue = result.error.issues[0]
   return {
     success: false,
     error: firstIssue?.message ?? t("validationFailed"),
-  };
+  }
 }

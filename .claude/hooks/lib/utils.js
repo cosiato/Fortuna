@@ -11,49 +11,49 @@ import {
   readFileSync,
   writeFileSync,
   appendFileSync,
-} from "fs";
-import { join, basename, dirname } from "path";
-import { homedir, tmpdir } from "os";
-import { execSync, spawnSync } from "child_process";
+} from "fs"
+import { join, basename, dirname } from "path"
+import { homedir, tmpdir } from "os"
+import { execSync, spawnSync } from "child_process"
 
 // Platform detection
-const isWindows = process.platform === "win32";
-const isMacOS = process.platform === "darwin";
-const isLinux = process.platform === "linux";
+const isWindows = process.platform === "win32"
+const isMacOS = process.platform === "darwin"
+const isLinux = process.platform === "linux"
 
 /**
  * Get the user's home directory (cross-platform)
  */
 function getHomeDir() {
-  return homedir();
+  return homedir()
 }
 
 /**
  * Get the Claude config directory
  */
 function getClaudeDir() {
-  return join(getHomeDir(), ".claude");
+  return join(getHomeDir(), ".claude")
 }
 
 /**
  * Get the sessions directory
  */
 function getSessionsDir() {
-  return join(getClaudeDir(), "sessions");
+  return join(getClaudeDir(), "sessions")
 }
 
 /**
  * Get the learned skills directory
  */
 function getLearnedSkillsDir() {
-  return join(getClaudeDir(), "skills", "learned");
+  return join(getClaudeDir(), "skills", "learned")
 }
 
 /**
  * Get the temp directory (cross-platform)
  */
 function getTempDir() {
-  return tmpdir();
+  return tmpdir()
 }
 
 /**
@@ -65,56 +65,54 @@ function getTempDir() {
 function ensureDir(dirPath) {
   try {
     if (!existsSync(dirPath)) {
-      mkdirSync(dirPath, { recursive: true });
+      mkdirSync(dirPath, { recursive: true })
     }
   } catch (err) {
     // EEXIST is fine (race condition with another process creating it)
     if (err.code !== "EEXIST") {
-      throw new Error(
-        `Failed to create directory '${dirPath}': ${err.message}`,
-      );
+      throw new Error(`Failed to create directory '${dirPath}': ${err.message}`)
     }
   }
-  return dirPath;
+  return dirPath
 }
 
 /**
  * Get current date in YYYY-MM-DD format
  */
 function getDateString() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const day = String(now.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
 }
 
 /**
  * Get current time in HH:MM format
  */
 function getTimeString() {
-  const now = new Date();
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
+  const now = new Date()
+  const hours = String(now.getHours()).padStart(2, "0")
+  const minutes = String(now.getMinutes()).padStart(2, "0")
+  return `${hours}:${minutes}`
 }
 
 /**
  * Get the git repository name
  */
 function getGitRepoName() {
-  const result = runCommand("git rev-parse --show-toplevel");
-  if (!result.success) return null;
-  return basename(result.output);
+  const result = runCommand("git rev-parse --show-toplevel")
+  if (!result.success) return null
+  return basename(result.output)
 }
 
 /**
  * Get project name from git repo or current directory
  */
 function getProjectName() {
-  const repoName = getGitRepoName();
-  if (repoName) return repoName;
-  return basename(process.cwd()) || null;
+  const repoName = getGitRepoName()
+  if (repoName) return repoName
+  return basename(process.cwd()) || null
 }
 
 /**
@@ -122,25 +120,25 @@ function getProjectName() {
  * Returns last 8 characters, falls back to project name then 'default'
  */
 function getSessionIdShort(fallback = "default") {
-  const sessionId = process.env.CLAUDE_SESSION_ID;
+  const sessionId = process.env.CLAUDE_SESSION_ID
   if (sessionId && sessionId.length > 0) {
-    return sessionId.slice(-8);
+    return sessionId.slice(-8)
   }
-  return getProjectName() || fallback;
+  return getProjectName() || fallback
 }
 
 /**
  * Get current datetime in YYYY-MM-DD HH:MM:SS format
  */
 function getDateTimeString() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const day = String(now.getDate()).padStart(2, "0")
+  const hours = String(now.getHours()).padStart(2, "0")
+  const minutes = String(now.getMinutes()).padStart(2, "0")
+  const seconds = String(now.getSeconds()).padStart(2, "0")
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 /**
@@ -150,14 +148,14 @@ function getDateTimeString() {
  * @param {object} options - Options { maxAge: days, recursive: boolean }
  */
 function findFiles(dir, pattern, options = {}) {
-  if (!dir || typeof dir !== "string") return [];
-  if (!pattern || typeof pattern !== "string") return [];
+  if (!dir || typeof dir !== "string") return []
+  if (!pattern || typeof pattern !== "string") return []
 
-  const { maxAge = null, recursive = false } = options;
-  const results = [];
+  const { maxAge = null, recursive = false } = options
+  const results = []
 
   if (!existsSync(dir)) {
-    return results;
+    return results
   }
 
   // Escape all regex special characters, then convert glob wildcards.
@@ -165,35 +163,34 @@ function findFiles(dir, pattern, options = {}) {
   const regexPattern = pattern
     .replace(/[.+^${}()|[\]\\]/g, "\\$&")
     .replace(/\*/g, ".*")
-    .replace(/\?/g, ".");
-  const regex = new RegExp(`^${regexPattern}$`);
+    .replace(/\?/g, ".")
+  const regex = new RegExp(`^${regexPattern}$`)
 
   function searchDir(currentDir) {
     try {
-      const entries = readdirSync(currentDir, { withFileTypes: true });
+      const entries = readdirSync(currentDir, { withFileTypes: true })
 
       for (const entry of entries) {
-        const fullPath = join(currentDir, entry.name);
+        const fullPath = join(currentDir, entry.name)
 
         if (entry.isFile() && regex.test(entry.name)) {
-          let stats;
+          let stats
           try {
-            stats = statSync(fullPath);
+            stats = statSync(fullPath)
           } catch {
-            continue; // File deleted between readdir and stat
+            continue // File deleted between readdir and stat
           }
 
           if (maxAge !== null) {
-            const ageInDays =
-              (Date.now() - stats.mtimeMs) / (1000 * 60 * 60 * 24);
+            const ageInDays = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60 * 24)
             if (ageInDays <= maxAge) {
-              results.push({ path: fullPath, mtime: stats.mtimeMs });
+              results.push({ path: fullPath, mtime: stats.mtimeMs })
             }
           } else {
-            results.push({ path: fullPath, mtime: stats.mtimeMs });
+            results.push({ path: fullPath, mtime: stats.mtimeMs })
           }
         } else if (entry.isDirectory() && recursive) {
-          searchDir(fullPath);
+          searchDir(fullPath)
         }
       }
     } catch (_err) {
@@ -201,12 +198,12 @@ function findFiles(dir, pattern, options = {}) {
     }
   }
 
-  searchDir(dir);
+  searchDir(dir)
 
   // Sort by modification time (newest first)
-  results.sort((a, b) => b.mtime - a.mtime);
+  results.sort((a, b) => b.mtime - a.mtime)
 
-  return results;
+  return results
 }
 
 /**
@@ -217,64 +214,64 @@ function findFiles(dir, pattern, options = {}) {
  * @returns {Promise<object>} Parsed JSON object, or empty object if stdin is empty
  */
 async function readStdinJson(options = {}) {
-  const { timeoutMs = 5000, maxSize = 1024 * 1024 } = options;
+  const { timeoutMs = 5000, maxSize = 1024 * 1024 } = options
 
   return new Promise((resolve) => {
-    let data = "";
-    let settled = false;
+    let data = ""
+    let settled = false
 
     const timer = setTimeout(() => {
       if (!settled) {
-        settled = true;
+        settled = true
         // Clean up stdin listeners so the event loop can exit
-        process.stdin.removeAllListeners("data");
-        process.stdin.removeAllListeners("end");
-        process.stdin.removeAllListeners("error");
-        if (process.stdin.unref) process.stdin.unref();
+        process.stdin.removeAllListeners("data")
+        process.stdin.removeAllListeners("end")
+        process.stdin.removeAllListeners("error")
+        if (process.stdin.unref) process.stdin.unref()
         // Resolve with whatever we have so far rather than hanging
         try {
-          resolve(data.trim() ? JSON.parse(data) : {});
+          resolve(data.trim() ? JSON.parse(data) : {})
         } catch {
-          resolve({});
+          resolve({})
         }
       }
-    }, timeoutMs);
+    }, timeoutMs)
 
-    process.stdin.setEncoding("utf8");
+    process.stdin.setEncoding("utf8")
     process.stdin.on("data", (chunk) => {
       if (data.length < maxSize) {
-        data += chunk;
+        data += chunk
       }
-    });
+    })
 
     process.stdin.on("end", () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
       try {
-        resolve(data.trim() ? JSON.parse(data) : {});
+        resolve(data.trim() ? JSON.parse(data) : {})
       } catch {
         // Consistent with timeout path: resolve with empty object
         // so hooks don't crash on malformed input
-        resolve({});
+        resolve({})
       }
-    });
+    })
 
     process.stdin.on("error", () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
       // Resolve with empty object so hooks don't crash on stdin errors
-      resolve({});
-    });
-  });
+      resolve({})
+    })
+  })
 }
 
 /**
  * Log to stderr (visible to user in Claude Code)
  */
 function log(message) {
-  console.error(message);
+  console.error(message)
 }
 
 /**
@@ -282,9 +279,9 @@ function log(message) {
  */
 function output(data) {
   if (typeof data === "object") {
-    console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data))
   } else {
-    console.log(data);
+    console.log(data)
   }
 }
 
@@ -293,9 +290,9 @@ function output(data) {
  */
 function readFile(filePath) {
   try {
-    return readFileSync(filePath, "utf8");
+    return readFileSync(filePath, "utf8")
   } catch {
-    return null;
+    return null
   }
 }
 
@@ -303,16 +300,16 @@ function readFile(filePath) {
  * Write a text file
  */
 function writeFile(filePath, content) {
-  ensureDir(dirname(filePath));
-  writeFileSync(filePath, content, "utf8");
+  ensureDir(dirname(filePath))
+  writeFileSync(filePath, content, "utf8")
 }
 
 /**
  * Append to a text file
  */
 function appendFile(filePath, content) {
-  ensureDir(dirname(filePath));
-  appendFileSync(filePath, content, "utf8");
+  ensureDir(dirname(filePath))
+  appendFileSync(filePath, content, "utf8")
 }
 
 /**
@@ -322,20 +319,20 @@ function appendFile(filePath, content) {
 function commandExists(cmd) {
   // Validate command name - only allow alphanumeric, dash, underscore, dot
   if (!/^[a-zA-Z0-9_.-]+$/.test(cmd)) {
-    return false;
+    return false
   }
 
   try {
     if (isWindows) {
       // Use spawnSync to avoid shell interpolation
-      const result = spawnSync("where", [cmd], { stdio: "pipe" });
-      return result.status === 0;
+      const result = spawnSync("where", [cmd], { stdio: "pipe" })
+      return result.status === 0
     } else {
-      const result = spawnSync("which", [cmd], { stdio: "pipe" });
-      return result.status === 0;
+      const result = spawnSync("which", [cmd], { stdio: "pipe" })
+      return result.status === 0
     }
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -355,10 +352,10 @@ function runCommand(cmd, options = {}) {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       ...options,
-    });
-    return { success: true, output: result.trim() };
+    })
+    return { success: true, output: result.trim() }
   } catch (err) {
-    return { success: false, output: err.stderr || err.message };
+    return { success: false, output: err.stderr || err.message }
   }
 }
 
@@ -366,7 +363,7 @@ function runCommand(cmd, options = {}) {
  * Check if current directory is a git repository
  */
 function isGitRepo() {
-  return runCommand("git rev-parse --git-dir").success;
+  return runCommand("git rev-parse --git-dir").success
 }
 
 /**
@@ -376,32 +373,30 @@ function isGitRepo() {
  * @returns {string[]} Array of modified file paths
  */
 function getGitModifiedFiles(patterns = []) {
-  if (!isGitRepo()) return [];
+  if (!isGitRepo()) return []
 
-  const result = runCommand("git diff --name-only HEAD");
-  if (!result.success) return [];
+  const result = runCommand("git diff --name-only HEAD")
+  if (!result.success) return []
 
-  let files = result.output.split("\n").filter(Boolean);
+  let files = result.output.split("\n").filter(Boolean)
 
   if (patterns.length > 0) {
     // Pre-compile patterns, skipping invalid ones
-    const compiled = [];
+    const compiled = []
     for (const pattern of patterns) {
-      if (typeof pattern !== "string" || pattern.length === 0) continue;
+      if (typeof pattern !== "string" || pattern.length === 0) continue
       try {
-        compiled.push(new RegExp(pattern));
+        compiled.push(new RegExp(pattern))
       } catch {
         // Skip invalid regex patterns
       }
     }
     if (compiled.length > 0) {
-      files = files.filter((file) =>
-        compiled.some((regex) => regex.test(file)),
-      );
+      files = files.filter((file) => compiled.some((regex) => regex.test(file)))
     }
   }
 
-  return files;
+  return files
 }
 
 /**
@@ -416,21 +411,21 @@ function getGitModifiedFiles(patterns = []) {
  * @returns {boolean} true if file was written, false on error
  */
 function replaceInFile(filePath, search, replace, options = {}) {
-  const content = readFile(filePath);
-  if (content === null) return false;
+  const content = readFile(filePath)
+  if (content === null) return false
 
   try {
-    let newContent;
+    let newContent
     if (options.all && typeof search === "string") {
-      newContent = content.replaceAll(search, replace);
+      newContent = content.replaceAll(search, replace)
     } else {
-      newContent = content.replace(search, replace);
+      newContent = content.replace(search, replace)
     }
-    writeFile(filePath, newContent);
-    return true;
+    writeFile(filePath, newContent)
+    return true
   } catch (err) {
-    log(`[Utils] replaceInFile failed for ${filePath}: ${err.message}`);
-    return false;
+    log(`[Utils] replaceInFile failed for ${filePath}: ${err.message}`)
+    return false
   }
 }
 
@@ -443,60 +438,60 @@ function replaceInFile(filePath, search, replace, options = {}) {
  * @returns {number} Number of matches found
  */
 function countInFile(filePath, pattern) {
-  const content = readFile(filePath);
-  if (content === null) return 0;
+  const content = readFile(filePath)
+  if (content === null) return 0
 
-  let regex;
+  let regex
   try {
     if (pattern instanceof RegExp) {
       // Always create new RegExp to avoid shared lastIndex state; ensure global flag
       regex = new RegExp(
         pattern.source,
         pattern.flags.includes("g") ? pattern.flags : pattern.flags + "g",
-      );
+      )
     } else if (typeof pattern === "string") {
-      regex = new RegExp(pattern, "g");
+      regex = new RegExp(pattern, "g")
     } else {
-      return 0;
+      return 0
     }
   } catch {
-    return 0; // Invalid regex pattern
+    return 0 // Invalid regex pattern
   }
-  const matches = content.match(regex);
-  return matches ? matches.length : 0;
+  const matches = content.match(regex)
+  return matches ? matches.length : 0
 }
 
 /**
  * Search for pattern in file and return matching lines with line numbers
  */
 function grepFile(filePath, pattern) {
-  const content = readFile(filePath);
-  if (content === null) return [];
+  const content = readFile(filePath)
+  if (content === null) return []
 
-  let regex;
+  let regex
   try {
     if (pattern instanceof RegExp) {
       // Always create a new RegExp without the 'g' flag to prevent lastIndex
       // state issues when using .test() in a loop (g flag makes .test() stateful,
       // causing alternating match/miss on consecutive matching lines)
-      const flags = pattern.flags.replace("g", "");
-      regex = new RegExp(pattern.source, flags);
+      const flags = pattern.flags.replace("g", "")
+      regex = new RegExp(pattern.source, flags)
     } else {
-      regex = new RegExp(pattern);
+      regex = new RegExp(pattern)
     }
   } catch {
-    return []; // Invalid regex pattern
+    return [] // Invalid regex pattern
   }
-  const lines = content.split("\n");
-  const results = [];
+  const lines = content.split("\n")
+  const results = []
 
   lines.forEach((line, index) => {
     if (regex.test(line)) {
-      results.push({ lineNumber: index + 1, content: line });
+      results.push({ lineNumber: index + 1, content: line })
     }
-  });
+  })
 
-  return results;
+  return results
 }
 
 export {
@@ -542,4 +537,4 @@ export {
   runCommand,
   isGitRepo,
   getGitModifiedFiles,
-};
+}

@@ -13,8 +13,8 @@
  * console.log is often intentional).
  */
 
-import { existsSync } from "fs";
-import { isGitRepo, getGitModifiedFiles, readFile, log } from "./lib/utils.js";
+import { existsSync } from "fs"
+import { isGitRepo, getGitModifiedFiles, readFile, log } from "./lib/utils.js"
 
 // Files where console.log is expected and should not trigger warnings
 const EXCLUDED_PATTERNS = [
@@ -24,47 +24,47 @@ const EXCLUDED_PATTERNS = [
   /scripts\//,
   /__tests__\//,
   /__mocks__\//,
-];
+]
 
-const MAX_STDIN = 1024 * 1024; // 1MB limit
-let data = "";
-process.stdin.setEncoding("utf8");
+const MAX_STDIN = 1024 * 1024 // 1MB limit
+let data = ""
+process.stdin.setEncoding("utf8")
 
 process.stdin.on("data", (chunk) => {
   if (data.length < MAX_STDIN) {
-    data += chunk;
+    data += chunk
   }
-});
+})
 
 process.stdin.on("end", () => {
   try {
     if (!isGitRepo()) {
-      process.stdout.write(data);
-      process.exit(0);
+      process.stdout.write(data)
+      process.exit(0)
     }
 
     const files = getGitModifiedFiles(["\\.tsx?$", "\\.jsx?$"])
       .filter((f) => existsSync(f))
-      .filter((f) => !EXCLUDED_PATTERNS.some((pattern) => pattern.test(f)));
+      .filter((f) => !EXCLUDED_PATTERNS.some((pattern) => pattern.test(f)))
 
-    let hasConsole = false;
+    let hasConsole = false
 
     for (const file of files) {
-      const content = readFile(file);
+      const content = readFile(file)
       if (content && content.includes("console.log")) {
-        log(`[Hook] WARNING: console.log found in ${file}`);
-        hasConsole = true;
+        log(`[Hook] WARNING: console.log found in ${file}`)
+        hasConsole = true
       }
     }
 
     if (hasConsole) {
-      log("[Hook] Remove console.log statements before committing");
+      log("[Hook] Remove console.log statements before committing")
     }
   } catch (err) {
-    log(`[Hook] check-console-log error: ${err.message}`);
+    log(`[Hook] check-console-log error: ${err.message}`)
   }
 
   // Always output the original data
-  process.stdout.write(data);
-  process.exit(0);
-});
+  process.stdout.write(data)
+  process.exit(0)
+})

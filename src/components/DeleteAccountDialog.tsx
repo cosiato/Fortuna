@@ -1,21 +1,21 @@
-import type { Account } from "@/types/database";
-import { Trans, useTranslation } from "react-i18next";
+import type { Account } from "@/types/database"
+import { Trans, useTranslation } from "react-i18next"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/react";
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Icon } from "@iconify/react"
 
 interface DeleteAccountDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  account: Account | null;
-  associatedCashFlowCount: number;
-  onConfirm: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  account: Account | null
+  associatedCashFlowCount: number
+  onConfirm: () => void
 }
 
 export default function DeleteAccountDialog({
@@ -25,9 +25,9 @@ export default function DeleteAccountDialog({
   associatedCashFlowCount,
   onConfirm,
 }: DeleteAccountDialogProps) {
-  const { t } = useTranslation("dialogs");
+  const { t } = useTranslation("dialogs")
 
-  if (!account) return null;
+  if (!account) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,9 +43,7 @@ export default function DeleteAccountDialog({
               />
             </div>
             <div>
-              <DialogTitle className="text-red-500">
-                {t("deleteVault.title")}
-              </DialogTitle>
+              <DialogTitle className="text-red-500">{t("deleteVault.title")}</DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 {t("deleteVault.cannotBeUndone")}
               </DialogDescription>
@@ -78,11 +76,7 @@ export default function DeleteAccountDialog({
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li className="flex items-center gap-2">
-                      <Icon
-                        icon="solar:round-transfer-vertical-linear"
-                        width={14}
-                        height={14}
-                      />
+                      <Icon icon="solar:round-transfer-vertical-linear" width={14} height={14} />
                       <span>
                         {t("deleteVault.cashFlow", {
                           count: associatedCashFlowCount,
@@ -104,17 +98,12 @@ export default function DeleteAccountDialog({
             >
               {t("cancel", { ns: "common" })}
             </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="flex-1"
-              onClick={onConfirm}
-            >
+            <Button type="button" variant="destructive" className="flex-1" onClick={onConfirm}>
               {t("delete", { ns: "common" })}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

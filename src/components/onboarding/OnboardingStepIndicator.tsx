@@ -34,11 +34,7 @@ export default function OnboardingStepIndicator({
                   : { duration: 0.2 }
               }
             >
-              {isCompleted ? (
-                <Icon icon="solar:check-read-linear" width={14} height={14} />
-              ) : (
-                step
-              )}
+              {isCompleted ? <Icon icon="solar:check-read-linear" width={14} height={14} /> : step}
             </motion.div>
 
             {step < totalSteps && (

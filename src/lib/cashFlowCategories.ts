@@ -1,10 +1,10 @@
-import i18n from "@/lib/i18n";
-import type { CashFlowCategory, CashFlowType } from "@/types/database";
+import i18n from "@/lib/i18n"
+import type { CashFlowCategory, CashFlowType } from "@/types/database"
 
 interface CategoryInfo {
-  labelKey: string;
-  icon: string;
-  type: CashFlowType;
+  labelKey: string
+  icon: string
+  type: CashFlowType
 }
 
 export const CASH_FLOW_CATEGORIES: Record<CashFlowCategory, CategoryInfo> = {
@@ -79,26 +79,22 @@ export const CASH_FLOW_CATEGORIES: Record<CashFlowCategory, CategoryInfo> = {
     icon: "solar:minus-circle-linear",
     type: "outflow",
   },
-};
+}
 
 export function getCategoryLabel(category: CashFlowCategory): string {
-  return i18n.t(`categories:${CASH_FLOW_CATEGORIES[category].labelKey}` as any);
+  return i18n.t(`categories:${CASH_FLOW_CATEGORIES[category].labelKey}` as any)
 }
 
 export function getCategoriesByType(flowType: CashFlowType): Array<{
-  key: CashFlowCategory;
-  label: string;
-  icon: string;
+  key: CashFlowCategory
+  label: string
+  icon: string
 }> {
-  return (
-    Object.entries(CASH_FLOW_CATEGORIES) as Array<
-      [CashFlowCategory, CategoryInfo]
-    >
-  )
+  return (Object.entries(CASH_FLOW_CATEGORIES) as Array<[CashFlowCategory, CategoryInfo]>)
     .filter(([, info]) => info.type === flowType)
     .map(([key, info]) => ({
       key,
       label: i18n.t(`categories:${info.labelKey}` as any),
       icon: info.icon,
-    }));
+    }))
 }

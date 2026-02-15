@@ -1,40 +1,34 @@
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Icon } from "@iconify/react";
-import { useTranslation } from "react-i18next";
-import type {
-  CashFlowFrequency,
-  CashFlowType,
-  CashFlowCategory,
-} from "@/types/database";
-import { CASH_FLOW_CATEGORIES } from "@/lib/cashFlowCategories";
-import { formatCurrency, type SupportedCurrency } from "@/lib/currency";
+import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Icon } from "@iconify/react"
+import { useTranslation } from "react-i18next"
+import type { CashFlowFrequency, CashFlowType, CashFlowCategory } from "@/types/database"
+import { CASH_FLOW_CATEGORIES } from "@/lib/cashFlowCategories"
+import { formatCurrency, type SupportedCurrency } from "@/lib/currency"
 
 interface CashFlowNodeData {
-  flowId: string;
-  name: string;
-  amount: number;
-  frequency: CashFlowFrequency;
-  flowType: CashFlowType;
-  category: CashFlowCategory;
-  isActive: boolean;
-  currency: SupportedCurrency;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onToggle: (id: string) => void;
+  flowId: string
+  name: string
+  amount: number
+  frequency: CashFlowFrequency
+  flowType: CashFlowType
+  category: CashFlowCategory
+  isActive: boolean
+  currency: SupportedCurrency
+  onEdit: (id: string) => void
+  onDelete: (id: string) => void
+  onToggle: (id: string) => void
 }
 
-export default function CashFlowNode({
-  data,
-}: NodeProps & { data: CashFlowNodeData }) {
-  const { t } = useTranslation(["common", "vaults"]);
-  const categoryInfo = CASH_FLOW_CATEGORIES[data.category];
-  const isInflow = data.flowType === "inflow";
+export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeData }) {
+  const { t } = useTranslation(["common", "vaults"])
+  const categoryInfo = CASH_FLOW_CATEGORIES[data.category]
+  const isInflow = data.flowType === "inflow"
 
   const bgClass = isInflow
     ? "from-green-950/50 to-green-900/20 border-green-700/40"
-    : "from-red-950/50 to-red-900/20 border-red-700/40";
+    : "from-red-950/50 to-red-900/20 border-red-700/40"
 
-  const amountColor = isInflow ? "text-green-400" : "text-red-400";
+  const amountColor = isInflow ? "text-green-400" : "text-red-400"
 
   return (
     <div
@@ -78,8 +72,8 @@ export default function CashFlowNode({
       <div className="absolute -top-1 -right-1 hidden group-hover:flex gap-0.5">
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            data.onToggle(data.flowId);
+            e.stopPropagation()
+            data.onToggle(data.flowId)
           }}
           className="w-5 h-5 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center hover:bg-slate-600"
           title={data.isActive ? t("vaults:pause") : t("vaults:resume")}
@@ -93,35 +87,25 @@ export default function CashFlowNode({
         </button>
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            data.onEdit(data.flowId);
+            e.stopPropagation()
+            data.onEdit(data.flowId)
           }}
           className="w-5 h-5 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center hover:bg-slate-600"
           title={t("common:edit")}
         >
-          <Icon
-            icon="solar:pen-linear"
-            width={10}
-            height={10}
-            className="text-foreground"
-          />
+          <Icon icon="solar:pen-linear" width={10} height={10} className="text-foreground" />
         </button>
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            data.onDelete(data.flowId);
+            e.stopPropagation()
+            data.onDelete(data.flowId)
           }}
           className="w-5 h-5 rounded-full bg-red-900/80 border border-red-700/50 flex items-center justify-center hover:bg-red-800"
           title={t("common:delete")}
         >
-          <Icon
-            icon="solar:trash-bin-2-linear"
-            width={10}
-            height={10}
-            className="text-red-300"
-          />
+          <Icon icon="solar:trash-bin-2-linear" width={10} height={10} className="text-red-300" />
         </button>
       </div>
     </div>
-  );
+  )
 }

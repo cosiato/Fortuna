@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -10,26 +10,19 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CRYPTOCURRENCIES, getCryptoBySymbol } from "@/lib/cryptocurrencies";
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CRYPTOCURRENCIES, getCryptoBySymbol } from "@/lib/cryptocurrencies"
 
 interface CryptoSelectorProps {
-  value: string;
-  onChange: (symbol: string) => void;
+  value: string
+  onChange: (symbol: string) => void
 }
 
-export default function CryptoSelector({
-  value,
-  onChange,
-}: CryptoSelectorProps) {
-  const { t } = useTranslation("common");
-  const [open, setOpen] = useState(false);
-  const selectedCrypto = getCryptoBySymbol(value);
+export default function CryptoSelector({ value, onChange }: CryptoSelectorProps) {
+  const { t } = useTranslation("common")
+  const [open, setOpen] = useState(false)
+  const selectedCrypto = getCryptoBySymbol(value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -48,14 +41,10 @@ export default function CryptoSelector({
                 className="w-5 h-5 rounded-full"
               />
               <span>{selectedCrypto.name}</span>
-              <span className="text-muted-foreground">
-                ({selectedCrypto.symbol})
-              </span>
+              <span className="text-muted-foreground">({selectedCrypto.symbol})</span>
             </span>
           ) : (
-            <span className="text-muted-foreground">
-              {t("selectCryptocurrency")}
-            </span>
+            <span className="text-muted-foreground">{t("selectCryptocurrency")}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -71,8 +60,8 @@ export default function CryptoSelector({
                   key={crypto.id}
                   value={`${crypto.name} ${crypto.symbol} ${crypto.id}`}
                   onSelect={() => {
-                    onChange(crypto.symbol);
-                    setOpen(false);
+                    onChange(crypto.symbol)
+                    setOpen(false)
                   }}
                 >
                   <Check
@@ -84,15 +73,9 @@ export default function CryptoSelector({
                     )}
                   />
                   <span className="flex items-center gap-2">
-                    <img
-                      src={crypto.logo}
-                      alt={crypto.name}
-                      className="w-5 h-5 rounded-full"
-                    />
+                    <img src={crypto.logo} alt={crypto.name} className="w-5 h-5 rounded-full" />
                     <span>{crypto.name}</span>
-                    <span className="text-muted-foreground">
-                      ({crypto.symbol})
-                    </span>
+                    <span className="text-muted-foreground">({crypto.symbol})</span>
                   </span>
                 </CommandItem>
               ))}
@@ -101,5 +84,5 @@ export default function CryptoSelector({
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

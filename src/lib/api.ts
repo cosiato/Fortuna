@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core"
 import type {
   Asset,
   Account,
@@ -15,14 +15,13 @@ import type {
   CreateSnapshotInput,
   CreateCashFlowInput,
   UpdateCashFlowInput,
-} from "@/types/database";
+} from "@/types/database"
 
 export const api = {
   entities: {
     getAll: () => invoke<Entity[]>("get_all_entities"),
     getById: (id: number) => invoke<Entity | null>("get_entity_by_id", { id }),
-    create: (input: CreateEntityInput) =>
-      invoke<Entity>("create_entity", { input }),
+    create: (input: CreateEntityInput) => invoke<Entity>("create_entity", { input }),
     update: (id: number, input: UpdateEntityInput) =>
       invoke<Entity>("update_entity", { id, input }),
     delete: (id: number) => invoke<void>("delete_entity", { id }),
@@ -31,24 +30,18 @@ export const api = {
 
   assets: {
     getAll: () => invoke<Asset[]>("get_all_assets"),
-    getByEntity: (entityId: number) =>
-      invoke<Asset[]>("get_assets_by_entity", { entityId }),
+    getByEntity: (entityId: number) => invoke<Asset[]>("get_assets_by_entity", { entityId }),
     getById: (id: string) => invoke<Asset | null>("get_asset_by_id", { id }),
-    create: (input: CreateAssetInput) =>
-      invoke<Asset>("create_asset", { input }),
-    update: (id: string, input: UpdateAssetInput) =>
-      invoke<Asset>("update_asset", { id, input }),
+    create: (input: CreateAssetInput) => invoke<Asset>("create_asset", { input }),
+    update: (id: string, input: UpdateAssetInput) => invoke<Asset>("update_asset", { id, input }),
     delete: (id: string) => invoke<void>("delete_asset", { id }),
   },
 
   accounts: {
     getAll: () => invoke<Account[]>("get_all_accounts"),
-    getByEntity: (entityId: number) =>
-      invoke<Account[]>("get_accounts_by_entity", { entityId }),
-    getById: (id: string) =>
-      invoke<Account | null>("get_account_by_id", { id }),
-    create: (input: CreateAccountInput) =>
-      invoke<Account>("create_account", { input }),
+    getByEntity: (entityId: number) => invoke<Account[]>("get_accounts_by_entity", { entityId }),
+    getById: (id: string) => invoke<Account | null>("get_account_by_id", { id }),
+    create: (input: CreateAccountInput) => invoke<Account>("create_account", { input }),
     update: (id: string, input: UpdateAccountInput) =>
       invoke<Account>("update_account", { id, input }),
     delete: (id: string) => invoke<void>("delete_account", { id }),
@@ -58,8 +51,7 @@ export const api = {
     getAll: () => invoke<Snapshot[]>("get_all_snapshots"),
     getToday: () => invoke<Snapshot | null>("get_today_snapshot"),
     getLatest: () => invoke<Snapshot | null>("get_latest_snapshot"),
-    create: (input: CreateSnapshotInput) =>
-      invoke<Snapshot>("create_snapshot", { input }),
+    create: (input: CreateSnapshotInput) => invoke<Snapshot>("create_snapshot", { input }),
     prune: () => invoke<number>("prune_old_snapshots"),
   },
 
@@ -67,10 +59,8 @@ export const api = {
     getAll: () => invoke<CashFlow[]>("get_all_cash_flows"),
     getByAccount: (accountId: string) =>
       invoke<CashFlow[]>("get_cash_flows_by_account", { accountId }),
-    getById: (id: string) =>
-      invoke<CashFlow | null>("get_cash_flow_by_id", { id }),
-    create: (input: CreateCashFlowInput) =>
-      invoke<CashFlow>("create_cash_flow", { input }),
+    getById: (id: string) => invoke<CashFlow | null>("get_cash_flow_by_id", { id }),
+    create: (input: CreateCashFlowInput) => invoke<CashFlow>("create_cash_flow", { input }),
     update: (id: string, input: UpdateCashFlowInput) =>
       invoke<CashFlow>("update_cash_flow", { id, input }),
     delete: (id: string) => invoke<void>("delete_cash_flow", { id }),
@@ -87,18 +77,15 @@ export const api = {
   settings: {
     setPin: (pin: string) => invoke<void>("set_pin", { pin }),
     verifyPin: (pin: string) => invoke<boolean>("verify_pin", { pin }),
-    removePin: (currentPin: string) =>
-      invoke<void>("remove_pin", { currentPin }),
+    removePin: (currentPin: string) => invoke<void>("remove_pin", { currentPin }),
     isPinEnabled: () => invoke<boolean>("is_pin_enabled"),
-    resetAllData: (pin?: string) =>
-      invoke<void>("reset_all_data", { pin: pin || null }),
+    resetAllData: (pin?: string) => invoke<void>("reset_all_data", { pin: pin || null }),
     lockApp: () => invoke<void>("lock_app"),
     unlockApp: (pin: string) => invoke<boolean>("unlock_app", { pin }),
     getCurrencyPreference: () => invoke<string>("get_currency_preference"),
     setCurrencyPreference: (currency: string) =>
       invoke<void>("set_currency_preference", { currency }),
     getLocalePreference: () => invoke<string>("get_locale_preference"),
-    setLocalePreference: (locale: string) =>
-      invoke<void>("set_locale_preference", { locale }),
+    setLocalePreference: (locale: string) => invoke<void>("set_locale_preference", { locale }),
   },
-};
+}

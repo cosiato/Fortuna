@@ -6,19 +6,15 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { useTranslation } from "react-i18next";
-import type { Snapshot } from "@/types/database";
-import {
-  SupportedCurrency,
-  formatCurrency,
-  getIntlLocale,
-} from "@/lib/currency";
+} from "recharts"
+import { useTranslation } from "react-i18next"
+import type { Snapshot } from "@/types/database"
+import { SupportedCurrency, formatCurrency, getIntlLocale } from "@/lib/currency"
 
 interface NetWorthChartProps {
-  snapshots: Snapshot[];
-  displayCurrency: SupportedCurrency;
-  exchangeRates: { [currency: string]: number };
+  snapshots: Snapshot[]
+  displayCurrency: SupportedCurrency
+  exchangeRates: { [currency: string]: number }
 }
 
 function convertValue(
@@ -27,22 +23,22 @@ function convertValue(
   toCurrency: string,
   rates: { [currency: string]: number },
 ): number {
-  if (fromCurrency === toCurrency) return value;
+  if (fromCurrency === toCurrency) return value
 
-  let valueInUsd = value;
+  let valueInUsd = value
   if (fromCurrency !== "USD") {
-    const fromRate = rates[fromCurrency];
+    const fromRate = rates[fromCurrency]
     if (fromRate && fromRate > 0) {
-      valueInUsd = value / fromRate;
+      valueInUsd = value / fromRate
     }
   }
 
-  const toRate = rates[toCurrency];
+  const toRate = rates[toCurrency]
   if (toRate && toRate > 0) {
-    return valueInUsd * toRate;
+    return valueInUsd * toRate
   }
 
-  return valueInUsd;
+  return valueInUsd
 }
 
 export default function NetWorthChart({
@@ -50,18 +46,15 @@ export default function NetWorthChart({
   displayCurrency,
   exchangeRates,
 }: NetWorthChartProps) {
-  const { t } = useTranslation("common");
-  const latestPerDay = new Map<string, Snapshot>();
+  const { t } = useTranslation("common")
+  const latestPerDay = new Map<string, Snapshot>()
   for (const snapshot of snapshots) {
-    const dayKey = new Date(snapshot.recordedAt).toLocaleDateString(
-      getIntlLocale(),
-      {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      },
-    );
-    latestPerDay.set(dayKey, snapshot);
+    const dayKey = new Date(snapshot.recordedAt).toLocaleDateString(getIntlLocale(), {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    latestPerDay.set(dayKey, snapshot)
   }
 
   const data = Array.from(latestPerDay.values()).map((snapshot) => ({
@@ -69,20 +62,15 @@ export default function NetWorthChart({
       month: "short",
       day: "numeric",
     }),
-    value: convertValue(
-      snapshot.totalValue,
-      snapshot.currency,
-      displayCurrency,
-      exchangeRates,
-    ),
-  }));
+    value: convertValue(snapshot.totalValue, snapshot.currency, displayCurrency, exchangeRates),
+  }))
 
   if (data.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
         <p className="text-muted-foreground text-sm">{t("noHistoryYet")}</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -94,17 +82,8 @@ export default function NetWorthChart({
             <stop offset="95%" stopColor="#FFD700" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="#2D2D3D"
-          vertical={false}
-        />
-        <XAxis
-          dataKey="date"
-          tick={false}
-          axisLine={{ stroke: "#2D2D3D" }}
-          tickLine={false}
-        />
+        <CartesianGrid strokeDasharray="3 3" stroke="#2D2D3D" vertical={false} />
+        <XAxis dataKey="date" tick={false} axisLine={{ stroke: "#2D2D3D" }} tickLine={false} />
         <YAxis
           stroke="#4B5563"
           fontSize={11}
@@ -131,10 +110,7 @@ export default function NetWorthChart({
             fontSize: "12px",
           }}
           labelStyle={{ color: "#6B7280" }}
-          formatter={(value) => [
-            formatCurrency(value as number, displayCurrency),
-            t("netWorth"),
-          ]}
+          formatter={(value) => [formatCurrency(value as number, displayCurrency), t("netWorth")]}
         />
         <Area
           type="monotone"
@@ -147,5 +123,5 @@ export default function NetWorthChart({
         />
       </AreaChart>
     </ResponsiveContainer>
-  );
+  )
 }

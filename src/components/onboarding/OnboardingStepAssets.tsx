@@ -1,9 +1,9 @@
-import { useTranslation } from "react-i18next";
-import OnboardingStepLayout from "./OnboardingStepLayout";
-import step1Src from "@/assets/step1.png";
+import { useTranslation } from "react-i18next"
+import OnboardingStepLayout from "./OnboardingStepLayout"
+import step1Src from "@/assets/step1.png"
 
 export default function OnboardingStepAssets() {
-  const { t } = useTranslation("onboarding");
+  const { t } = useTranslation("onboarding")
 
   return (
     <OnboardingStepLayout
@@ -14,5 +14,5 @@ export default function OnboardingStepAssets() {
       screenshotSrc={step1Src}
       screenshotAlt="Assets overview screenshot"
     />
-  );
+  )
 }

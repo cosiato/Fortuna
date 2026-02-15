@@ -1,4 +1,4 @@
-import { type EdgeProps, getBezierPath } from '@xyflow/react';
+import { type EdgeProps, getBezierPath } from "@xyflow/react"
 
 export default function PlaceholderFlowEdge({
   id,
@@ -16,7 +16,7 @@ export default function PlaceholderFlowEdge({
     targetY,
     sourcePosition,
     targetPosition,
-  });
+  })
 
   return (
     <path
@@ -28,5 +28,5 @@ export default function PlaceholderFlowEdge({
       strokeDasharray="4 4"
       strokeOpacity={0.5}
     />
-  );
+  )
 }

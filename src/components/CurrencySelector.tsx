@@ -25,12 +25,7 @@ export default function CurrencySelector({ value, onChange }: CurrencySelectorPr
           <span className="text-sm font-medium">{value}</span>
         </span>
       </Button>
-      <CurrencyPickerOverlay
-        open={open}
-        value={value}
-        onSelect={onChange}
-        onClose={handleClose}
-      />
+      <CurrencyPickerOverlay open={open} value={value} onSelect={onChange} onClose={handleClose} />
     </>
   )
 }

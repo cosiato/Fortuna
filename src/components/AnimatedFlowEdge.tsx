@@ -1,11 +1,11 @@
-import { type EdgeProps, getBezierPath } from '@xyflow/react';
+import { type EdgeProps, getBezierPath } from "@xyflow/react"
 
 interface AnimatedFlowEdgeData {
-  flowType: 'inflow' | 'outflow';
+  flowType: "inflow" | "outflow"
 }
 
-const PARTICLE_COUNT = 4;
-const DURATION = 2.5;
+const PARTICLE_COUNT = 4
+const DURATION = 2.5
 
 export default function AnimatedFlowEdge({
   id,
@@ -24,15 +24,15 @@ export default function AnimatedFlowEdge({
     targetY,
     sourcePosition,
     targetPosition,
-  });
+  })
 
-  const isInflow = data?.flowType === 'inflow';
-  const color = isInflow ? '#22c55e' : '#ef4444';
+  const isInflow = data?.flowType === "inflow"
+  const color = isInflow ? "#22c55e" : "#ef4444"
 
   const particles = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-    const delay = (i / PARTICLE_COUNT) * DURATION;
-    return { key: `${id}-p-${i}`, delay };
-  });
+    const delay = (i / PARTICLE_COUNT) * DURATION
+    return { key: `${id}-p-${i}`, delay }
+  })
 
   return (
     <>
@@ -76,19 +76,13 @@ export default function AnimatedFlowEdge({
       </defs>
 
       {particles.map(({ key, delay }) => (
-        <circle
-          key={key}
-          r={2}
-          fill={color}
-          opacity={0}
-          filter={`url(#glow-${id})`}
-        >
+        <circle key={key} r={2} fill={color} opacity={0} filter={`url(#glow-${id})`}>
           <animateMotion
             dur={`${DURATION}s`}
             repeatCount="indefinite"
             path={edgePath}
             begin={`${delay}s`}
-            keyPoints={isInflow ? '0;1' : '0;1'}
+            keyPoints={isInflow ? "0;1" : "0;1"}
             keyTimes="0;1"
           />
           <animate
@@ -110,5 +104,5 @@ export default function AnimatedFlowEdge({
         </circle>
       ))}
     </>
-  );
+  )
 }

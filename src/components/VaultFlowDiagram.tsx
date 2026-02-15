@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback, useEffect } from "react"
 import {
   ReactFlow,
   type Node,
@@ -8,47 +8,47 @@ import {
   useNodesState,
   useEdgesState,
   Position,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import { Icon } from "@iconify/react";
-import { useTranslation } from "react-i18next";
-import type { Account, CashFlow } from "@/types/database";
-import type { SupportedCurrency } from "@/lib/currency";
-import { Button } from "@/components/ui/button";
-import VaultFlowNode from "@/components/VaultFlowNode";
-import CashFlowNode from "@/components/CashFlowNode";
-import PlaceholderFlowNode from "@/components/PlaceholderFlowNode";
-import AnimatedFlowEdge from "@/components/AnimatedFlowEdge";
-import PlaceholderFlowEdge from "@/components/PlaceholderFlowEdge";
+} from "@xyflow/react"
+import "@xyflow/react/dist/style.css"
+import { Icon } from "@iconify/react"
+import { useTranslation } from "react-i18next"
+import type { Account, CashFlow } from "@/types/database"
+import type { SupportedCurrency } from "@/lib/currency"
+import { Button } from "@/components/ui/button"
+import VaultFlowNode from "@/components/VaultFlowNode"
+import CashFlowNode from "@/components/CashFlowNode"
+import PlaceholderFlowNode from "@/components/PlaceholderFlowNode"
+import AnimatedFlowEdge from "@/components/AnimatedFlowEdge"
+import PlaceholderFlowEdge from "@/components/PlaceholderFlowEdge"
 
 interface VaultFlowDiagramProps {
-  account: Account;
-  cashFlows: readonly CashFlow[];
-  displayCurrency: SupportedCurrency;
-  displayBalance: number;
-  exchangeRates: { [currency: string]: number };
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onToggle: (id: string) => void;
-  onAddFlow: (flowType?: "inflow" | "outflow") => void;
+  account: Account
+  cashFlows: readonly CashFlow[]
+  displayCurrency: SupportedCurrency
+  displayBalance: number
+  exchangeRates: { [currency: string]: number }
+  onEdit: (id: string) => void
+  onDelete: (id: string) => void
+  onToggle: (id: string) => void
+  onAddFlow: (flowType?: "inflow" | "outflow") => void
 }
 
 const nodeTypes: NodeTypes = {
   vault: VaultFlowNode,
   cashFlow: CashFlowNode,
   placeholder: PlaceholderFlowNode,
-};
+}
 
 const edgeTypes: EdgeTypes = {
   animated: AnimatedFlowEdge,
   placeholder: PlaceholderFlowEdge,
-};
+}
 
-const NODE_WIDTH = 160;
-const NODE_HEIGHT = 60;
-const VERTICAL_GAP = 16;
-const CENTER_X = 400;
-const SIDE_OFFSET = 280;
+const NODE_WIDTH = 160
+const NODE_HEIGHT = 60
+const VERTICAL_GAP = 16
+const CENTER_X = 400
+const SIDE_OFFSET = 280
 
 export default function VaultFlowDiagram({
   account,
@@ -61,34 +61,27 @@ export default function VaultFlowDiagram({
   onToggle,
   onAddFlow,
 }: VaultFlowDiagramProps) {
-  const { t } = useTranslation("vaults");
-  const inflows = useMemo(
-    () => cashFlows.filter((f) => f.flowType === "inflow"),
-    [cashFlows],
-  );
-  const outflows = useMemo(
-    () => cashFlows.filter((f) => f.flowType === "outflow"),
-    [cashFlows],
-  );
+  const { t } = useTranslation("vaults")
+  const inflows = useMemo(() => cashFlows.filter((f) => f.flowType === "inflow"), [cashFlows])
+  const outflows = useMemo(() => cashFlows.filter((f) => f.flowType === "outflow"), [cashFlows])
 
   const convertAmount = useCallback(
     (amount: number): number => {
-      const accountRate = exchangeRates[account.currency] ?? 1;
-      const displayRate = exchangeRates[displayCurrency] ?? 1;
-      return amount * (displayRate / accountRate);
+      const accountRate = exchangeRates[account.currency] ?? 1
+      const displayRate = exchangeRates[displayCurrency] ?? 1
+      return amount * (displayRate / accountRate)
     },
     [exchangeRates, account.currency, displayCurrency],
-  );
+  )
 
   const buildNodes = useCallback((): Node[] => {
-    const inflowCount = Math.max(inflows.length, 1);
-    const outflowCount = Math.max(outflows.length, 1);
+    const inflowCount = Math.max(inflows.length, 1)
+    const outflowCount = Math.max(outflows.length, 1)
 
     const vaultY = Math.max(
-      (Math.max(inflowCount, outflowCount) * (NODE_HEIGHT + VERTICAL_GAP)) / 2 -
-        NODE_HEIGHT / 2,
+      (Math.max(inflowCount, outflowCount) * (NODE_HEIGHT + VERTICAL_GAP)) / 2 - NODE_HEIGHT / 2,
       60,
-    );
+    )
 
     const vaultNode: Node = {
       id: "vault",
@@ -103,14 +96,12 @@ export default function VaultFlowDiagram({
         displayBalance,
       },
       draggable: false,
-    };
+    }
 
     const inflowNodes: Node[] =
       inflows.length > 0
         ? inflows.map((flow, i) => {
-            const startY =
-              vaultY -
-              ((inflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
+            const startY = vaultY - ((inflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2
             return {
               id: `inflow-${flow.id}`,
               type: "cashFlow",
@@ -133,7 +124,7 @@ export default function VaultFlowDiagram({
               },
               sourcePosition: Position.Right,
               draggable: false,
-            };
+            }
           })
         : [
             {
@@ -150,14 +141,12 @@ export default function VaultFlowDiagram({
               sourcePosition: Position.Right,
               draggable: false,
             },
-          ];
+          ]
 
     const outflowNodes: Node[] =
       outflows.length > 0
         ? outflows.map((flow, i) => {
-            const startY =
-              vaultY -
-              ((outflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2;
+            const startY = vaultY - ((outflows.length - 1) * (NODE_HEIGHT + VERTICAL_GAP)) / 2
             return {
               id: `outflow-${flow.id}`,
               type: "cashFlow",
@@ -180,7 +169,7 @@ export default function VaultFlowDiagram({
               },
               targetPosition: Position.Left,
               draggable: false,
-            };
+            }
           })
         : [
             {
@@ -197,9 +186,9 @@ export default function VaultFlowDiagram({
               targetPosition: Position.Left,
               draggable: false,
             },
-          ];
+          ]
 
-    return [vaultNode, ...inflowNodes, ...outflowNodes];
+    return [vaultNode, ...inflowNodes, ...outflowNodes]
   }, [
     account,
     inflows,
@@ -211,7 +200,7 @@ export default function VaultFlowDiagram({
     onDelete,
     onToggle,
     onAddFlow,
-  ]);
+  ])
 
   const buildEdges = useCallback((): Edge[] => {
     const inflowEdges: Edge[] =
@@ -232,7 +221,7 @@ export default function VaultFlowDiagram({
               type: "placeholder",
               animated: false,
             },
-          ];
+          ]
 
     const outflowEdges: Edge[] =
       outflows.length > 0
@@ -252,30 +241,29 @@ export default function VaultFlowDiagram({
               type: "placeholder",
               animated: false,
             },
-          ];
+          ]
 
-    return [...inflowEdges, ...outflowEdges];
-  }, [inflows, outflows]);
+    return [...inflowEdges, ...outflowEdges]
+  }, [inflows, outflows])
 
-  const initialNodes = useMemo(() => buildNodes(), [buildNodes]);
-  const initialEdges = useMemo(() => buildEdges(), [buildEdges]);
+  const initialNodes = useMemo(() => buildNodes(), [buildNodes])
+  const initialEdges = useMemo(() => buildEdges(), [buildEdges])
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
-  useEffect(() => {
-    setNodes(initialNodes);
-  }, [initialNodes, setNodes]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
 
   useEffect(() => {
-    setEdges(initialEdges);
-  }, [initialEdges, setEdges]);
+    setNodes(initialNodes)
+  }, [initialNodes, setNodes])
+
+  useEffect(() => {
+    setEdges(initialEdges)
+  }, [initialEdges, setEdges])
 
   const containerHeight = Math.max(
     200,
-    Math.max(inflows.length, outflows.length) * (NODE_HEIGHT + VERTICAL_GAP) +
-      80,
-  );
+    Math.max(inflows.length, outflows.length) * (NODE_HEIGHT + VERTICAL_GAP) + 80,
+  )
 
   return (
     <div
@@ -289,12 +277,7 @@ export default function VaultFlowDiagram({
           className="h-7 px-2 text-accent hover:text-accent/80 hover:bg-accent/10"
           onClick={() => onAddFlow()}
         >
-          <Icon
-            icon="solar:add-circle-linear"
-            width={14}
-            height={14}
-            className="mr-1"
-          />
+          <Icon icon="solar:add-circle-linear" width={14} height={14} className="mr-1" />
           <span className="text-xs">{t("cashFlow.addFlowBtn")}</span>
         </Button>
       </div>
@@ -318,5 +301,5 @@ export default function VaultFlowDiagram({
         proOptions={{ hideAttribution: true }}
       />
     </div>
-  );
+  )
 }

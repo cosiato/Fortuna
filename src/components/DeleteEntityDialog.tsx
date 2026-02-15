@@ -1,22 +1,22 @@
-import type { Entity } from "@/types/database";
-import { Trans, useTranslation } from "react-i18next";
+import type { Entity } from "@/types/database"
+import { Trans, useTranslation } from "react-i18next"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/react";
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Icon } from "@iconify/react"
 
 interface DeleteEntityDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  entity: Entity | null;
-  associatedAssetCount: number;
-  associatedAccountCount: number;
-  onConfirm: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  entity: Entity | null
+  associatedAssetCount: number
+  associatedAccountCount: number
+  onConfirm: () => void
 }
 
 export default function DeleteEntityDialog({
@@ -27,12 +27,11 @@ export default function DeleteEntityDialog({
   associatedAccountCount,
   onConfirm,
 }: DeleteEntityDialogProps) {
-  const { t } = useTranslation("dialogs");
+  const { t } = useTranslation("dialogs")
 
-  if (!entity) return null;
+  if (!entity) return null
 
-  const hasAssociatedData =
-    associatedAssetCount > 0 || associatedAccountCount > 0;
+  const hasAssociatedData = associatedAssetCount > 0 || associatedAccountCount > 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,9 +47,7 @@ export default function DeleteEntityDialog({
               />
             </div>
             <div>
-              <DialogTitle className="text-red-500">
-                {t("deleteEntity.title")}
-              </DialogTitle>
+              <DialogTitle className="text-red-500">{t("deleteEntity.title")}</DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 {t("deleteEntity.cannotBeUndone")}
               </DialogDescription>
@@ -117,17 +114,12 @@ export default function DeleteEntityDialog({
             >
               {t("cancel", { ns: "common" })}
             </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="flex-1"
-              onClick={onConfirm}
-            >
+            <Button type="button" variant="destructive" className="flex-1" onClick={onConfirm}>
               {t("delete", { ns: "common" })}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

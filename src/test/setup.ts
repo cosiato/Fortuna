@@ -1,34 +1,34 @@
-import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import "@testing-library/jest-dom"
+import { vi } from "vitest"
 
 const localStorageMock = (() => {
-  let store: Record<string, string> = {};
+  let store: Record<string, string> = {}
   return {
     getItem: vi.fn((key: string) => store[key] ?? null),
     setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
+      store[key] = value
     }),
     removeItem: vi.fn((key: string) => {
-      delete store[key];
+      delete store[key]
     }),
     clear: vi.fn(() => {
-      store = {};
+      store = {}
     }),
     get length() {
-      return Object.keys(store).length;
+      return Object.keys(store).length
     },
     key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
-  };
-})();
+  }
+})()
 
-Object.defineProperty(globalThis, 'localStorage', {
+Object.defineProperty(globalThis, "localStorage", {
   value: localStorageMock,
-});
+})
 
-vi.mock('@tauri-apps/api/core', () => ({
+vi.mock("@tauri-apps/api/core", () => ({
   invoke: vi.fn(),
-}));
+}))
 
-vi.mock('@tauri-apps/plugin-http', () => ({
+vi.mock("@tauri-apps/plugin-http", () => ({
   fetch: vi.fn(),
-}));
+}))

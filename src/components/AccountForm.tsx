@@ -1,26 +1,21 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import type { Account } from '@/types/database'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import type { Account } from "@/types/database"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency'
-import CountrySelector from '@/components/CountrySelector'
-import { createAccountSchema, validateSchema } from '@/lib/validation'
-import { toast } from 'sonner'
+} from "@/components/ui/select"
+import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/currency"
+import CountrySelector from "@/components/CountrySelector"
+import { createAccountSchema, validateSchema } from "@/lib/validation"
+import { toast } from "sonner"
 
 interface AccountFormProps {
   account?: Account | null
@@ -29,29 +24,24 @@ interface AccountFormProps {
   onSubmit: (data: Partial<Account>) => void
 }
 
-export default function AccountForm({
-  account,
-  open,
-  onOpenChange,
-  onSubmit,
-}: AccountFormProps) {
-  const { t } = useTranslation('vaults')
-  const [name, setName] = useState(account?.name ?? '')
-  const [balance, setBalance] = useState(account?.balance?.toString() ?? '')
-  const [currency, setCurrency] = useState(account?.currency ?? 'USD')
-  const [countryCode, setCountryCode] = useState(account?.countryCode ?? '')
+export default function AccountForm({ account, open, onOpenChange, onSubmit }: AccountFormProps) {
+  const { t } = useTranslation("vaults")
+  const [name, setName] = useState(account?.name ?? "")
+  const [balance, setBalance] = useState(account?.balance?.toString() ?? "")
+  const [currency, setCurrency] = useState(account?.currency ?? "USD")
+  const [countryCode, setCountryCode] = useState(account?.countryCode ?? "")
 
   useEffect(() => {
     if (account) {
-      setName(account.name ?? '')
-      setBalance(account.balance?.toString() ?? '')
-      setCurrency(account.currency ?? 'USD')
-      setCountryCode(account.countryCode ?? '')
+      setName(account.name ?? "")
+      setBalance(account.balance?.toString() ?? "")
+      setCurrency(account.currency ?? "USD")
+      setCountryCode(account.countryCode ?? "")
     } else {
-      setName('')
-      setBalance('')
-      setCurrency('USD')
-      setCountryCode('')
+      setName("")
+      setBalance("")
+      setCurrency("USD")
+      setCountryCode("")
     }
   }, [account, open])
 
@@ -77,25 +67,23 @@ export default function AccountForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? t('editVault') : t('addVault')}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? t("editVault") : t("addVault")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">{t('name')}</Label>
+            <Label htmlFor="name">{t("name")}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t('namePlaceholder')}
+              placeholder={t("namePlaceholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="balance">{t('cashValue')}</Label>
+            <Label htmlFor="balance">{t("cashValue")}</Label>
             <Input
               id="balance"
               type="number"
@@ -109,7 +97,7 @@ export default function AccountForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="currency">{t('currency')}</Label>
+            <Label htmlFor="currency">{t("currency")}</Label>
             <Select value={currency} onValueChange={setCurrency}>
               <SelectTrigger>
                 <SelectValue>
@@ -120,7 +108,7 @@ export default function AccountForm({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {SUPPORTED_CURRENCIES.filter((c) => c !== 'BTC').map((c) => (
+                {SUPPORTED_CURRENCIES.filter((c) => c !== "BTC").map((c) => (
                   <SelectItem key={c} value={c}>
                     <span className="flex items-center gap-2">
                       <span>{CURRENCY_INFO[c].flag}</span>
@@ -133,7 +121,7 @@ export default function AccountForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="country">{t('location')}</Label>
+            <Label htmlFor="country">{t("location")}</Label>
             <CountrySelector value={countryCode} onChange={setCountryCode} />
           </div>
 
@@ -144,10 +132,10 @@ export default function AccountForm({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              {t('cancel', { ns: 'common' })}
+              {t("cancel", { ns: "common" })}
             </Button>
             <Button type="submit" variant="default" className="flex-1" disabled={!countryCode}>
-              {isEditing ? t('update', { ns: 'common' }) : t('addBtn')}
+              {isEditing ? t("update", { ns: "common" }) : t("addBtn")}
             </Button>
           </div>
         </form>

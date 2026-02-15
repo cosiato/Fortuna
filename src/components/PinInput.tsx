@@ -124,7 +124,7 @@ export default function PinInput({
             error
               ? "border-red-500 focus:border-red-500"
               : "border-slate-600/50 focus:border-accent",
-            disabled && "opacity-50 cursor-not-allowed"
+            disabled && "opacity-50 cursor-not-allowed",
           )}
           aria-label={`PIN digit ${index + 1}`}
         />
