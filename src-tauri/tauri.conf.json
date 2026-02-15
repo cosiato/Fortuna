@@ -27,6 +27,7 @@
     }
   },
   "bundle": {
+    "createUpdaterArtifacts": true,
     "active": true,
     "targets": ["dmg", "nsis"],
     "icon": [
@@ -65,5 +66,11 @@
       }
     }
   },
-  "plugins": {}
+
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://github.com/cosiato/fortuna/releases/latest/download/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzOEY5Qzc4RDhFQUMzMTcKUldRWHcrclllSnlQRS9UTnJxc0hINEQvVExib3RZL2FKSmxmMmcvbGJqSXN6Q0xsTUJ0OWJMNGMK"
+    }
+  }
 }
