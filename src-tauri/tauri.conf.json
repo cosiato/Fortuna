@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Fortuna",
   "version": "0.1.0",
-  "identifier": "com.fortuna.dev",
+  "identifier": "com.givemefortuna.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -42,6 +42,8 @@
     "copyright": "Copyright @2026 Thomas Cosialls",
     "publisher": "Thomas Cosialls",
     "macOS": {
+      "signingIdentity": "Developer ID Application: Thomas Cosialls (A5GWN75X5A)",
+      "entitlements": "./Entitlements.plist",
       "minimumSystemVersion": "11.0",
       "dmg": {
         "appPosition": {
