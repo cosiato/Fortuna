@@ -54,6 +54,9 @@ Use the following tech stack:
 .github/
 |-- workflows/
 |   |-- release.yml               # CI/CD: cross-platform build + GitHub Release
+scripts/
+|-- bump-version.mjs              # Version bumping script
+|-- generate-icons.mjs            # Extracts used Solar icons into src/lib/icons.ts
 src-tauri/                        # Tauri backend (Rust)
 |-- Cargo.toml                    # Rust dependencies
 |-- tauri.conf.json               # Tauri configuration
@@ -71,7 +74,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
 |       |-- cash_flows.rs         # Cash flow CRUD (recurring income/expenses)
 |       |-- entities.rs           # Entity CRUD
-|       |-- settings.rs            # Settings (currency/locale preferences, PIN)
+|       |-- settings.rs           # Settings (currency/locale preferences, PIN)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
 |-- main.tsx                      # React entry point
@@ -91,6 +94,7 @@ src/
 |   |   |-- sonner.tsx
 |   |   |-- switch.tsx
 |   |   |-- tabs.tsx
+|   |   |-- tooltip.tsx
 |   |-- AccountForm.tsx           # Form for adding/editing accounts
 |   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
 |   |-- AssetForm.tsx             # Form for adding/editing assets
@@ -134,6 +138,7 @@ src/
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting and exchange rates
 |   |-- errorHandling.ts          # Toast-based error notification utility
+|   |-- icons.ts                  # Auto-generated Solar icon bundle (via scripts/generate-icons.mjs)
 |   |-- i18n.ts                   # i18next configuration and initialization
 |   |-- prices.ts                 # Price fetching (Yahoo Finance, CoinGecko)
 |   |-- utils.ts                  # General utilities (cn helper)

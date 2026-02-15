@@ -130,6 +130,24 @@ npm run tauri:build:windows
 
 Release builds are also automated via GitHub Actions -- push a `v*` tag to trigger cross-platform builds and a draft GitHub Release.
 
+### macOS Notarization
+
+To produce a notarized DMG, create a `src-tauri/.env` file with your Apple App Store Connect API credentials:
+
+```env
+APPLE_API_ISSUER="<your-issuer-id>"
+APPLE_API_KEY="<your-key-id>"
+APPLE_API_KEY_PATH="/full/path/to/AuthKey_<key-id>.p8"
+```
+
+Then load the environment variables before building:
+
+```bash
+set -a && source src-tauri/.env && set +a && npm run tauri build -- --bundles dmg
+```
+
+> **Note:** Use the full absolute path for `APPLE_API_KEY_PATH` -- tilde (`~`) does not expand inside double quotes.
+
 ## License
 
 Copyright 2025-2026 Thomas Cosialls. All rights reserved.
