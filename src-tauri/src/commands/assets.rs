@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use super::activity_log::log_activity;
 use super::entities::DbConnection;
-use super::settings::{check_not_locked, LockState};
+use super::settings::{check_not_locked, validate_currency, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -191,6 +191,9 @@ pub fn create_asset(
     check_not_locked(&lock)?;
     validate_name(&input.name)?;
     validate_asset_type(&input.asset_type)?;
+    if let Some(ref currency) = input.currency {
+        validate_currency(currency)?;
+    }
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
@@ -286,6 +289,9 @@ pub fn update_asset(
     }
     if let Some(ref asset_type) = input.asset_type {
         validate_asset_type(asset_type)?;
+    }
+    if let Some(ref currency) = input.currency {
+        validate_currency(currency)?;
     }
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;

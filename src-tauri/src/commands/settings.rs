@@ -357,7 +357,7 @@ pub fn set_locale_preference(db: State<DbConnection>, locale: String) -> Result<
     Ok(())
 }
 
-const ALLOWED_CURRENCIES: &[&str] = &[
+pub const ALLOWED_CURRENCIES: &[&str] = &[
     // North America
     "USD", "CAD", "MXN",
     // South America
@@ -374,6 +374,16 @@ const ALLOWED_CURRENCIES: &[&str] = &[
     // Digital
     "BTC",
 ];
+
+pub fn validate_currency(currency: &str) -> Result<(), String> {
+    if !ALLOWED_CURRENCIES.contains(&currency) {
+        return Err(format!(
+            "Unsupported currency: {}. Must be a valid ISO 4217 code",
+            currency
+        ));
+    }
+    Ok(())
+}
 
 #[tauri::command]
 pub fn get_currency_preference(db: State<DbConnection>) -> Result<String, String> {

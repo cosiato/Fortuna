@@ -4,7 +4,7 @@ use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 use super::entities::DbConnection;
-use super::settings::{check_not_locked, LockState};
+use super::settings::{check_not_locked, validate_currency, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -173,6 +173,9 @@ pub fn create_account(
     check_not_locked(&lock)?;
     validate_name(&input.name)?;
     validate_country_code(&input.country_code)?;
+    if let Some(ref currency) = input.currency {
+        validate_currency(currency)?;
+    }
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
@@ -223,6 +226,9 @@ pub fn update_account(
     }
     if let Some(ref code) = input.country_code {
         validate_country_code(code)?;
+    }
+    if let Some(ref currency) = input.currency {
+        validate_currency(currency)?;
     }
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;

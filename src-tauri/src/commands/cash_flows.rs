@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, State};
@@ -121,20 +122,17 @@ fn validate_name(name: &str) -> Result<(), String> {
     Ok(())
 }
 
+fn parse_date(value: &str, field: &str) -> Result<NaiveDate, String> {
+    NaiveDate::parse_from_str(value, "%Y-%m-%d")
+        .map_err(|_| format!("Invalid {field} format. Use YYYY-MM-DD"))
+}
+
 fn validate_dates(start_date: &str, end_date: &Option<String>) -> Result<(), String> {
-    if start_date.len() != 10
-        || !start_date
-            .chars()
-            .all(|c| c.is_ascii_digit() || c == '-')
-    {
-        return Err("Invalid start_date format. Use YYYY-MM-DD".to_string());
-    }
+    let start = parse_date(start_date, "start_date")?;
 
     if let Some(end) = end_date {
-        if end.len() != 10 || !end.chars().all(|c| c.is_ascii_digit() || c == '-') {
-            return Err("Invalid end_date format. Use YYYY-MM-DD".to_string());
-        }
-        if end.as_str() < start_date {
+        let end = parse_date(end, "end_date")?;
+        if end < start {
             return Err("end_date must be after start_date".to_string());
         }
     }
