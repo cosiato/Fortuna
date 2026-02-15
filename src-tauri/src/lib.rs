@@ -64,6 +64,8 @@ pub fn run() {
             commands::unlock_app,
             commands::get_currency_preference,
             commands::set_currency_preference,
+            commands::get_locale_preference,
+            commands::set_locale_preference,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

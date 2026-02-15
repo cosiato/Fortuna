@@ -321,6 +321,42 @@ pub fn unlock_app(
     }
 }
 
+const ALLOWED_LOCALES: &[&str] = &["en", "fr", "es", "pt"];
+
+#[tauri::command]
+pub fn get_locale_preference(db: State<DbConnection>) -> Result<String, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT value FROM settings WHERE key = 'display_locale'",
+        [],
+        |row| row.get::<_, String>(0),
+    );
+
+    match result {
+        Ok(locale) => Ok(locale),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok("en".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn set_locale_preference(db: State<DbConnection>, locale: String) -> Result<(), String> {
+    if !ALLOWED_LOCALES.contains(&locale.as_str()) {
+        return Err(format!("Unsupported locale: {}", locale));
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('display_locale', ?1)",
+        [&locale],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 const ALLOWED_CURRENCIES: &[&str] = &[
     // North America
     "USD", "CAD", "MXN",
