@@ -15,6 +15,7 @@ Use the following tech stack:
 - Shadcn for UI components
 - Framer Motion for animations
 - Iconify with Solar icon set (linear variant)
+- i18next + react-i18next for multilingual support (en, fr, es, pt)
 
 ## Critical Rules
 
@@ -70,6 +71,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
 |       |-- cash_flows.rs         # Cash flow CRUD (recurring income/expenses)
 |       |-- entities.rs           # Entity CRUD
+|       |-- settings.rs            # Settings (currency/locale preferences, PIN)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
 |-- main.tsx                      # React entry point
@@ -122,6 +124,7 @@ src/
 |       |-- OnboardingStepEntities.tsx    # Step 3: Entities intro
 |       |-- OnboardingStepIndicator.tsx   # Progress dots + XP bar
 |-- hooks/                        # Custom React hooks
+|   |-- useLanguage.ts            # Language management hook (syncs i18n + SQLite)
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
@@ -131,11 +134,28 @@ src/
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting and exchange rates
 |   |-- errorHandling.ts          # Toast-based error notification utility
+|   |-- i18n.ts                   # i18next configuration and initialization
 |   |-- prices.ts                 # Price fetching (Yahoo Finance, CoinGecko)
 |   |-- utils.ts                  # General utilities (cn helper)
 |   |-- validation.ts             # Zod schemas for form validation
+|-- locales/                      # Translation files (en, fr, es, pt)
+|   |-- en/                       # English (default/fallback)
+|   |   |-- common.json           # Buttons, labels, navigation, footer
+|   |   |-- assets.json           # Asset-related strings
+|   |   |-- vaults.json           # Vault/account-related strings
+|   |   |-- entities.json         # Entity-related strings
+|   |   |-- settings.json         # Settings dialog, PIN management
+|   |   |-- onboarding.json       # Onboarding flow
+|   |   |-- dialogs.json          # Delete/reset confirmation dialogs
+|   |   |-- errors.json           # Error toast messages
+|   |   |-- validation.json       # Zod validation messages
+|   |   |-- categories.json       # Cash flow category labels
+|   |-- fr/                       # French (same structure)
+|   |-- es/                       # Spanish (same structure)
+|   |-- pt/                       # Portuguese (same structure)
 |-- types/                        # TypeScript definitions
 |   |-- database.ts               # Database entity types
+|   |-- i18next.d.ts              # i18next type augmentation for strict key checking
 |-- config/                       # Configuration files
 |   |-- cryptocurrencies.json     # Top 200 cryptocurrencies data
 public/                           # Static assets
