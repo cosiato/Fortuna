@@ -1,8 +1,9 @@
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use tauri::{AppHandle, State};
 
+use super::activity_log::log_activity;
 use super::settings::{check_not_locked, LockState};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -242,6 +243,90 @@ pub fn delete_entity(app: AppHandle, db: State<DbConnection>, lock: State<LockSt
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn delete_entity_cascade(
+    app: AppHandle,
+    db: State<DbConnection>,
+    lock: State<LockState>,
+    id: i64,
+) -> Result<(), String> {
+    let _ = app;
+    check_not_locked(&lock)?;
+    if id == 0 {
+        return Err("Cannot delete the Individual entity".to_string());
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    conn.execute("BEGIN TRANSACTION", [])
+        .map_err(|e| e.to_string())?;
+
+    let result = (|| -> Result<(), String> {
+        // Fetch and log activity for each asset before deletion
+        let mut stmt = conn
+            .prepare(
+                "SELECT id, name, type, quantity, currency FROM assets WHERE entity_id = ?",
+            )
+            .map_err(|e| e.to_string())?;
+
+        let asset_rows: Vec<(String, String, String, f64, String)> = stmt
+            .query_map(params![id], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, f64>(3)?,
+                    row.get::<_, String>(4)?,
+                ))
+            })
+            .map_err(|e| e.to_string())?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| e.to_string())?;
+
+        for (asset_id, name, asset_type, quantity, currency) in &asset_rows {
+            let _ = log_activity(
+                &conn,
+                "asset_deleted",
+                asset_id,
+                name,
+                asset_type,
+                id,
+                Some(*quantity),
+                None,
+                Some(currency),
+            );
+        }
+
+        conn.execute("DELETE FROM assets WHERE entity_id = ?", params![id])
+            .map_err(|e| e.to_string())?;
+
+        // cash_flows cascade via ON DELETE CASCADE on accounts
+        conn.execute("DELETE FROM accounts WHERE entity_id = ?", params![id])
+            .map_err(|e| e.to_string())?;
+
+        let affected = conn
+            .execute("DELETE FROM entities WHERE id = ?", params![id])
+            .map_err(|e| e.to_string())?;
+
+        if affected == 0 {
+            return Err("Entity not found".to_string());
+        }
+
+        Ok(())
+    })();
+
+    match result {
+        Ok(()) => {
+            conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
+            Ok(())
+        }
+        Err(e) => {
+            let _ = conn.execute("ROLLBACK", []);
+            Err(e)
+        }
+    }
 }
 
 #[tauri::command]

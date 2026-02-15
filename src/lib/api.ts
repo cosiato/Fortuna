@@ -25,6 +25,7 @@ export const api = {
     update: (id: number, input: UpdateEntityInput) =>
       invoke<Entity>("update_entity", { id, input }),
     delete: (id: number) => invoke<void>("delete_entity", { id }),
+    deleteCascade: (id: number) => invoke<void>("delete_entity_cascade", { id }),
     ensureIndividual: () => invoke<Entity>("ensure_individual_entity"),
   },
 

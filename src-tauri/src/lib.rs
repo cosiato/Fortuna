@@ -28,6 +28,7 @@ pub fn run() {
             commands::create_entity,
             commands::update_entity,
             commands::delete_entity,
+            commands::delete_entity_cascade,
             commands::ensure_individual_entity,
             commands::get_all_assets,
             commands::get_assets_by_entity,
