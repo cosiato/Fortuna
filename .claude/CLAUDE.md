@@ -73,7 +73,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- activity_log.rs       # Activity log helper + query commands
 |       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
 |       |-- cash_flows.rs         # Cash flow CRUD (recurring income/expenses)
-|       |-- entities.rs           # Entity CRUD
+|       |-- entities.rs           # Entity CRUD (includes transactional cascade delete)
 |       |-- settings.rs           # Settings (currency/locale preferences, PIN)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
@@ -128,8 +128,12 @@ src/
 |       |-- OnboardingStepEntities.tsx    # Step 3: Entities intro
 |       |-- OnboardingStepIndicator.tsx   # Progress dots + XP bar
 |-- hooks/                        # Custom React hooks
+|   |-- useAppData.ts             # App data fetching, prices, exchange rates, initialization
+|   |-- useAssetCrud.ts           # Asset CRUD operations and form state
+|   |-- useEntityCrud.ts          # Entity CRUD operations and form state
 |   |-- useLanguage.ts            # Language management hook (syncs i18n + SQLite)
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
+|   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
 |   |-- cashFlowCategories.ts     # Cash flow category definitions and helpers
@@ -137,6 +141,7 @@ src/
 |   |-- countries.ts              # Country data and utilities
 |   |-- cryptocurrencies.ts       # Cryptocurrency data and utilities
 |   |-- currency.ts               # Currency formatting and exchange rates
+|   |-- currencyConversion.ts     # Pure currency conversion utilities (toUsd, fromUsd, etc.)
 |   |-- errorHandling.ts          # Toast-based error notification utility
 |   |-- icons.ts                  # Auto-generated Solar icon bundle (via scripts/generate-icons.mjs)
 |   |-- i18n.ts                   # i18next configuration and initialization
