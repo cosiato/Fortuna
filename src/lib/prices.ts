@@ -7,34 +7,87 @@ interface PriceCacheEntry {
   timestamp: number
 }
 
-interface PriceCache {
-  [symbol: string]: PriceCacheEntry
-}
-
 const STORAGE_KEY = "fortuna_price_cache"
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
-function loadCacheFromStorage(): PriceCache {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      return JSON.parse(stored) as PriceCache
+class PriceCacheManager {
+  private data: Record<string, PriceCacheEntry>
+
+  constructor() {
+    this.data = PriceCacheManager.loadFromStorage()
+  }
+
+  private static loadFromStorage(): Record<string, PriceCacheEntry> {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        return JSON.parse(stored) as Record<string, PriceCacheEntry>
+      }
+    } catch {
+      // Ignore parse errors, return empty cache
     }
-  } catch {
-    // Ignore parse errors, return empty cache
+    return {}
   }
-  return {}
+
+  private persist(): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data))
+    } catch {
+      // Ignore storage errors (e.g., quota exceeded)
+    }
+  }
+
+  get(key: string): PriceCacheEntry | undefined {
+    return this.data[key]
+  }
+
+  set(key: string, entry: PriceCacheEntry): void {
+    this.data = { ...this.data, [key]: entry }
+    this.persist()
+  }
+
+  setMany(entries: Record<string, PriceCacheEntry>): void {
+    this.data = { ...this.data, ...entries }
+    this.persist()
+  }
+
+  remove(key: string): void {
+    const { [key]: _, ...rest } = this.data
+    this.data = rest
+    this.persist()
+  }
+
+  removeMany(keys: string[]): void {
+    const next = { ...this.data }
+    for (const key of keys) {
+      delete next[key]
+    }
+    this.data = next
+    this.persist()
+  }
 }
 
-function saveCacheToStorage(cacheData: PriceCache): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData))
-  } catch {
-    // Ignore storage errors (e.g., quota exceeded)
+interface StockInfoCacheEntry {
+  name: string
+  price: number
+  currency: string
+  timestamp: number
+}
+
+class MemoryCache<T> {
+  private data: Record<string, T> = {}
+
+  get(key: string): T | undefined {
+    return this.data[key]
+  }
+
+  set(key: string, value: T): void {
+    this.data = { ...this.data, [key]: value }
   }
 }
 
-const cache: PriceCache = loadCacheFromStorage()
+const priceCache = new PriceCacheManager()
+const stockInfoCache = new MemoryCache<StockInfoCacheEntry>()
 
 export interface PriceResult {
   symbol: string
@@ -57,19 +110,6 @@ interface YahooChartMeta {
   regularMarketPrice?: number
   currency?: string
 }
-
-interface StockInfoCacheEntry {
-  name: string
-  price: number
-  currency: string
-  timestamp: number
-}
-
-interface StockInfoCache {
-  [symbol: string]: StockInfoCacheEntry
-}
-
-const stockInfoCache: StockInfoCache = {}
 
 async function fetchYahooChartData(
   symbol: string,
@@ -109,7 +149,7 @@ export async function getStockInfo(symbol: string): Promise<StockInfo> {
   }
 
   const cacheKey = `stockinfo:${trimmedSymbol}`
-  const cached = stockInfoCache[cacheKey]
+  const cached = stockInfoCache.get(cacheKey)
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return {
@@ -133,19 +173,19 @@ export async function getStockInfo(symbol: string): Promise<StockInfo> {
     currency: meta.currency || "USD",
   }
 
-  stockInfoCache[cacheKey] = {
+  stockInfoCache.set(cacheKey, {
     name: result.name,
     price: result.price,
     currency: result.currency,
     timestamp: Date.now(),
-  }
+  })
 
   return result
 }
 
 export async function getStockPrice(symbol: string): Promise<PriceResult> {
   const cacheKey = `stock:${symbol.toUpperCase()}`
-  const cached = cache[cacheKey]
+  const cached = priceCache.get(cacheKey)
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return {
@@ -167,12 +207,11 @@ export async function getStockPrice(symbol: string): Promise<PriceResult> {
     currency: meta.currency || "USD",
   }
 
-  cache[cacheKey] = {
+  priceCache.set(cacheKey, {
     price: result.price,
     currency: result.currency,
     timestamp: Date.now(),
-  }
-  saveCacheToStorage(cache)
+  })
 
   return result
 }
@@ -182,7 +221,7 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
   const coinId = crypto?.id || symbol.toLowerCase()
 
   const cacheKey = `crypto:${symbol.toUpperCase()}`
-  const cached = cache[cacheKey]
+  const cached = priceCache.get(cacheKey)
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return {
@@ -213,12 +252,11 @@ export async function getCryptoPrice(symbol: string): Promise<PriceResult> {
       currency: "USD",
     }
 
-    cache[cacheKey] = {
+    priceCache.set(cacheKey, {
       price: result.price,
       currency: result.currency,
       timestamp: Date.now(),
-    }
-    saveCacheToStorage(cache)
+    })
 
     return result
   } catch {
@@ -235,7 +273,7 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
 
   for (const symbol of symbols) {
     const cacheKey = `crypto:${symbol.toUpperCase()}`
-    const cached = cache[cacheKey]
+    const cached = priceCache.get(cacheKey)
     if (cached && now - cached.timestamp < CACHE_TTL) {
       cachedResults.push({
         symbol,
@@ -273,6 +311,7 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
     const data = await response.json()
 
     const results: PriceResult[] = [...cachedResults]
+    const newEntries: Record<string, PriceCacheEntry> = {}
 
     for (const { symbol, coinId } of coinIds) {
       const price = data[coinId]?.usd ?? data[coinId.toLowerCase()]?.usd
@@ -285,7 +324,7 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
       results.push(result)
 
       if (price !== undefined) {
-        cache[`crypto:${symbol.toUpperCase()}`] = {
+        newEntries[`crypto:${symbol.toUpperCase()}`] = {
           price,
           currency: "USD",
           timestamp: now,
@@ -293,7 +332,7 @@ async function getBatchCryptoPrices(symbols: string[]): Promise<PriceResult[]> {
       }
     }
 
-    saveCacheToStorage(cache)
+    priceCache.setMany(newEntries)
     return results
   } catch {
     const individualResults = await Promise.all(
@@ -318,12 +357,11 @@ export async function getMultiplePrices(
 }
 
 function invalidateCacheForSymbols(symbols: { symbol: string; type: "stock" | "crypto" }[]): void {
-  for (const { symbol, type } of symbols) {
+  const keys = symbols.map(({ symbol, type }) => {
     const prefix = type === "stock" ? "stock" : "crypto"
-    const cacheKey = `${prefix}:${symbol.toUpperCase()}`
-    delete cache[cacheKey]
-  }
-  saveCacheToStorage(cache)
+    return `${prefix}:${symbol.toUpperCase()}`
+  })
+  priceCache.removeMany(keys)
 }
 
 export async function forceRefreshPrices(

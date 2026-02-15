@@ -9,30 +9,51 @@ interface ExchangeRates {
 const RATES_STORAGE_KEY = "fortuna_exchange_rates"
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
-function loadRatesFromStorage(): ExchangeRates | null {
-  try {
-    const stored = localStorage.getItem(RATES_STORAGE_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored) as ExchangeRates
-      if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL) {
-        return parsed
+class RatesCacheManager {
+  private cached: ExchangeRates | null
+
+  constructor() {
+    this.cached = RatesCacheManager.loadFromStorage()
+  }
+
+  private static loadFromStorage(): ExchangeRates | null {
+    try {
+      const stored = localStorage.getItem(RATES_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as ExchangeRates
+        if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL) {
+          return parsed
+        }
       }
+    } catch {
+      // Ignore parse errors
     }
-  } catch {
-    // Ignore parse errors
+    return null
   }
-  return null
+
+  private persist(rates: ExchangeRates): void {
+    try {
+      localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates))
+    } catch {
+      // Ignore storage errors
+    }
+  }
+
+  get(): ExchangeRates | null {
+    return this.cached
+  }
+
+  set(rates: ExchangeRates): void {
+    this.cached = rates
+    this.persist(rates)
+  }
+
+  invalidate(): void {
+    this.cached = null
+  }
 }
 
-function saveRatesToStorage(rates: ExchangeRates): void {
-  try {
-    localStorage.setItem(RATES_STORAGE_KEY, JSON.stringify(rates))
-  } catch {
-    // Ignore storage errors
-  }
-}
-
-let cachedRates: ExchangeRates | null = loadRatesFromStorage()
+const ratesCache = new RatesCacheManager()
 
 export const SUPPORTED_CURRENCIES = [
   // North America
@@ -284,8 +305,9 @@ const FIAT_CURRENCIES = SUPPORTED_CURRENCIES.filter(
 )
 
 export async function getExchangeRates(): Promise<ExchangeRates> {
-  if (cachedRates && Date.now() - cachedRates.timestamp < CACHE_TTL) {
-    return cachedRates
+  const cached = ratesCache.get()
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached
   }
 
   try {
@@ -319,14 +341,14 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
     }
     rates.BTC = btcRate
 
-    cachedRates = {
+    const result: ExchangeRates = {
       base: "USD",
       rates,
       timestamp: Date.now(),
     }
-    saveRatesToStorage(cachedRates)
+    ratesCache.set(result)
 
-    return cachedRates
+    return result
   } catch {
     // Return fallback rates
     return {
@@ -390,6 +412,6 @@ export function formatCurrency(amount: number, currency: SupportedCurrency): str
 }
 
 export async function forceRefreshExchangeRates(): Promise<ExchangeRates> {
-  cachedRates = null
+  ratesCache.invalidate()
   return getExchangeRates()
 }
