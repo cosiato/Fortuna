@@ -1,0 +1,35 @@
+{
+  "title": "Actifs",
+  "addAsset": "Ajouter un actif",
+  "editAsset": "Modifier l'actif",
+  "noAssets": "Aucun actif pour le moment. Cliquez sur + pour en ajouter un.",
+  "noAssetsInCategory": "Aucun actif {{category}} pour le moment.",
+  "qty": "Qte",
+  "value": "Valeur",
+  "deleteConfirm": "Supprimer {{name}} ?",
+  "type": {
+    "stock": "Actions",
+    "crypto": "Crypto",
+    "real_estate": "Immobilier",
+    "other": "Autre"
+  },
+  "assetType": {
+    "crypto": "Cryptomonnaie",
+    "stock": "Action",
+    "real_estate": "Maison / Immobilier",
+    "other": "Autre"
+  },
+  "selectType": "Selectionner un type",
+  "cryptocurrency": "Cryptomonnaie",
+  "tickerSymbol": "Symbole boursier",
+  "tickerPlaceholder": "ex. AAPL, GOOGL",
+  "lookingUpStock": "Recherche de l'action...",
+  "cryptoNotFound": "Cryptomonnaie introuvable",
+  "quantity": "Quantite",
+  "valueIn": "Valeur (en {{currency}})",
+  "enterCurrentValue": "Entrez la valeur actuelle",
+  "currency": "Devise",
+  "namePlaceholder": "ex. Maison, Voiture",
+  "loadingBtn": "Chargement...",
+  "addBtn": "Ajouter l'actif"
+}

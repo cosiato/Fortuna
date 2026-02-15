@@ -1,0 +1,37 @@
+{
+  "title": "Coffres",
+  "addVault": "Ajouter un coffre",
+  "editVault": "Modifier le coffre",
+  "noVaults": "Aucun coffre pour le moment. Cliquez sur + pour en ajouter un.",
+  "name": "Nom",
+  "namePlaceholder": "ex. Epargne principale, Fonds d'urgence",
+  "cashValue": "Valeur en especes",
+  "currency": "Devise",
+  "location": "Localisation",
+  "addBtn": "Ajouter le coffre",
+  "cashFlow": {
+    "title": "Ajouter un flux",
+    "editTitle": "Modifier le flux",
+    "name": "Nom",
+    "namePlaceholder": "ex. Salaire mensuel, Netflix",
+    "amount": "Montant",
+    "frequency": "Frequence",
+    "type": "Type",
+    "category": "Categorie",
+    "startDate": "Date de debut",
+    "endDate": "Date de fin (optionnel)",
+    "addBtn": "Ajouter le flux",
+    "addFlowBtn": "Ajouter le flux",
+    "addInflow": "Ajouter une entree",
+    "addOutflow": "Ajouter une sortie"
+  },
+  "projection": {
+    "title": "Projection du solde",
+    "emptyState": "Ajoutez des flux actifs pour voir la projection du solde.",
+    "balance": "Solde",
+    "inflow": "Entree",
+    "outflow": "Sortie"
+  },
+  "pause": "Suspendre",
+  "resume": "Reprendre"
+}

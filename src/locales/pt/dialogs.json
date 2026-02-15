@@ -1,0 +1,35 @@
+{
+  "deleteEntity": {
+    "title": "Excluir Entidade",
+    "cannotBeUndone": "Esta ação não pode ser desfeita.",
+    "confirmMessage": "Tem certeza de que deseja excluir <bold>{{name}}</bold>?",
+    "warningTitle": "Atenção: Os dados serão excluídos",
+    "asset_one": "{{count}} ativo",
+    "asset_other": "{{count}} ativos",
+    "vault_one": "{{count}} cofre",
+    "vault_other": "{{count}} cofres"
+  },
+  "deleteVault": {
+    "title": "Excluir Cofre",
+    "cannotBeUndone": "Esta ação não pode ser desfeita.",
+    "confirmMessage": "Tem certeza de que deseja excluir <bold>{{name}}</bold>?",
+    "warningTitle": "Atenção: Os dados serão excluídos",
+    "cashFlow_one": "{{count}} fluxo de caixa",
+    "cashFlow_other": "{{count}} fluxos de caixa"
+  },
+  "resetAllData": {
+    "title": "Redefinir Todos os Dados",
+    "cannotBeUndone": "Esta ação não pode ser desfeita.",
+    "warningTitle": "Todos os dados serão excluídos permanentemente",
+    "allAssets": "Todos os ativos",
+    "allVaults": "Todos os cofres e fluxos de caixa",
+    "allSnapshots": "Todos os registros e histórico de atividades",
+    "allEntities": "Todas as entidades (exceto Pessoal)",
+    "allSettings": "Todas as configurações incluindo o PIN",
+    "enterPinToAuthorize": "Digite seu PIN para autorizar esta ação",
+    "enterPin": "Digite o PIN de 4 dígitos",
+    "typeToConfirm": "Digite <bold>{{word}}</bold> para confirmar",
+    "resetting": "Redefinindo...",
+    "resetBtn": "Redefinir Todos os Dados"
+  }
+}

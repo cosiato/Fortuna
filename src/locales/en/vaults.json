@@ -1,0 +1,37 @@
+{
+  "title": "Vaults",
+  "addVault": "Add New Vault",
+  "editVault": "Edit Vault",
+  "noVaults": "No vaults yet. Click + to add one.",
+  "name": "Name",
+  "namePlaceholder": "e.g., Main Savings, Emergency Fund",
+  "cashValue": "Cash Value",
+  "currency": "Currency",
+  "location": "Location",
+  "addBtn": "Add Vault",
+  "cashFlow": {
+    "title": "Add Cash Flow",
+    "editTitle": "Edit Cash Flow",
+    "name": "Name",
+    "namePlaceholder": "e.g., Monthly Salary, Netflix",
+    "amount": "Amount",
+    "frequency": "Frequency",
+    "type": "Type",
+    "category": "Category",
+    "startDate": "Start Date",
+    "endDate": "End Date (optional)",
+    "addBtn": "Add Flow",
+    "addFlowBtn": "Add Flow",
+    "addInflow": "Add inflow",
+    "addOutflow": "Add outflow"
+  },
+  "projection": {
+    "title": "Balance Projection",
+    "emptyState": "Add active cash flows to see the balance projection.",
+    "balance": "Balance",
+    "inflow": "Inflow",
+    "outflow": "Outflow"
+  },
+  "pause": "Pause",
+  "resume": "Resume"
+}

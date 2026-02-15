@@ -1,0 +1,19 @@
+{
+  "welcomeAriaLabel": "Bienvenido a Fortuna",
+  "beginJourney": "Comienza Tu Aventura",
+  "step1": {
+    "title": "Construye Tu Inventario",
+    "subtitle": "Toda fortuna comienza con lo que posees.",
+    "description": "Registra acciones, cripto, bienes raíces y más. Fortuna obtiene precios en tiempo real automáticamente -- tu nivel de poder se mantiene actualizado sin mover un dedo."
+  },
+  "step2": {
+    "title": "Asegura Tus Bóvedas",
+    "subtitle": "El oro es tan seguro como la bóveda que lo guarda.",
+    "description": "Agrega tus cuentas bancarias, luego configura ingresos y egresos recurrentes. Fortuna proyecta tu saldo hacia adelante para que siempre sepas lo que viene."
+  },
+  "step3": {
+    "title": "Elige Tu Camino",
+    "subtitle": "Un héroe. Muchas lealtades.",
+    "description": "Organiza tu patrimonio bajo entidades Personales o de Empresa. Cambia entre reinos al instante y ve el poder total de cada uno de un vistazo."
+  }
+}

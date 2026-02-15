@@ -1,0 +1,35 @@
+{
+  "deleteEntity": {
+    "title": "Delete Entity",
+    "cannotBeUndone": "This action cannot be undone.",
+    "confirmMessage": "Are you sure you want to delete <bold>{{name}}</bold>?",
+    "warningTitle": "Warning: Data will be deleted",
+    "asset_one": "{{count}} asset",
+    "asset_other": "{{count}} assets",
+    "vault_one": "{{count}} vault",
+    "vault_other": "{{count}} vaults"
+  },
+  "deleteVault": {
+    "title": "Delete Vault",
+    "cannotBeUndone": "This action cannot be undone.",
+    "confirmMessage": "Are you sure you want to delete <bold>{{name}}</bold>?",
+    "warningTitle": "Warning: Data will be deleted",
+    "cashFlow_one": "{{count}} cash flow",
+    "cashFlow_other": "{{count}} cash flows"
+  },
+  "resetAllData": {
+    "title": "Reset All Data",
+    "cannotBeUndone": "This action cannot be undone.",
+    "warningTitle": "All data will be permanently deleted",
+    "allAssets": "All assets",
+    "allVaults": "All vaults and cash flows",
+    "allSnapshots": "All snapshots and activity history",
+    "allEntities": "All entities (except Personal)",
+    "allSettings": "All settings including PIN",
+    "enterPinToAuthorize": "Enter your PIN to authorize this action",
+    "enterPin": "Enter 4-digit PIN",
+    "typeToConfirm": "Type <bold>{{word}}</bold> to confirm",
+    "resetting": "Resetting...",
+    "resetBtn": "Reset All Data"
+  }
+}

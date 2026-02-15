@@ -1,0 +1,63 @@
+{
+  "loading": "Chargement",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "confirm": "Confirmer",
+  "update": "Mettre a jour",
+  "add": "Ajouter",
+  "edit": "Modifier",
+  "back": "Retour",
+  "skip": "Passer",
+  "next": "Suivant",
+  "save": "Enregistrer",
+  "close": "Fermer",
+  "name": "Nom",
+  "type": "Type",
+  "refreshPrices": "Actualiser les prix",
+  "updated": "Mis a jour",
+  "updatePrices": "Actualiser",
+  "settings": "Parametres",
+  "netWorth": "Patrimoine net",
+  "noHistoryYet": "Pas encore d'historique",
+  "footer": "Tous droits reserves",
+  "madeWithLoveBy": "Fait avec amour par",
+  "continent": {
+    "northAmerica": "Amerique du Nord",
+    "southAmerica": "Amerique du Sud",
+    "europe": "Europe",
+    "asia": "Asie",
+    "africa": "Afrique",
+    "oceania": "Oceanie",
+    "digital": "Numerique"
+  },
+  "frequency": {
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "yearly": "Annuel"
+  },
+  "frequencyShort": {
+    "daily": "/jour",
+    "weekly": "/sem",
+    "monthly": "/mois",
+    "yearly": "/an"
+  },
+  "flowType": {
+    "inflow": "Entree",
+    "outflow": "Sortie"
+  },
+  "perMonth": "/mois",
+  "projectedMonthlyGain": "Gain mensuel projete et % de variation",
+  "currentBalance": "Solde actuel",
+  "selectCountry": "Selectionner un pays",
+  "searchCountry": "Rechercher un pays...",
+  "noCountryFound": "Aucun pays trouve.",
+  "selectCryptocurrency": "Selectionner une cryptomonnaie",
+  "searchCryptocurrency": "Rechercher une cryptomonnaie...",
+  "noCryptocurrencyFound": "Aucune cryptomonnaie trouvee.",
+  "selectCurrency": "Selectionner une devise",
+  "searchByCodeOrName": "Rechercher par code ou nom...",
+  "noCurrenciesMatch": "Aucune devise ne correspond a votre recherche.",
+  "scrollLeft": "Defiler a gauche",
+  "scrollRight": "Defiler a droite"
+}

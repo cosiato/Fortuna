@@ -1,0 +1,15 @@
+{
+  "nameRequired": "Name is required",
+  "nameTooLong": "Name is too long (max 255)",
+  "quantityMin": "Quantity must be 0 or greater",
+  "priceMin": "Price must be 0 or greater",
+  "currencyCode": "Currency must be a 3-letter code",
+  "balanceMin": "Balance must be 0 or greater",
+  "countryCodeLength": "Country code must be a 2-letter code",
+  "countryCodeFormat": "Country code must be uppercase letters",
+  "amountPositive": "Amount must be greater than 0",
+  "categoryRequired": "Category is required",
+  "startDateRequired": "Start date is required",
+  "endDateAfterStart": "End date must be after start date",
+  "validationFailed": "Validation failed"
+}

@@ -1,0 +1,35 @@
+{
+  "deleteEntity": {
+    "title": "Eliminar Entidad",
+    "cannotBeUndone": "Esta acción no se puede deshacer.",
+    "confirmMessage": "¿Estás seguro de que deseas eliminar <bold>{{name}}</bold>?",
+    "warningTitle": "Advertencia: Se eliminarán datos",
+    "asset_one": "{{count}} activo",
+    "asset_other": "{{count}} activos",
+    "vault_one": "{{count}} bóveda",
+    "vault_other": "{{count}} bóvedas"
+  },
+  "deleteVault": {
+    "title": "Eliminar Bóveda",
+    "cannotBeUndone": "Esta acción no se puede deshacer.",
+    "confirmMessage": "¿Estás seguro de que deseas eliminar <bold>{{name}}</bold>?",
+    "warningTitle": "Advertencia: Se eliminarán datos",
+    "cashFlow_one": "{{count}} flujo de caja",
+    "cashFlow_other": "{{count}} flujos de caja"
+  },
+  "resetAllData": {
+    "title": "Restablecer Todos los Datos",
+    "cannotBeUndone": "Esta acción no se puede deshacer.",
+    "warningTitle": "Todos los datos se eliminarán permanentemente",
+    "allAssets": "Todos los activos",
+    "allVaults": "Todas las bóvedas y flujos de caja",
+    "allSnapshots": "Todas las capturas e historial de actividad",
+    "allEntities": "Todas las entidades (excepto Personal)",
+    "allSettings": "Toda la configuración incluyendo el PIN",
+    "enterPinToAuthorize": "Ingresa tu PIN para autorizar esta acción",
+    "enterPin": "Ingresa el PIN de 4 dígitos",
+    "typeToConfirm": "Escribe <bold>{{word}}</bold> para confirmar",
+    "resetting": "Restableciendo...",
+    "resetBtn": "Restablecer Todos los Datos"
+  }
+}

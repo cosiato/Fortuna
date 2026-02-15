@@ -1,0 +1,63 @@
+{
+  "loading": "Loading",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "update": "Update",
+  "add": "Add",
+  "edit": "Edit",
+  "back": "Back",
+  "skip": "Skip",
+  "next": "Next",
+  "save": "Save",
+  "close": "Close",
+  "name": "Name",
+  "type": "Type",
+  "refreshPrices": "Refresh prices",
+  "updated": "Updated",
+  "updatePrices": "Update",
+  "settings": "Settings",
+  "netWorth": "Net Worth",
+  "noHistoryYet": "No history yet",
+  "footer": "All rights reserved",
+  "madeWithLoveBy": "Made with love by",
+  "continent": {
+    "northAmerica": "North America",
+    "southAmerica": "South America",
+    "europe": "Europe",
+    "asia": "Asia",
+    "africa": "Africa",
+    "oceania": "Oceania",
+    "digital": "Digital"
+  },
+  "frequency": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "frequencyShort": {
+    "daily": "/day",
+    "weekly": "/wk",
+    "monthly": "/mo",
+    "yearly": "/yr"
+  },
+  "flowType": {
+    "inflow": "Inflow",
+    "outflow": "Outflow"
+  },
+  "perMonth": "/mo",
+  "projectedMonthlyGain": "Projected monthly gain and % change",
+  "currentBalance": "Current balance",
+  "selectCountry": "Select country",
+  "searchCountry": "Search country...",
+  "noCountryFound": "No country found.",
+  "selectCryptocurrency": "Select cryptocurrency",
+  "searchCryptocurrency": "Search cryptocurrency...",
+  "noCryptocurrencyFound": "No cryptocurrency found.",
+  "selectCurrency": "Select Currency",
+  "searchByCodeOrName": "Search by code or name...",
+  "noCurrenciesMatch": "No currencies match your search.",
+  "scrollLeft": "Scroll left",
+  "scrollRight": "Scroll right"
+}

@@ -1,0 +1,17 @@
+{
+  "salary": "Salário",
+  "freelance": "Freelance",
+  "investment_income": "Investimento",
+  "rental_income": "Aluguel",
+  "other_income": "Outra Renda",
+  "rent": "Aluguel",
+  "mortgage": "Financiamento",
+  "subscription": "Assinatura",
+  "utilities": "Contas de Consumo",
+  "insurance": "Seguro",
+  "groceries": "Supermercado",
+  "transport": "Transporte",
+  "entertainment": "Entretenimento",
+  "savings_transfer": "Poupança",
+  "other_expense": "Outra Despesa"
+}

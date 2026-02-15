@@ -1,0 +1,20 @@
+{
+  "failedToCreateAsset": "Falha ao criar ativo",
+  "failedToUpdateAsset": "Falha ao atualizar ativo",
+  "failedToDeleteAsset": "Falha ao excluir ativo",
+  "failedToUpdateQuantity": "Falha ao atualizar quantidade",
+  "failedToCreateVault": "Falha ao criar cofre",
+  "failedToUpdateVault": "Falha ao atualizar cofre",
+  "failedToDeleteVault": "Falha ao excluir cofre",
+  "failedToCreateEntity": "Falha ao criar entidade",
+  "failedToUpdateEntity": "Falha ao atualizar entidade",
+  "failedToDeleteEntity": "Falha ao excluir entidade",
+  "failedToSaveCashFlow": "Falha ao salvar fluxo de caixa",
+  "failedToDeleteCashFlow": "Falha ao excluir fluxo de caixa",
+  "failedToToggleCashFlow": "Falha ao alternar fluxo de caixa",
+  "failedToSaveCurrency": "Falha ao salvar preferência de moeda",
+  "failedToRefreshPrices": "Falha ao atualizar preços",
+  "failedToLoadData": "Falha ao carregar dados",
+  "failedToResetData": "Falha ao redefinir dados",
+  "genericError": "Ocorreu um erro"
+}

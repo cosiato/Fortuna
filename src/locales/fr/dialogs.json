@@ -1,0 +1,35 @@
+{
+  "deleteEntity": {
+    "title": "Supprimer l'entite",
+    "cannotBeUndone": "Cette action est irreversible.",
+    "confirmMessage": "Etes-vous sur de vouloir supprimer <bold>{{name}}</bold> ?",
+    "warningTitle": "Attention : des donnees seront supprimees",
+    "asset_one": "{{count}} actif",
+    "asset_other": "{{count}} actifs",
+    "vault_one": "{{count}} coffre",
+    "vault_other": "{{count}} coffres"
+  },
+  "deleteVault": {
+    "title": "Supprimer le coffre",
+    "cannotBeUndone": "Cette action est irreversible.",
+    "confirmMessage": "Etes-vous sur de vouloir supprimer <bold>{{name}}</bold> ?",
+    "warningTitle": "Attention : des donnees seront supprimees",
+    "cashFlow_one": "{{count}} flux",
+    "cashFlow_other": "{{count}} flux"
+  },
+  "resetAllData": {
+    "title": "Reinitialiser toutes les donnees",
+    "cannotBeUndone": "Cette action est irreversible.",
+    "warningTitle": "Toutes les donnees seront definitivement supprimees",
+    "allAssets": "Tous les actifs",
+    "allVaults": "Tous les coffres et flux",
+    "allSnapshots": "Tous les instantanes et l'historique d'activite",
+    "allEntities": "Toutes les entites (sauf Personnel)",
+    "allSettings": "Tous les parametres, y compris le PIN",
+    "enterPinToAuthorize": "Entrez votre PIN pour autoriser cette action",
+    "enterPin": "Entrez le code PIN a 4 chiffres",
+    "typeToConfirm": "Tapez <bold>{{word}}</bold> pour confirmer",
+    "resetting": "Reinitialisation...",
+    "resetBtn": "Reinitialiser toutes les donnees"
+  }
+}

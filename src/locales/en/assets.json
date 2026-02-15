@@ -1,0 +1,35 @@
+{
+  "title": "Assets",
+  "addAsset": "Add New Asset",
+  "editAsset": "Edit Asset",
+  "noAssets": "No assets yet. Click + to add one.",
+  "noAssetsInCategory": "No {{category}} assets yet.",
+  "qty": "Qty",
+  "value": "Value",
+  "deleteConfirm": "Delete {{name}}?",
+  "type": {
+    "stock": "Stocks",
+    "crypto": "Crypto",
+    "real_estate": "Real Estate",
+    "other": "Other"
+  },
+  "assetType": {
+    "crypto": "Cryptocurrency",
+    "stock": "Stock",
+    "real_estate": "House / Real Estate",
+    "other": "Other"
+  },
+  "selectType": "Select type",
+  "cryptocurrency": "Cryptocurrency",
+  "tickerSymbol": "Ticker Symbol",
+  "tickerPlaceholder": "e.g., AAPL, GOOGL",
+  "lookingUpStock": "Looking up stock...",
+  "cryptoNotFound": "Cryptocurrency not found",
+  "quantity": "Quantity",
+  "valueIn": "Value (in {{currency}})",
+  "enterCurrentValue": "Enter current value",
+  "currency": "Currency",
+  "namePlaceholder": "e.g., House, Car",
+  "loadingBtn": "Loading...",
+  "addBtn": "Add Asset"
+}

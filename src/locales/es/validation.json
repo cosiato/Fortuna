@@ -1,0 +1,15 @@
+{
+  "nameRequired": "El nombre es obligatorio",
+  "nameTooLong": "El nombre es demasiado largo (máx. 255)",
+  "quantityMin": "La cantidad debe ser 0 o mayor",
+  "priceMin": "El precio debe ser 0 o mayor",
+  "currencyCode": "La moneda debe ser un código de 3 letras",
+  "balanceMin": "El saldo debe ser 0 o mayor",
+  "countryCodeLength": "El código de país debe ser de 2 letras",
+  "countryCodeFormat": "El código de país debe estar en mayúsculas",
+  "amountPositive": "El monto debe ser mayor que 0",
+  "categoryRequired": "La categoría es obligatoria",
+  "startDateRequired": "La fecha de inicio es obligatoria",
+  "endDateAfterStart": "La fecha de fin debe ser posterior a la de inicio",
+  "validationFailed": "La validación falló"
+}

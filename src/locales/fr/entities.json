@@ -1,0 +1,8 @@
+{
+  "personal": "Personnel",
+  "addCompany": "Ajouter une entreprise",
+  "editEntity": "Modifier l'entite",
+  "namePlaceholder": "ex. Acme Corp, Ma SARL",
+  "addBtn": "Ajouter",
+  "entityOptions": "Options de l'entite"
+}

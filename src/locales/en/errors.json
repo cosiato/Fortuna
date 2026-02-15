@@ -1,0 +1,20 @@
+{
+  "failedToCreateAsset": "Failed to create asset",
+  "failedToUpdateAsset": "Failed to update asset",
+  "failedToDeleteAsset": "Failed to delete asset",
+  "failedToUpdateQuantity": "Failed to update quantity",
+  "failedToCreateVault": "Failed to create vault",
+  "failedToUpdateVault": "Failed to update vault",
+  "failedToDeleteVault": "Failed to delete vault",
+  "failedToCreateEntity": "Failed to create entity",
+  "failedToUpdateEntity": "Failed to update entity",
+  "failedToDeleteEntity": "Failed to delete entity",
+  "failedToSaveCashFlow": "Failed to save cash flow",
+  "failedToDeleteCashFlow": "Failed to delete cash flow",
+  "failedToToggleCashFlow": "Failed to toggle cash flow",
+  "failedToSaveCurrency": "Failed to save currency preference",
+  "failedToRefreshPrices": "Failed to refresh prices",
+  "failedToLoadData": "Failed to load data",
+  "failedToResetData": "Failed to reset data",
+  "genericError": "An error occurred"
+}

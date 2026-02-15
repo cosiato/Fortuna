@@ -1,0 +1,37 @@
+{
+  "title": "Cofres",
+  "addVault": "Adicionar Novo Cofre",
+  "editVault": "Editar Cofre",
+  "noVaults": "Nenhum cofre ainda. Clique em + para adicionar.",
+  "name": "Nome",
+  "namePlaceholder": "ex., Poupança Principal, Reserva de Emergência",
+  "cashValue": "Valor em Dinheiro",
+  "currency": "Moeda",
+  "location": "Localização",
+  "addBtn": "Adicionar Cofre",
+  "cashFlow": {
+    "title": "Adicionar Fluxo de Caixa",
+    "editTitle": "Editar Fluxo de Caixa",
+    "name": "Nome",
+    "namePlaceholder": "ex., Salário Mensal, Netflix",
+    "amount": "Valor",
+    "frequency": "Frequência",
+    "type": "Tipo",
+    "category": "Categoria",
+    "startDate": "Data de Início",
+    "endDate": "Data de Término (opcional)",
+    "addBtn": "Adicionar Fluxo",
+    "addFlowBtn": "Adicionar Fluxo",
+    "addInflow": "Adicionar entrada",
+    "addOutflow": "Adicionar saída"
+  },
+  "projection": {
+    "title": "Projeção de Saldo",
+    "emptyState": "Adicione fluxos de caixa ativos para ver a projeção de saldo.",
+    "balance": "Saldo",
+    "inflow": "Entrada",
+    "outflow": "Saída"
+  },
+  "pause": "Pausar",
+  "resume": "Retomar"
+}

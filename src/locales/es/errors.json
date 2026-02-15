@@ -1,0 +1,20 @@
+{
+  "failedToCreateAsset": "Error al crear el activo",
+  "failedToUpdateAsset": "Error al actualizar el activo",
+  "failedToDeleteAsset": "Error al eliminar el activo",
+  "failedToUpdateQuantity": "Error al actualizar la cantidad",
+  "failedToCreateVault": "Error al crear la bóveda",
+  "failedToUpdateVault": "Error al actualizar la bóveda",
+  "failedToDeleteVault": "Error al eliminar la bóveda",
+  "failedToCreateEntity": "Error al crear la entidad",
+  "failedToUpdateEntity": "Error al actualizar la entidad",
+  "failedToDeleteEntity": "Error al eliminar la entidad",
+  "failedToSaveCashFlow": "Error al guardar el flujo de caja",
+  "failedToDeleteCashFlow": "Error al eliminar el flujo de caja",
+  "failedToToggleCashFlow": "Error al alternar el flujo de caja",
+  "failedToSaveCurrency": "Error al guardar la preferencia de moneda",
+  "failedToRefreshPrices": "Error al actualizar los precios",
+  "failedToLoadData": "Error al cargar los datos",
+  "failedToResetData": "Error al restablecer los datos",
+  "genericError": "Ocurrió un error"
+}

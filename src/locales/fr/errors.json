@@ -1,0 +1,20 @@
+{
+  "failedToCreateAsset": "Echec de la creation de l'actif",
+  "failedToUpdateAsset": "Echec de la mise a jour de l'actif",
+  "failedToDeleteAsset": "Echec de la suppression de l'actif",
+  "failedToUpdateQuantity": "Echec de la mise a jour de la quantite",
+  "failedToCreateVault": "Echec de la creation du coffre",
+  "failedToUpdateVault": "Echec de la mise a jour du coffre",
+  "failedToDeleteVault": "Echec de la suppression du coffre",
+  "failedToCreateEntity": "Echec de la creation de l'entite",
+  "failedToUpdateEntity": "Echec de la mise a jour de l'entite",
+  "failedToDeleteEntity": "Echec de la suppression de l'entite",
+  "failedToSaveCashFlow": "Echec de l'enregistrement du flux",
+  "failedToDeleteCashFlow": "Echec de la suppression du flux",
+  "failedToToggleCashFlow": "Echec du basculement du flux",
+  "failedToSaveCurrency": "Echec de l'enregistrement de la devise",
+  "failedToRefreshPrices": "Echec de l'actualisation des prix",
+  "failedToLoadData": "Echec du chargement des donnees",
+  "failedToResetData": "Echec de la reinitialisation des donnees",
+  "genericError": "Une erreur est survenue"
+}

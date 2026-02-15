@@ -1,0 +1,17 @@
+{
+  "salary": "Salary",
+  "freelance": "Freelance",
+  "investment_income": "Investment",
+  "rental_income": "Rental",
+  "other_income": "Other Income",
+  "rent": "Rent",
+  "mortgage": "Mortgage",
+  "subscription": "Subscription",
+  "utilities": "Utilities",
+  "insurance": "Insurance",
+  "groceries": "Groceries",
+  "transport": "Transport",
+  "entertainment": "Entertainment",
+  "savings_transfer": "Savings",
+  "other_expense": "Other Expense"
+}

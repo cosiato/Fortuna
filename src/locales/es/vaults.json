@@ -1,0 +1,37 @@
+{
+  "title": "Bóvedas",
+  "addVault": "Agregar Nueva Bóveda",
+  "editVault": "Editar Bóveda",
+  "noVaults": "Aún no hay bóvedas. Haz clic en + para agregar una.",
+  "name": "Nombre",
+  "namePlaceholder": "p. ej., Ahorros Principales, Fondo de Emergencia",
+  "cashValue": "Valor en Efectivo",
+  "currency": "Moneda",
+  "location": "Ubicación",
+  "addBtn": "Agregar Bóveda",
+  "cashFlow": {
+    "title": "Agregar Flujo de Caja",
+    "editTitle": "Editar Flujo de Caja",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej., Salario Mensual, Netflix",
+    "amount": "Monto",
+    "frequency": "Frecuencia",
+    "type": "Tipo",
+    "category": "Categoría",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Fin (opcional)",
+    "addBtn": "Agregar Flujo",
+    "addFlowBtn": "Agregar Flujo",
+    "addInflow": "Agregar ingreso",
+    "addOutflow": "Agregar egreso"
+  },
+  "projection": {
+    "title": "Proyección de Saldo",
+    "emptyState": "Agrega flujos de caja activos para ver la proyección de saldo.",
+    "balance": "Saldo",
+    "inflow": "Ingreso",
+    "outflow": "Egreso"
+  },
+  "pause": "Pausar",
+  "resume": "Reanudar"
+}
