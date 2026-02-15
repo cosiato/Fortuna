@@ -1,12 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { Toaster } from '@/components/ui/sonner';
-import './globals.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./lib/i18n";
+import App from "./App";
+import { Toaster } from "@/components/ui/sonner";
+import "./globals.css";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
     <Toaster />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

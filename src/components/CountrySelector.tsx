@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -9,24 +10,32 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { COUNTRIES } from '@/lib/countries';
+} from "@/components/ui/popover";
+import { COUNTRIES } from "@/lib/countries";
 
-const sortedCountries = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name));
+const sortedCountries = [...COUNTRIES].sort((a, b) =>
+  a.name.localeCompare(b.name),
+);
 
 interface CountrySelectorProps {
   value: string;
   onChange: (countryCode: string) => void;
 }
 
-export default function CountrySelector({ value, onChange }: CountrySelectorProps) {
+export default function CountrySelector({
+  value,
+  onChange,
+}: CountrySelectorProps) {
+  const { t } = useTranslation("common");
   const [open, setOpen] = useState(false);
-  const selectedCountry = sortedCountries.find((country) => country.code === value);
+  const selectedCountry = sortedCountries.find(
+    (country) => country.code === value,
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,16 +52,16 @@ export default function CountrySelector({ value, onChange }: CountrySelectorProp
               <span>{selectedCountry.name}</span>
             </span>
           ) : (
-            <span className="text-muted-foreground">Select country</span>
+            <span className="text-muted-foreground">{t("selectCountry")}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput placeholder="Search country..." />
+          <CommandInput placeholder={t("searchCountry")} />
           <CommandList>
-            <CommandEmpty>No country found.</CommandEmpty>
+            <CommandEmpty>{t("noCountryFound")}</CommandEmpty>
             <CommandGroup>
               {sortedCountries.map((country) => (
                 <CommandItem
@@ -65,8 +74,8 @@ export default function CountrySelector({ value, onChange }: CountrySelectorProp
                 >
                   <Check
                     className={cn(
-                      'mr-2 h-4 w-4',
-                      value === country.code ? 'opacity-100' : 'opacity-0'
+                      "mr-2 h-4 w-4",
+                      value === country.code ? "opacity-100" : "opacity-0",
                     )}
                   />
                   <span className="flex items-center gap-2">

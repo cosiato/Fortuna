@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import type { Asset } from "@/types/database"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,7 @@ import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/cu
 import CryptoSelector from "@/components/CryptoSelector"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { getStockInfo } from "@/lib/prices"
-import { assetSchema, validateSchema } from "@/lib/validation"
+import { createAssetSchema, validateSchema } from "@/lib/validation"
 import { toast } from "sonner"
 
 interface AssetFormProps {
@@ -25,14 +26,8 @@ interface AssetFormProps {
   onSubmit: (data: Partial<Asset>) => void
 }
 
-const ASSET_TYPES = [
-  { value: "crypto", label: "Cryptocurrency" },
-  { value: "stock", label: "Stock" },
-  { value: "real_estate", label: "House / Real Estate" },
-  { value: "other", label: "Other" },
-]
-
 export default function AssetForm({ asset, open, onOpenChange, onSubmit }: AssetFormProps) {
+  const { t } = useTranslation("assets")
   const [name, setName] = useState(asset?.name || "")
   const [type, setType] = useState<Asset["type"]>(asset?.type || "stock")
   const [symbol, setSymbol] = useState(asset?.symbol || "")
@@ -44,6 +39,13 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
   const [nameError, setNameError] = useState<string | null>(null)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const requestIdRef = useRef(0)
+
+  const ASSET_TYPES = [
+    { value: "crypto", label: t("assetType.crypto") },
+    { value: "stock", label: t("assetType.stock") },
+    { value: "real_estate", label: t("assetType.real_estate") },
+    { value: "other", label: t("assetType.other") },
+  ]
 
   useEffect(() => {
     if (debounceTimerRef.current) {
@@ -128,9 +130,9 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setNameError(null)
     } else {
       setResolvedName("")
-      setNameError("Cryptocurrency not found")
+      setNameError(t("cryptoNotFound"))
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     return () => {
@@ -164,7 +166,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       manualPrice: requiresManualPrice ? parseFloat(manualPrice) || null : null,
       currency,
     }
-    const result = validateSchema(assetSchema, data)
+    const result = validateSchema(createAssetSchema(), data)
     if (!result.success) {
       toast.error(result.error)
       return
@@ -176,12 +178,12 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Asset" : "Add New Asset"}</DialogTitle>
+          <DialogTitle>{isEditing ? t("editAsset") : t("addAsset")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="type">Type</Label>
+            <Label htmlFor="type">{t("type", { ns: "common" })}</Label>
             <Select
               value={type}
               onValueChange={(val) => {
@@ -194,12 +196,12 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder={t("selectType")} />
               </SelectTrigger>
               <SelectContent>
-                {ASSET_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
+                {ASSET_TYPES.map((assetType) => (
+                  <SelectItem key={assetType.value} value={assetType.value}>
+                    {assetType.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -208,7 +210,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
           {type === "crypto" && (
             <div className="space-y-2">
-              <Label>Cryptocurrency</Label>
+              <Label>{t("cryptocurrency")}</Label>
               <CryptoSelector value={symbol} onChange={handleCryptoChange} />
               {nameError && <p className="text-sm text-destructive">{nameError}</p>}
             </div>
@@ -216,16 +218,16 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
           {type === "stock" && (
             <div className="space-y-2">
-              <Label htmlFor="symbol">Ticker Symbol</Label>
+              <Label htmlFor="symbol">{t("tickerSymbol")}</Label>
               <Input
                 id="symbol"
                 value={symbol}
                 onChange={(e) => handleStockSymbolChange(e.target.value)}
-                placeholder="e.g., AAPL, GOOGL"
+                placeholder={t("tickerPlaceholder")}
                 required
               />
               {isLoadingName && (
-                <p className="text-sm text-muted-foreground">Looking up stock...</p>
+                <p className="text-sm text-muted-foreground">{t("lookingUpStock")}</p>
               )}
               {resolvedName && !isLoadingName && (
                 <p className="text-sm text-muted-foreground">{resolvedName}</p>
@@ -238,19 +240,19 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
           {!usesApiName && (
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("name", { ns: "common" })}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., House, Car"
+                placeholder={t("namePlaceholder")}
                 required
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity</Label>
+            <Label htmlFor="quantity">{t("quantity")}</Label>
             <Input
               id="quantity"
               type="number"
@@ -264,7 +266,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
           {requiresManualPrice && (
             <div className="space-y-2">
-              <Label htmlFor="manualPrice">Value (in {currency})</Label>
+              <Label htmlFor="manualPrice">{t("valueIn", { currency })}</Label>
               <Input
                 id="manualPrice"
                 type="number"
@@ -272,14 +274,14 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
                 onChange={(e) => setManualPrice(e.target.value)}
                 step="any"
                 min="0"
-                placeholder="Enter current value"
+                placeholder={t("enterCurrentValue")}
                 required
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
+            <Label htmlFor="currency">{t("currency")}</Label>
             <Select value={currency} onValueChange={setCurrency}>
               <SelectTrigger>
                 <SelectValue>
@@ -309,10 +311,10 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
             <Button type="submit" variant="default" className="flex-1" disabled={isSubmitDisabled}>
-              {isLoadingName ? "Loading..." : isEditing ? "Update" : "Add Asset"}
+              {isLoadingName ? t("loadingBtn") : isEditing ? t("update", { ns: "common" }) : t("addBtn")}
             </Button>
           </div>
         </form>

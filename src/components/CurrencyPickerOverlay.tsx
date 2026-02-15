@@ -1,17 +1,18 @@
-import { useState, useEffect, useRef, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Icon } from "@iconify/react"
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import { Icon } from "@iconify/react";
 import {
   CURRENCY_GROUPS,
   CURRENCY_INFO,
   type SupportedCurrency,
-} from "@/lib/currency"
+} from "@/lib/currency";
 
 interface CurrencyPickerOverlayProps {
-  open: boolean
-  value: SupportedCurrency
-  onSelect: (currency: SupportedCurrency) => void
-  onClose: () => void
+  open: boolean;
+  value: SupportedCurrency;
+  onSelect: (currency: SupportedCurrency) => void;
+  onClose: () => void;
 }
 
 export default function CurrencyPickerOverlay({
@@ -20,55 +21,64 @@ export default function CurrencyPickerOverlay({
   onSelect,
   onClose,
 }: CurrencyPickerOverlayProps) {
-  const [search, setSearch] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [search, setSearch] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useTranslation("common");
+
+  const CONTINENT_KEY_MAP: Record<string, string> = {
+    "North America": "continent.northAmerica",
+    "South America": "continent.southAmerica",
+    Europe: "continent.europe",
+    Asia: "continent.asia",
+    Africa: "continent.africa",
+    Oceania: "continent.oceania",
+    Digital: "continent.digital",
+  };
 
   useEffect(() => {
     if (open) {
-      setSearch("")
+      setSearch("");
       // Small delay to ensure the overlay is mounted before focusing
-      const timer = setTimeout(() => inputRef.current?.focus(), 50)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
     }
-  }, [open])
+  }, [open]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        e.preventDefault()
-        onClose()
+        e.preventDefault();
+        onClose();
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [open, onClose])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
-  const query = search.trim().toLowerCase()
+  const query = search.trim().toLowerCase();
 
   const filteredGroups = useMemo(() => {
-    if (!query) return CURRENCY_GROUPS
+    if (!query) return CURRENCY_GROUPS;
 
-    return CURRENCY_GROUPS
-      .map((group) => ({
-        ...group,
-        currencies: group.currencies.filter((code) => {
-          const info = CURRENCY_INFO[code]
-          return (
-            code.toLowerCase().includes(query) ||
-            info.name.toLowerCase().includes(query)
-          )
-        }),
-      }))
-      .filter((group) => group.currencies.length > 0)
-  }, [query])
+    return CURRENCY_GROUPS.map((group) => ({
+      ...group,
+      currencies: group.currencies.filter((code) => {
+        const info = CURRENCY_INFO[code];
+        return (
+          code.toLowerCase().includes(query) ||
+          info.name.toLowerCase().includes(query)
+        );
+      }),
+    })).filter((group) => group.currencies.length > 0);
+  }, [query]);
 
   const handleSelect = (currency: SupportedCurrency) => {
-    onSelect(currency)
-    onClose()
-  }
+    onSelect(currency);
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -80,18 +90,18 @@ export default function CurrencyPickerOverlay({
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[90] flex flex-col bg-background"
           role="dialog"
-          aria-label="Select currency"
+          aria-label={t("selectCurrency")}
           aria-modal="true"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-border">
             <h2 className="text-lg font-semibold text-foreground">
-              Select Currency
+              {t("selectCurrency")}
             </h2>
             <button
               onClick={onClose}
               className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-800/50 transition-colors"
-              aria-label="Close"
+              aria-label={t("close")}
             >
               <Icon icon="solar:close-circle-linear" width={20} height={20} />
             </button>
@@ -111,7 +121,7 @@ export default function CurrencyPickerOverlay({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by code or name..."
+                placeholder={t("searchByCodeOrName")}
                 className="w-full pl-9 pr-4 py-2 rounded-md bg-slate-800/50 border border-slate-700/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 focus:border-accent/50"
               />
             </div>
@@ -121,19 +131,22 @@ export default function CurrencyPickerOverlay({
           <div className="flex-1 overflow-y-auto px-6 py-4">
             {filteredGroups.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                No currencies match your search.
+                {t("noCurrenciesMatch")}
               </div>
             ) : (
               <div className="space-y-6">
                 {filteredGroups.map((group) => (
                   <section key={group.continent}>
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                      {group.continent}
+                      {t(
+                        (CONTINENT_KEY_MAP[group.continent] ??
+                          group.continent) as any,
+                      )}
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                       {group.currencies.map((code) => {
-                        const info = CURRENCY_INFO[code]
-                        const isSelected = code === value
+                        const info = CURRENCY_INFO[code];
+                        const isSelected = code === value;
 
                         return (
                           <button
@@ -151,9 +164,7 @@ export default function CurrencyPickerOverlay({
                             <div className="min-w-0">
                               <span
                                 className={`text-sm font-semibold block ${
-                                  isSelected
-                                    ? "text-accent"
-                                    : "text-foreground"
+                                  isSelected ? "text-accent" : "text-foreground"
                                 }`}
                               >
                                 {code}
@@ -163,7 +174,7 @@ export default function CurrencyPickerOverlay({
                               </span>
                             </div>
                           </button>
-                        )
+                        );
                       })}
                     </div>
                   </section>
@@ -174,5 +185,5 @@ export default function CurrencyPickerOverlay({
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

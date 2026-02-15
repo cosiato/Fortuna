@@ -1,15 +1,18 @@
-import OnboardingStepLayout from "./OnboardingStepLayout"
-import step3Src from "@/assets/step3.png"
+import { useTranslation } from "react-i18next";
+import OnboardingStepLayout from "./OnboardingStepLayout";
+import step3Src from "@/assets/step3.png";
 
 export default function OnboardingStepEntities() {
+  const { t } = useTranslation("onboarding");
+
   return (
     <OnboardingStepLayout
       icon="solar:users-group-rounded-linear"
-      title="Choose Your Path"
-      subtitle="One hero. Many allegiances."
-      description="Organize wealth under Personal or Company entities. Switch between realms instantly and see each one's total power at a glance."
+      title={t("step3.title")}
+      subtitle={t("step3.subtitle")}
+      description={t("step3.description")}
       screenshotSrc={step3Src}
       screenshotAlt="Entities overview screenshot"
     />
-  )
+  );
 }

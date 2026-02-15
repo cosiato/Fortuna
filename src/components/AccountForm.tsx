@@ -1,31 +1,32 @@
-import { useState, useEffect } from 'react';
-import type { Account } from '@/types/database';
+import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { Account } from '@/types/database'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency';
-import CountrySelector from '@/components/CountrySelector';
-import { accountSchema, validateSchema } from '@/lib/validation';
-import { toast } from 'sonner';
+} from '@/components/ui/select'
+import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from '@/lib/currency'
+import CountrySelector from '@/components/CountrySelector'
+import { createAccountSchema, validateSchema } from '@/lib/validation'
+import { toast } from 'sonner'
 
 interface AccountFormProps {
-  account?: Account | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: Partial<Account>) => void;
+  account?: Account | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSubmit: (data: Partial<Account>) => void
 }
 
 export default function AccountForm({
@@ -34,66 +35,67 @@ export default function AccountForm({
   onOpenChange,
   onSubmit,
 }: AccountFormProps) {
-  const [name, setName] = useState(account?.name ?? '');
-  const [balance, setBalance] = useState(account?.balance?.toString() ?? '');
-  const [currency, setCurrency] = useState(account?.currency ?? 'USD');
-  const [countryCode, setCountryCode] = useState(account?.countryCode ?? '');
+  const { t } = useTranslation('vaults')
+  const [name, setName] = useState(account?.name ?? '')
+  const [balance, setBalance] = useState(account?.balance?.toString() ?? '')
+  const [currency, setCurrency] = useState(account?.currency ?? 'USD')
+  const [countryCode, setCountryCode] = useState(account?.countryCode ?? '')
 
   useEffect(() => {
     if (account) {
-      setName(account.name ?? '');
-      setBalance(account.balance?.toString() ?? '');
-      setCurrency(account.currency ?? 'USD');
-      setCountryCode(account.countryCode ?? '');
+      setName(account.name ?? '')
+      setBalance(account.balance?.toString() ?? '')
+      setCurrency(account.currency ?? 'USD')
+      setCountryCode(account.countryCode ?? '')
     } else {
-      setName('');
-      setBalance('');
-      setCurrency('USD');
-      setCountryCode('');
+      setName('')
+      setBalance('')
+      setCurrency('USD')
+      setCountryCode('')
     }
-  }, [account, open]);
+  }, [account, open])
 
-  const isEditing = !!account;
+  const isEditing = !!account
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     const data = {
       name,
       balance: parseFloat(balance) || 0,
       currency,
       countryCode,
-    };
-    const result = validateSchema(accountSchema, data);
-    if (!result.success) {
-      toast.error(result.error);
-      return;
     }
-    onSubmit(data);
-  };
+    const result = validateSchema(createAccountSchema(), data)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    onSubmit(data)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Vault' : 'Add New Vault'}
+            {isEditing ? t('editVault') : t('addVault')}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Main Savings, Emergency Fund"
+              placeholder={t('namePlaceholder')}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="balance">Cash Value</Label>
+            <Label htmlFor="balance">{t('cashValue')}</Label>
             <Input
               id="balance"
               type="number"
@@ -107,7 +109,7 @@ export default function AccountForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
+            <Label htmlFor="currency">{t('currency')}</Label>
             <Select value={currency} onValueChange={setCurrency}>
               <SelectTrigger>
                 <SelectValue>
@@ -131,7 +133,7 @@ export default function AccountForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="country">Location</Label>
+            <Label htmlFor="country">{t('location')}</Label>
             <CountrySelector value={countryCode} onChange={setCountryCode} />
           </div>
 
@@ -142,14 +144,14 @@ export default function AccountForm({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('cancel', { ns: 'common' })}
             </Button>
             <Button type="submit" variant="default" className="flex-1" disabled={!countryCode}>
-              {isEditing ? 'Update' : 'Add Vault'}
+              {isEditing ? t('update', { ns: 'common' }) : t('addBtn')}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

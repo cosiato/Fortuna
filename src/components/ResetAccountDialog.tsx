@@ -1,23 +1,24 @@
-import { useState, useEffect } from "react"
-import { Icon } from "@iconify/react"
+import { useState, useEffect } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Icon } from "@iconify/react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ResetAccountDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: (pin?: string) => void
-  pinEnabled: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: (pin?: string) => void;
+  pinEnabled: boolean;
 }
 
-const CONFIRMATION_WORD = "RESET"
+const CONFIRMATION_WORD = "RESET";
 
 export default function ResetAccountDialog({
   open,
@@ -25,30 +26,31 @@ export default function ResetAccountDialog({
   onConfirm,
   pinEnabled,
 }: ResetAccountDialogProps) {
-  const [confirmText, setConfirmText] = useState("")
-  const [pin, setPin] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { t } = useTranslation("dialogs");
+  const [confirmText, setConfirmText] = useState("");
+  const [pin, setPin] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setConfirmText("")
-      setPin("")
-      setIsLoading(false)
+      setConfirmText("");
+      setPin("");
+      setIsLoading(false);
     }
-  }, [open])
+  }, [open]);
 
-  const isConfirmed = confirmText === CONFIRMATION_WORD
-  const isPinValid = !pinEnabled || pin.length === 4
+  const isConfirmed = confirmText === CONFIRMATION_WORD;
+  const isPinValid = !pinEnabled || pin.length === 4;
 
   const handleConfirm = async () => {
-    if (!isConfirmed || !isPinValid) return
-    setIsLoading(true)
+    if (!isConfirmed || !isPinValid) return;
+    setIsLoading(true);
     try {
-      await onConfirm(pinEnabled ? pin : undefined)
+      await onConfirm(pinEnabled ? pin : undefined);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={isLoading ? undefined : onOpenChange}>
@@ -64,9 +66,11 @@ export default function ResetAccountDialog({
               />
             </div>
             <div>
-              <DialogTitle className="text-red-500">Reset All Data</DialogTitle>
+              <DialogTitle className="text-red-500">
+                {t("resetAllData.title")}
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                This action cannot be undone.
+                {t("resetAllData.cannotBeUndone")}
               </DialogDescription>
             </div>
           </div>
@@ -83,28 +87,32 @@ export default function ResetAccountDialog({
               />
               <div className="space-y-2">
                 <p className="text-sm font-medium text-red-500">
-                  All data will be permanently deleted
+                  {t("resetAllData.warningTitle")}
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:box-linear" width={14} height={14} />
-                    <span>All assets</span>
+                    <span>{t("resetAllData.allAssets")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:safe-2-linear" width={14} height={14} />
-                    <span>All vaults and cash flows</span>
+                    <span>{t("resetAllData.allVaults")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:chart-linear" width={14} height={14} />
-                    <span>All snapshots and activity history</span>
+                    <span>{t("resetAllData.allSnapshots")}</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Icon icon="solar:buildings-linear" width={14} height={14} />
-                    <span>All entities (except Personal)</span>
+                    <Icon
+                      icon="solar:buildings-linear"
+                      width={14}
+                      height={14}
+                    />
+                    <span>{t("resetAllData.allEntities")}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Icon icon="solar:settings-linear" width={14} height={14} />
-                    <span>All settings including PIN</span>
+                    <span>{t("resetAllData.allSettings")}</span>
                   </li>
                 </ul>
               </div>
@@ -114,12 +122,14 @@ export default function ResetAccountDialog({
           {pinEnabled && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Enter your PIN to authorize this action
+                {t("resetAllData.enterPinToAuthorize")}
               </p>
               <Input
                 value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                placeholder="Enter 4-digit PIN"
+                onChange={(e) =>
+                  setPin(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
+                placeholder={t("resetAllData.enterPin")}
                 type="password"
                 inputMode="numeric"
                 maxLength={4}
@@ -131,8 +141,16 @@ export default function ResetAccountDialog({
 
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              Type <span className="font-mono font-bold text-foreground">{CONFIRMATION_WORD}</span>{" "}
-              to confirm
+              <Trans
+                ns="dialogs"
+                i18nKey="resetAllData.typeToConfirm"
+                values={{ word: CONFIRMATION_WORD }}
+                components={{
+                  bold: (
+                    <span className="font-mono font-bold text-foreground" />
+                  ),
+                }}
+              />
             </p>
             <Input
               value={confirmText}
@@ -152,7 +170,7 @@ export default function ResetAccountDialog({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
             <Button
               type="button"
@@ -161,11 +179,13 @@ export default function ResetAccountDialog({
               onClick={handleConfirm}
               disabled={!isConfirmed || !isPinValid || isLoading}
             >
-              {isLoading ? "Resetting..." : "Reset All Data"}
+              {isLoading
+                ? t("resetAllData.resetting")
+                : t("resetAllData.resetBtn")}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

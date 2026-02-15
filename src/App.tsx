@@ -1,12 +1,14 @@
-import { useEffect, useState, useCallback } from "react"
-import { Icon } from "@iconify/react"
-import CurrencySelector from "@/components/CurrencySelector"
-import NetWorthChart from "@/components/NetWorthChart"
-import AssetForm from "@/components/AssetForm"
-import AccountForm from "@/components/AccountForm"
-import VaultFlowDiagram from "@/components/VaultFlowDiagram"
-import VaultProjectionChart from "@/components/VaultProjectionChart"
-import CashFlowForm from "@/components/CashFlowForm"
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/lib/i18n";
+import { Icon } from "@iconify/react";
+import CurrencySelector from "@/components/CurrencySelector";
+import NetWorthChart from "@/components/NetWorthChart";
+import AssetForm from "@/components/AssetForm";
+import AccountForm from "@/components/AccountForm";
+import VaultFlowDiagram from "@/components/VaultFlowDiagram";
+import VaultProjectionChart from "@/components/VaultProjectionChart";
+import CashFlowForm from "@/components/CashFlowForm";
 import type {
   Asset,
   Snapshot,
@@ -15,9 +17,14 @@ import type {
   CashFlow,
   CreateCashFlowInput,
   UpdateCashFlowInput,
-} from "@/types/database"
-import { api } from "@/lib/api"
-import { PriceResult, getMultiplePrices, forceRefreshPrices, fetchSinglePrice } from "@/lib/prices"
+} from "@/types/database";
+import { api } from "@/lib/api";
+import {
+  PriceResult,
+  getMultiplePrices,
+  forceRefreshPrices,
+  fetchSinglePrice,
+} from "@/lib/prices";
 import {
   SUPPORTED_CURRENCIES,
   SupportedCurrency,
@@ -25,34 +32,43 @@ import {
   formatCurrency,
   getExchangeRates,
   forceRefreshExchangeRates,
-} from "@/lib/currency"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
-import EntitySelector from "@/components/EntitySelector"
-import SlotMachineNumber from "@/components/SlotMachineNumber"
-import EntityForm from "@/components/EntityForm"
-import DeleteEntityDialog from "@/components/DeleteEntityDialog"
-import DeleteAccountDialog from "@/components/DeleteAccountDialog"
-import ResetAccountDialog from "@/components/ResetAccountDialog"
-import LockScreen from "@/components/LockScreen"
-import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
-import SettingsDialog from "@/components/SettingsDialog"
+  getIntlLocale,
+} from "@/lib/currency";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile";
+import EntitySelector from "@/components/EntitySelector";
+import SlotMachineNumber from "@/components/SlotMachineNumber";
+import EntityForm from "@/components/EntityForm";
+import DeleteEntityDialog from "@/components/DeleteEntityDialog";
+import DeleteAccountDialog from "@/components/DeleteAccountDialog";
+import ResetAccountDialog from "@/components/ResetAccountDialog";
+import LockScreen from "@/components/LockScreen";
+import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay";
+import SettingsDialog from "@/components/SettingsDialog";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion"
-import { getCountryFlag } from "@/lib/countries"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { motion } from "framer-motion"
-import { showErrorToast } from "@/lib/errorHandling"
-import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
-import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
+} from "@/components/ui/accordion";
+import { getCountryFlag } from "@/lib/countries";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { motion } from "framer-motion";
+import { showErrorToast } from "@/lib/errorHandling";
+import {
+  calculateMonthlyTotals,
+  calculateProjection,
+} from "@/lib/cashFlowProjection";
+import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder";
 
-const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
+const REFRESH_COOLDOWN = 2 * 60 * 1000; // 2 minutes
 
 const CATEGORY_BADGE_CONFIG: Record<
   string,
@@ -82,78 +98,86 @@ const CATEGORY_BADGE_CONFIG: Record<
     border: "border-slate-400/25",
     icon: "solar:box-linear",
   },
-}
+};
 
-function formatCompactValue(value: number, currency: SupportedCurrency): string {
+function formatCompactValue(
+  value: number,
+  currency: SupportedCurrency,
+): string {
   if (currency === "BTC") {
-    return value >= 1 ? `${value.toFixed(2)} BTC` : `${value.toFixed(4)} BTC`
+    return value >= 1 ? `${value.toFixed(2)} BTC` : `${value.toFixed(4)} BTC`;
   }
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(getIntlLocale(), {
     style: "currency",
     currency,
     notation: "compact",
     maximumFractionDigits: 1,
-  }).format(value)
+  }).format(value);
 }
 
 export default function App() {
-  const [assets, setAssets] = useState<Asset[]>([])
-  const [accounts, setAccounts] = useState<Account[]>([])
-  const [snapshots, setSnapshots] = useState<Snapshot[]>([])
-  const [entities, setEntities] = useState<Entity[]>([])
-  const [selectedEntityId, setSelectedEntityId] = useState<number>(0)
-  const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({})
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = useState<number>(0);
+  const [prices, setPrices] = useState<{ [symbol: string]: PriceResult }>({});
   const [exchangeRates, setExchangeRates] = useState<{
-    [currency: string]: number
-  }>(FALLBACK_RATES)
-  const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
-  const [loading, setLoading] = useState(true)
-  const [assetFormOpen, setAssetFormOpen] = useState(false)
-  const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
-  const [accountFormOpen, setAccountFormOpen] = useState(false)
-  const [editingAccount, setEditingAccount] = useState<Account | null>(null)
-  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false)
-  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null)
-  const [entityFormOpen, setEntityFormOpen] = useState(false)
-  const [editingEntity, setEditingEntity] = useState<Entity | null>(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [refreshCooldown, setRefreshCooldown] = useState(false)
-  const [isLocked, setIsLocked] = useState(false)
-  const [isPinEnabled, setIsPinEnabled] = useState(false)
+    [currency: string]: number;
+  }>(FALLBACK_RATES);
+  const [displayCurrency, setDisplayCurrency] =
+    useState<SupportedCurrency>("USD");
+  const [loading, setLoading] = useState(true);
+  const [assetFormOpen, setAssetFormOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [accountFormOpen, setAccountFormOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
+  const [entityFormOpen, setEntityFormOpen] = useState(false);
+  const [editingEntity, setEditingEntity] = useState<Entity | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshCooldown, setRefreshCooldown] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isPinEnabled, setIsPinEnabled] = useState(false);
 
   const handleLock = async () => {
     try {
-      await api.settings.lockApp()
+      await api.settings.lockApp();
     } catch {
       // Lock frontend even if backend call fails
     }
-    setIsLocked(true)
-  }
+    setIsLocked(true);
+  };
 
   const handleUnlock = async () => {
-    setIsLocked(false)
-  }
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [resetDialogOpen, setResetDialogOpen] = useState(false)
-  const [cashFlows, setCashFlows] = useState<CashFlow[]>([])
-  const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false)
-  const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null)
-  const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("")
-  const [defaultFlowType, setDefaultFlowType] = useState<"inflow" | "outflow" | undefined>(
-    undefined,
-  )
-  const [showOnboarding, setShowOnboarding] = useState(false)
+    setIsLocked(false);
+  };
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [cashFlows, setCashFlows] = useState<CashFlow[]>([]);
+  const [cashFlowFormOpen, setCashFlowFormOpen] = useState(false);
+  const [editingCashFlow, setEditingCashFlow] = useState<CashFlow | null>(null);
+  const [cashFlowAccountId, setCashFlowAccountId] = useState<string>("");
+  const [defaultFlowType, setDefaultFlowType] = useState<
+    "inflow" | "outflow" | undefined
+  >(undefined);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const { t } = useTranslation(["common", "assets", "vaults", "errors"]);
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const handleCurrencyChange = async (currency: SupportedCurrency) => {
-    setDisplayCurrency(currency)
+    setDisplayCurrency(currency);
     try {
-      await api.settings.setCurrencyPreference(currency)
+      await api.settings.setCurrencyPreference(currency);
     } catch (error) {
-      showErrorToast(error, "Failed to save currency preference")
+      showErrorToast(error, t("errors:failedToSaveCurrency"));
     }
-  }
+  };
 
   const handleAddAsset = async (data: Partial<Asset>) => {
     try {
@@ -165,33 +189,36 @@ export default function App() {
         manualPrice: data.manualPrice,
         currency: data.currency,
         entityId: selectedEntityId,
-      })
-      setAssetFormOpen(false)
-      await fetchDataOnly()
-      requestSnapshot()
+      });
+      setAssetFormOpen(false);
+      await fetchDataOnly();
+      requestSnapshot();
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
+        const priceResult = await fetchSinglePrice(
+          data.symbol,
+          data.type as "stock" | "crypto",
+        );
         if (priceResult.price > 0) {
           setPrices((prev) => ({
             ...prev,
             [priceResult.symbol.toLowerCase()]: priceResult,
             [priceResult.symbol.toUpperCase()]: priceResult,
-          }))
+          }));
         }
       }
     } catch (error) {
-      showErrorToast(error, "Failed to create asset")
+      showErrorToast(error, t("errors:failedToCreateAsset"));
     }
-  }
+  };
 
   const handleEditAsset = (asset: Asset) => {
-    setEditingAsset(asset)
-    setAssetFormOpen(true)
-  }
+    setEditingAsset(asset);
+    setAssetFormOpen(true);
+  };
 
   const handleUpdateAsset = async (data: Partial<Asset>) => {
-    if (!editingAsset) return
+    if (!editingAsset) return;
     try {
       await api.assets.update(editingAsset.id, {
         name: data.name,
@@ -200,55 +227,60 @@ export default function App() {
         quantity: data.quantity,
         manualPrice: data.manualPrice,
         currency: data.currency,
-      })
-      setAssetFormOpen(false)
-      setEditingAsset(null)
-      await fetchDataOnly()
-      requestSnapshot()
+      });
+      setAssetFormOpen(false);
+      setEditingAsset(null);
+      await fetchDataOnly();
+      requestSnapshot();
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
+        const priceResult = await fetchSinglePrice(
+          data.symbol,
+          data.type as "stock" | "crypto",
+        );
         if (priceResult.price > 0) {
           setPrices((prev) => ({
             ...prev,
             [priceResult.symbol.toLowerCase()]: priceResult,
             [priceResult.symbol.toUpperCase()]: priceResult,
-          }))
+          }));
         }
       }
     } catch (error) {
-      showErrorToast(error, "Failed to update asset")
+      showErrorToast(error, t("errors:failedToUpdateAsset"));
     }
-  }
+  };
 
   const handleDeleteAsset = async (id: string) => {
     try {
-      await api.assets.delete(id)
-      await fetchDataOnly()
-      requestSnapshot()
+      await api.assets.delete(id);
+      await fetchDataOnly();
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to delete asset")
+      showErrorToast(error, t("errors:failedToDeleteAsset"));
     }
-  }
+  };
 
   const handleQuantityChange = async (id: string, newQuantity: number) => {
     try {
-      await api.assets.update(id, { quantity: newQuantity })
+      await api.assets.update(id, { quantity: newQuantity });
       setAssets((prev) =>
-        prev.map((asset) => (asset.id === id ? { ...asset, quantity: newQuantity } : asset)),
-      )
-      requestSnapshot()
+        prev.map((asset) =>
+          asset.id === id ? { ...asset, quantity: newQuantity } : asset,
+        ),
+      );
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to update quantity")
+      showErrorToast(error, t("errors:failedToUpdateQuantity"));
     }
-  }
+  };
 
   const handleAssetFormClose = (open: boolean) => {
-    setAssetFormOpen(open)
+    setAssetFormOpen(open);
     if (!open) {
-      setEditingAsset(null)
+      setEditingAsset(null);
     }
-  }
+  };
 
   const handleAddAccount = async (data: Partial<Account>) => {
     try {
@@ -258,133 +290,137 @@ export default function App() {
         currency: data.currency,
         countryCode: data.countryCode!,
         entityId: selectedEntityId,
-      })
-      setAccountFormOpen(false)
-      await fetchDataOnly()
-      requestSnapshot()
+      });
+      setAccountFormOpen(false);
+      await fetchDataOnly();
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to create vault")
+      showErrorToast(error, t("errors:failedToCreateVault"));
     }
-  }
+  };
 
   const handleEditAccount = (account: Account) => {
-    setEditingAccount(account)
-    setAccountFormOpen(true)
-  }
+    setEditingAccount(account);
+    setAccountFormOpen(true);
+  };
 
   const handleUpdateAccount = async (data: Partial<Account>) => {
-    if (!editingAccount) return
+    if (!editingAccount) return;
     try {
       await api.accounts.update(editingAccount.id, {
         name: data.name,
         balance: data.balance,
         currency: data.currency,
         countryCode: data.countryCode,
-      })
-      setAccountFormOpen(false)
-      setEditingAccount(null)
-      await fetchDataOnly()
-      requestSnapshot()
+      });
+      setAccountFormOpen(false);
+      setEditingAccount(null);
+      await fetchDataOnly();
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to update vault")
+      showErrorToast(error, t("errors:failedToUpdateVault"));
     }
-  }
+  };
 
   const handleAccountFormClose = (open: boolean) => {
-    setAccountFormOpen(open)
+    setAccountFormOpen(open);
     if (!open) {
-      setEditingAccount(null)
+      setEditingAccount(null);
     }
-  }
+  };
 
   const handleDeleteAccountRequest = (account: Account) => {
-    setAccountToDelete(account)
-    setDeleteAccountDialogOpen(true)
-  }
+    setAccountToDelete(account);
+    setDeleteAccountDialogOpen(true);
+  };
 
   const handleConfirmDeleteAccount = async () => {
-    if (!accountToDelete) return
+    if (!accountToDelete) return;
     try {
-      await api.accounts.delete(accountToDelete.id)
-      setDeleteAccountDialogOpen(false)
-      setAccountToDelete(null)
-      await fetchDataOnly()
-      requestSnapshot()
-      const updated = await api.cashFlows.getAll()
-      setCashFlows(updated)
+      await api.accounts.delete(accountToDelete.id);
+      setDeleteAccountDialogOpen(false);
+      setAccountToDelete(null);
+      await fetchDataOnly();
+      requestSnapshot();
+      const updated = await api.cashFlows.getAll();
+      setCashFlows(updated);
     } catch (error) {
-      showErrorToast(error, "Failed to delete vault")
+      showErrorToast(error, t("errors:failedToDeleteVault"));
     }
-  }
+  };
 
   const handleAddCompany = async (data: { name: string }) => {
     try {
-      await api.entities.create({ name: data.name, type: "company" })
-      setEntityFormOpen(false)
-      await fetchDataOnly()
+      await api.entities.create({ name: data.name, type: "company" });
+      setEntityFormOpen(false);
+      await fetchDataOnly();
     } catch (error) {
-      showErrorToast(error, "Failed to create entity")
+      showErrorToast(error, t("errors:failedToCreateEntity"));
     }
-  }
+  };
 
   const handleEditEntity = (entity: Entity) => {
-    setEditingEntity(entity)
-    setEntityFormOpen(true)
-  }
+    setEditingEntity(entity);
+    setEntityFormOpen(true);
+  };
 
   const handleUpdateEntity = async (data: { name: string }) => {
-    if (!editingEntity) return
+    if (!editingEntity) return;
     try {
-      await api.entities.update(editingEntity.id, { name: data.name })
-      setEntityFormOpen(false)
-      setEditingEntity(null)
-      await fetchDataOnly()
+      await api.entities.update(editingEntity.id, { name: data.name });
+      setEntityFormOpen(false);
+      setEditingEntity(null);
+      await fetchDataOnly();
     } catch (error) {
-      showErrorToast(error, "Failed to update entity")
+      showErrorToast(error, t("errors:failedToUpdateEntity"));
     }
-  }
+  };
 
   const handleEntityFormClose = (open: boolean) => {
-    setEntityFormOpen(open)
+    setEntityFormOpen(open);
     if (!open) {
-      setEditingEntity(null)
+      setEditingEntity(null);
     }
-  }
+  };
 
   const handleDeleteEntityRequest = (entity: Entity) => {
-    setEntityToDelete(entity)
-    setDeleteDialogOpen(true)
-  }
+    setEntityToDelete(entity);
+    setDeleteDialogOpen(true);
+  };
 
   const handleConfirmDeleteEntity = async () => {
-    if (!entityToDelete) return
+    if (!entityToDelete) return;
 
     try {
-      const entityAssets = assets.filter((a) => a.entityId === entityToDelete.id)
-      const entityAccounts = accounts.filter((a) => a.entityId === entityToDelete.id)
+      const entityAssets = assets.filter(
+        (a) => a.entityId === entityToDelete.id,
+      );
+      const entityAccounts = accounts.filter(
+        (a) => a.entityId === entityToDelete.id,
+      );
 
       for (const asset of entityAssets) {
-        await api.assets.delete(asset.id)
+        await api.assets.delete(asset.id);
       }
 
       for (const account of entityAccounts) {
-        await api.accounts.delete(account.id)
+        await api.accounts.delete(account.id);
       }
 
-      await api.entities.delete(entityToDelete.id)
+      await api.entities.delete(entityToDelete.id);
 
       if (selectedEntityId === entityToDelete.id) {
-        setSelectedEntityId(0)
+        setSelectedEntityId(0);
       }
 
-      setDeleteDialogOpen(false)
-      setEntityToDelete(null)
-      await fetchDataOnly()
-      requestSnapshot()
+      setDeleteDialogOpen(false);
+      setEntityToDelete(null);
+      await fetchDataOnly();
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to delete entity")
+      showErrorToast(error, t("errors:failedToDeleteEntity"));
     }
-  }
+  };
 
   const handleAddCashFlow = async (
     data: CreateCashFlowInput | UpdateCashFlowInput,
@@ -392,148 +428,156 @@ export default function App() {
   ) => {
     try {
       if (isEdit && editingCashFlow) {
-        await api.cashFlows.update(editingCashFlow.id, data as UpdateCashFlowInput)
+        await api.cashFlows.update(
+          editingCashFlow.id,
+          data as UpdateCashFlowInput,
+        );
       } else {
-        await api.cashFlows.create(data as CreateCashFlowInput)
+        await api.cashFlows.create(data as CreateCashFlowInput);
       }
-      setCashFlowFormOpen(false)
-      setEditingCashFlow(null)
-      const updated = await api.cashFlows.getAll()
-      setCashFlows(updated)
+      setCashFlowFormOpen(false);
+      setEditingCashFlow(null);
+      const updated = await api.cashFlows.getAll();
+      setCashFlows(updated);
     } catch (error) {
-      showErrorToast(error, "Failed to save cash flow")
+      showErrorToast(error, t("errors:failedToSaveCashFlow"));
     }
-  }
+  };
 
   const handleEditCashFlow = (id: string) => {
-    const flow = cashFlows.find((f) => f.id === id)
+    const flow = cashFlows.find((f) => f.id === id);
     if (flow) {
-      setEditingCashFlow(flow)
-      setCashFlowAccountId(flow.accountId)
-      setCashFlowFormOpen(true)
+      setEditingCashFlow(flow);
+      setCashFlowAccountId(flow.accountId);
+      setCashFlowFormOpen(true);
     }
-  }
+  };
 
   const handleDeleteCashFlow = async (id: string) => {
     try {
-      await api.cashFlows.delete(id)
-      const updated = await api.cashFlows.getAll()
-      setCashFlows(updated)
+      await api.cashFlows.delete(id);
+      const updated = await api.cashFlows.getAll();
+      setCashFlows(updated);
     } catch (error) {
-      showErrorToast(error, "Failed to delete cash flow")
+      showErrorToast(error, t("errors:failedToDeleteCashFlow"));
     }
-  }
+  };
 
   const handleToggleCashFlow = async (id: string) => {
-    const flow = cashFlows.find((f) => f.id === id)
-    if (!flow) return
+    const flow = cashFlows.find((f) => f.id === id);
+    if (!flow) return;
     try {
-      await api.cashFlows.update(id, { isActive: !flow.isActive })
-      const updated = await api.cashFlows.getAll()
-      setCashFlows(updated)
+      await api.cashFlows.update(id, { isActive: !flow.isActive });
+      const updated = await api.cashFlows.getAll();
+      setCashFlows(updated);
     } catch (error) {
-      showErrorToast(error, "Failed to toggle cash flow")
+      showErrorToast(error, t("errors:failedToToggleCashFlow"));
     }
-  }
+  };
 
   const handleCashFlowFormClose = (open: boolean) => {
-    setCashFlowFormOpen(open)
+    setCashFlowFormOpen(open);
     if (!open) {
-      setEditingCashFlow(null)
-      setDefaultFlowType(undefined)
+      setEditingCashFlow(null);
+      setDefaultFlowType(undefined);
     }
-  }
+  };
 
   const handleResetAccount = async (pin?: string) => {
     try {
-      await api.settings.resetAllData(pin)
-      setPrices({})
-      setIsPinEnabled(false)
-      setIsLocked(false)
-      setSelectedEntityId(0)
-      setResetDialogOpen(false)
-      setSettingsOpen(false)
-      localStorage.removeItem("fortuna_onboarding_completed")
-      setShowOnboarding(true)
-      await fetchDataOnly()
+      await api.settings.resetAllData(pin);
+      setPrices({});
+      setIsPinEnabled(false);
+      setIsLocked(false);
+      setSelectedEntityId(0);
+      setResetDialogOpen(false);
+      setSettingsOpen(false);
+      localStorage.removeItem("fortuna_onboarding_completed");
+      setShowOnboarding(true);
+      await fetchDataOnly();
     } catch (error) {
-      showErrorToast(error, "Failed to reset data")
+      showErrorToast(error, t("errors:failedToResetData"));
     }
-  }
+  };
 
   const fetchDataOnly = useCallback(async () => {
     try {
-      await api.entities.ensureIndividual()
+      await api.entities.ensureIndividual();
 
-      const [assetsData, snapshotsData, accountsData, entitiesData, cashFlowsData] =
-        await Promise.all([
-          api.assets.getAll(),
-          api.snapshots.getAll(),
-          api.accounts.getAll(),
-          api.entities.getAll(),
-          api.cashFlows.getAll(),
-        ])
+      const [
+        assetsData,
+        snapshotsData,
+        accountsData,
+        entitiesData,
+        cashFlowsData,
+      ] = await Promise.all([
+        api.assets.getAll(),
+        api.snapshots.getAll(),
+        api.accounts.getAll(),
+        api.entities.getAll(),
+        api.cashFlows.getAll(),
+      ]);
 
-      setAssets(assetsData)
-      setSnapshots(snapshotsData)
-      setAccounts(accountsData)
-      setEntities(entitiesData)
-      setCashFlows(cashFlowsData)
+      setAssets(assetsData);
+      setSnapshots(snapshotsData);
+      setAccounts(accountsData);
+      setEntities(entitiesData);
+      setCashFlows(cashFlowsData);
 
-      return { assetsData, accountsData }
+      return { assetsData, accountsData };
     } catch (error) {
-      showErrorToast(error, "Failed to load data")
-      return { assetsData: [] as Asset[], accountsData: [] as Account[] }
+      showErrorToast(error, tRef.current("errors:failedToLoadData"));
+      return { assetsData: [] as Asset[], accountsData: [] as Account[] };
     }
-  }, [])
+  }, []);
 
   const refreshPrices = useCallback(async (assetsData: Asset[]) => {
     try {
-      const ratesData = await getExchangeRates()
-      setExchangeRates(ratesData.rates || FALLBACK_RATES)
+      const ratesData = await getExchangeRates();
+      setExchangeRates(ratesData.rates || FALLBACK_RATES);
 
       const tradeableAssets = assetsData.filter(
         (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
-      )
+      );
 
       if (tradeableAssets.length > 0) {
         const symbolsWithTypes = tradeableAssets.map((a: Asset) => ({
           symbol: a.symbol!,
           type: a.type as "stock" | "crypto",
-        }))
+        }));
 
-        const pricesArray = await getMultiplePrices(symbolsWithTypes)
+        const pricesArray = await getMultiplePrices(symbolsWithTypes);
 
-        const pricesMap: { [symbol: string]: PriceResult } = {}
+        const pricesMap: { [symbol: string]: PriceResult } = {};
 
         for (const p of pricesArray) {
-          pricesMap[p.symbol.toLowerCase()] = p
-          pricesMap[p.symbol.toUpperCase()] = p
+          pricesMap[p.symbol.toLowerCase()] = p;
+          pricesMap[p.symbol.toUpperCase()] = p;
         }
 
-        setPrices((prev) => ({ ...prev, ...pricesMap }))
+        setPrices((prev) => ({ ...prev, ...pricesMap }));
       }
     } catch (error) {
-      showErrorToast(error, "Failed to refresh prices")
+      showErrorToast(error, tRef.current("errors:failedToRefreshPrices"));
     }
-  }, [])
+  }, []);
 
   const handleManualRefresh = useCallback(async () => {
     if (refreshCooldown) {
-      return
+      return;
     }
 
-    setIsRefreshing(true)
-    setRefreshCooldown(true)
+    setIsRefreshing(true);
+    setRefreshCooldown(true);
 
     setTimeout(() => {
-      setRefreshCooldown(false)
-    }, REFRESH_COOLDOWN)
+      setRefreshCooldown(false);
+    }, REFRESH_COOLDOWN);
 
     try {
       const tradeableAssets = assets.filter(
         (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
-      )
+      );
 
       const [ratesData] = await Promise.all([
         forceRefreshExchangeRates(),
@@ -544,246 +588,296 @@ export default function App() {
                 type: a.type as "stock" | "crypto",
               })),
             ).then((pricesArray) => {
-              const pricesMap: { [symbol: string]: PriceResult } = {}
+              const pricesMap: { [symbol: string]: PriceResult } = {};
               for (const p of pricesArray) {
-                pricesMap[p.symbol.toLowerCase()] = p
-                pricesMap[p.symbol.toUpperCase()] = p
+                pricesMap[p.symbol.toLowerCase()] = p;
+                pricesMap[p.symbol.toUpperCase()] = p;
               }
-              setPrices((prev) => ({ ...prev, ...pricesMap }))
+              setPrices((prev) => ({ ...prev, ...pricesMap }));
             })
           : Promise.resolve(),
-      ])
+      ]);
 
-      setExchangeRates(ratesData.rates || FALLBACK_RATES)
-      requestSnapshot()
+      setExchangeRates(ratesData.rates || FALLBACK_RATES);
+      requestSnapshot();
     } catch (error) {
-      showErrorToast(error, "Failed to refresh prices")
+      showErrorToast(error, t("errors:failedToRefreshPrices"));
     } finally {
-      setIsRefreshing(false)
+      setIsRefreshing(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assets, refreshCooldown])
+  }, [assets, refreshCooldown]);
 
   useEffect(() => {
     const initializeApp = async () => {
-      const { assetsData, accountsData } = await fetchDataOnly()
-      await refreshPrices(assetsData)
+      const { assetsData, accountsData } = await fetchDataOnly();
+      await refreshPrices(assetsData);
 
       try {
-        const savedCurrency = await api.settings.getCurrencyPreference()
+        const savedCurrency = await api.settings.getCurrencyPreference();
         if (SUPPORTED_CURRENCIES.includes(savedCurrency as SupportedCurrency)) {
-          setDisplayCurrency(savedCurrency as SupportedCurrency)
+          setDisplayCurrency(savedCurrency as SupportedCurrency);
         }
       } catch {
         // Currency preference load failed, keep default USD
       }
 
       try {
-        const pinEnabled = await api.settings.isPinEnabled()
-        setIsPinEnabled(pinEnabled)
+        const savedLocale = await api.settings.getLocalePreference();
+        if (savedLocale && savedLocale !== i18n.language) {
+          await i18n.changeLanguage(savedLocale);
+        }
+      } catch {
+        // Locale preference load failed, keep default 'en'
+      }
+
+      try {
+        const pinEnabled = await api.settings.isPinEnabled();
+        setIsPinEnabled(pinEnabled);
         if (pinEnabled) {
-          handleLock()
+          handleLock();
         }
       } catch {
         // PIN check failed, continue without lock
       }
 
-      const onboardingCompleted = localStorage.getItem("fortuna_onboarding_completed")
-      if (!onboardingCompleted && assetsData.length === 0 && accountsData.length === 0) {
-        setShowOnboarding(true)
+      const onboardingCompleted = localStorage.getItem(
+        "fortuna_onboarding_completed",
+      );
+      if (
+        !onboardingCompleted &&
+        assetsData.length === 0 &&
+        accountsData.length === 0
+      ) {
+        setShowOnboarding(true);
       }
 
-      setLoading(false)
-    }
-    initializeApp()
-  }, [fetchDataOnly, refreshPrices])
+      setLoading(false);
+    };
+    initializeApp();
+  }, [fetchDataOnly, refreshPrices]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "l" && isPinEnabled && !isLocked) {
-        e.preventDefault()
-        handleLock()
+      if (
+        (e.metaKey || e.ctrlKey) &&
+        e.key === "l" &&
+        isPinEnabled &&
+        !isLocked
+      ) {
+        e.preventDefault();
+        handleLock();
       }
-    }
+    };
 
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isPinEnabled, isLocked])
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPinEnabled, isLocked]);
 
   const calculateNetWorthUsd = () => {
-    let totalInUsd = 0
+    let totalInUsd = 0;
 
     for (const asset of assets) {
-      let value = 0
-      let currency = asset.currency
+      let value = 0;
+      let currency = asset.currency;
 
       if (asset.manualPrice !== null) {
-        value = asset.manualPrice * asset.quantity
+        value = asset.manualPrice * asset.quantity;
       } else if (asset.symbol) {
-        const priceKey = asset.symbol.toLowerCase()
-        const priceData = prices[priceKey] || prices[asset.symbol.toUpperCase()]
+        const priceKey = asset.symbol.toLowerCase();
+        const priceData =
+          prices[priceKey] || prices[asset.symbol.toUpperCase()];
         if (priceData && priceData.price > 0) {
-          value = priceData.price * asset.quantity
-          currency = priceData.currency
+          value = priceData.price * asset.quantity;
+          currency = priceData.currency;
         }
       }
 
       if (currency !== "USD" && exchangeRates[currency]) {
-        value = value / exchangeRates[currency]
+        value = value / exchangeRates[currency];
       }
 
-      totalInUsd += value
+      totalInUsd += value;
     }
 
     for (const account of accounts) {
-      let value = account.balance
+      let value = account.balance;
       if (account.currency !== "USD" && exchangeRates[account.currency]) {
-        value = value / exchangeRates[account.currency]
+        value = value / exchangeRates[account.currency];
       }
-      totalInUsd += value
+      totalInUsd += value;
     }
 
-    return totalInUsd
-  }
+    return totalInUsd;
+  };
 
-  const netWorthUsd = calculateNetWorthUsd()
+  const netWorthUsd = calculateNetWorthUsd();
   const netWorth =
     displayCurrency !== "USD" && exchangeRates[displayCurrency]
       ? netWorthUsd * exchangeRates[displayCurrency]
-      : netWorthUsd
+      : netWorthUsd;
 
   const refreshSnapshots = useCallback(async () => {
     try {
-      const updated = await api.snapshots.getAll()
-      setSnapshots(updated)
+      const updated = await api.snapshots.getAll();
+      setSnapshots(updated);
     } catch {
       // Snapshot refresh is best-effort
     }
-  }, [])
+  }, []);
 
   const { requestSnapshot, recordSnapshotNow } = useSnapshotRecorder({
     netWorth: netWorthUsd,
     currency: "USD",
     enabled: !loading,
     onSnapshotsUpdated: refreshSnapshots,
-  })
+  });
 
   const ASSET_CATEGORIES = [
     {
       key: "stock",
-      label: "Stocks",
+      label: t("assets:type.stock"),
       icon: <Icon icon="solar:chart-linear" width={12} height={12} />,
     },
     {
       key: "crypto",
-      label: "Crypto",
+      label: t("assets:type.crypto"),
       icon: <Icon icon="solar:money-bag-linear" width={12} height={12} />,
     },
     {
       key: "real_estate",
-      label: "Real Estate",
+      label: t("assets:type.real_estate"),
       icon: <Icon icon="solar:home-linear" width={12} height={12} />,
     },
     {
       key: "other",
-      label: "Other",
+      label: t("assets:type.other"),
       icon: <Icon icon="solar:box-linear" width={12} height={12} />,
     },
-  ]
+  ];
 
-  const filteredAssets = assets.filter((asset) => asset.entityId === selectedEntityId)
-  const filteredAccounts = accounts.filter((account) => account.entityId === selectedEntityId)
+  const filteredAssets = assets.filter(
+    (asset) => asset.entityId === selectedEntityId,
+  );
+  const filteredAccounts = accounts.filter(
+    (account) => account.entityId === selectedEntityId,
+  );
 
-  const assetsByType = ASSET_CATEGORIES.reduce<Record<string, Asset[]>>((acc, category) => {
-    acc[category.key] = filteredAssets.filter((asset) => asset.type === category.key)
-    return acc
-  }, {})
+  const assetsByType = ASSET_CATEGORIES.reduce<Record<string, Asset[]>>(
+    (acc, category) => {
+      acc[category.key] = filteredAssets.filter(
+        (asset) => asset.type === category.key,
+      );
+      return acc;
+    },
+    {},
+  );
 
   const nonEmptyCategories = ASSET_CATEGORIES.filter(
     (category) => assetsByType[category.key].length > 0,
-  )
+  );
 
-  const defaultAssetTab = nonEmptyCategories[0]?.key || "stock"
-  const [activeTab, setActiveTab] = useState(defaultAssetTab)
+  const defaultAssetTab = nonEmptyCategories[0]?.key || "stock";
+  const [activeTab, setActiveTab] = useState(defaultAssetTab);
 
   useEffect(() => {
-    if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some((c) => c.key === activeTab)) {
-      setActiveTab(nonEmptyCategories[0].key)
+    if (
+      nonEmptyCategories.length > 0 &&
+      !nonEmptyCategories.some((c) => c.key === activeTab)
+    ) {
+      setActiveTab(nonEmptyCategories[0].key);
     }
-  }, [nonEmptyCategories, activeTab])
+  }, [nonEmptyCategories, activeTab]);
 
   const getAssetValue = (asset: Asset): number => {
-    let value = 0
-    let currency = asset.currency
+    let value = 0;
+    let currency = asset.currency;
 
     if (asset.manualPrice !== null) {
-      value = asset.manualPrice * asset.quantity
+      value = asset.manualPrice * asset.quantity;
     } else if (asset.symbol) {
-      const priceData = prices[asset.symbol.toLowerCase()] || prices[asset.symbol.toUpperCase()]
+      const priceData =
+        prices[asset.symbol.toLowerCase()] ||
+        prices[asset.symbol.toUpperCase()];
       if (priceData && priceData.price > 0) {
-        value = priceData.price * asset.quantity
-        currency = priceData.currency
+        value = priceData.price * asset.quantity;
+        currency = priceData.currency;
       }
     }
 
     if (currency !== "USD" && exchangeRates[currency]) {
-      value = value / exchangeRates[currency]
+      value = value / exchangeRates[currency];
     }
 
     if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
-      return value * exchangeRates[displayCurrency]
+      return value * exchangeRates[displayCurrency];
     }
 
-    return value
-  }
+    return value;
+  };
 
   const getAccountValue = (account: Account): number => {
-    let value = account.balance
+    let value = account.balance;
     if (account.currency !== "USD" && exchangeRates[account.currency]) {
-      value = value / exchangeRates[account.currency]
+      value = value / exchangeRates[account.currency];
     }
     if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
-      return value * exchangeRates[displayCurrency]
+      return value * exchangeRates[displayCurrency];
     }
-    return value
-  }
+    return value;
+  };
 
-  const entityTotals = entities.reduce<Record<number, number>>((acc, entity) => {
-    const entityAssets = assets.filter((a) => a.entityId === entity.id)
-    const entityAccounts = accounts.filter((a) => a.entityId === entity.id)
+  const entityTotals = entities.reduce<Record<number, number>>(
+    (acc, entity) => {
+      const entityAssets = assets.filter((a) => a.entityId === entity.id);
+      const entityAccounts = accounts.filter((a) => a.entityId === entity.id);
 
-    const assetsTotal = entityAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
-    const accountsTotal = entityAccounts.reduce((sum, account) => sum + getAccountValue(account), 0)
+      const assetsTotal = entityAssets.reduce(
+        (sum, asset) => sum + getAssetValue(asset),
+        0,
+      );
+      const accountsTotal = entityAccounts.reduce(
+        (sum, account) => sum + getAccountValue(account),
+        0,
+      );
 
-    acc[entity.id] = assetsTotal + accountsTotal
-    return acc
-  }, {})
+      acc[entity.id] = assetsTotal + accountsTotal;
+      return acc;
+    },
+    {},
+  );
 
   const categoryBadgeData = ASSET_CATEGORIES.map((cat) => {
-    const catAssets = assets.filter((a) => a.type === cat.key)
-    const total = catAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
-    return { key: cat.key, label: cat.label, count: catAssets.length, total }
-  }).filter((c) => c.count > 0)
+    const catAssets = assets.filter((a) => a.type === cat.key);
+    const total = catAssets.reduce(
+      (sum, asset) => sum + getAssetValue(asset),
+      0,
+    );
+    return { key: cat.key, label: cat.label, count: catAssets.length, total };
+  }).filter((c) => c.count > 0);
 
-  const vaultBadgeTotal = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
+  const vaultBadgeTotal = accounts.reduce(
+    (sum, acc) => sum + getAccountValue(acc),
+    0,
+  );
 
   useEffect(() => {
     if (!loading && (assets.length > 0 || accounts.length > 0)) {
-      recordSnapshotNow()
+      recordSnapshotNow();
       api.snapshots.prune().catch(() => {
         // Pruning is best-effort; failures do not affect user experience
-      })
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading])
+  }, [loading]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <img src="/logo.png" alt="Fortuna" className="w-24 h-24" />
-        <div className="text-foreground text-2xl">Loading</div>
+        <div className="text-foreground text-2xl">{t("common:loading")}</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -793,7 +887,9 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Fortuna" className="w-7 h-7 logo-hover" />
-            <h1 className="text-2xl font-bold text-accent leading-none pt-0.5">Fortuna</h1>
+            <h1 className="text-2xl font-bold text-accent leading-none pt-0.5">
+              Fortuna
+            </h1>
           </div>
           <div className="flex items-center gap-4">
             <Button
@@ -802,7 +898,7 @@ export default function App() {
               className="h-auto px-2 py-1.5 text-muted-foreground hover:text-foreground disabled:opacity-100"
               onClick={handleManualRefresh}
               disabled={isRefreshing || refreshCooldown}
-              title="Refresh prices"
+              title={t("common:refreshPrices")}
             >
               {refreshCooldown && !isRefreshing ? (
                 <span className="flex items-center gap-1.5">
@@ -810,7 +906,9 @@ export default function App() {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                   </span>
-                  <span className="text-xs text-emerald-500">Updated</span>
+                  <span className="text-xs text-emerald-500">
+                    {t("common:updated")}
+                  </span>
                 </span>
               ) : (
                 <span className="flex items-center gap-1.5">
@@ -820,17 +918,20 @@ export default function App() {
                     height={16}
                     className={isRefreshing ? "animate-spin" : ""}
                   />
-                  <span className="text-xs">Update</span>
+                  <span className="text-xs">{t("common:updatePrices")}</span>
                 </span>
               )}
             </Button>
-            <CurrencySelector value={displayCurrency} onChange={handleCurrencyChange} />
+            <CurrencySelector
+              value={displayCurrency}
+              onChange={handleCurrencyChange}
+            />
             <Button
               variant="ghost"
               size="sm"
               className="h-auto px-2 py-1.5 text-muted-foreground hover:text-foreground"
               onClick={() => setSettingsOpen(true)}
-              title="Settings"
+              title={t("common:settings")}
             >
               <Icon icon="solar:settings-linear" width={16} height={16} />
             </Button>
@@ -848,21 +949,30 @@ export default function App() {
             />
             <div className="flex flex-wrap items-center gap-2 mt-3 mb-8">
               {categoryBadgeData.map((cat) => {
-                const colors = CATEGORY_BADGE_CONFIG[cat.key]
+                const colors = CATEGORY_BADGE_CONFIG[cat.key];
                 return (
                   <div
                     key={cat.key}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${colors.bg} border ${colors.border}`}
                   >
-                    <Icon icon={colors.icon} className={colors.text} width={14} height={14} />
-                    <span className={`text-xs font-medium ${colors.text}`}>{cat.label}</span>
+                    <Icon
+                      icon={colors.icon}
+                      className={colors.text}
+                      width={14}
+                      height={14}
+                    />
+                    <span className={`text-xs font-medium ${colors.text}`}>
+                      {cat.label}
+                    </span>
                     <span className="text-xs text-muted-foreground/60">|</span>
-                    <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
+                    <span className={`text-xs font-bold ${colors.text}`}>
+                      {cat.count}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {formatCompactValue(cat.total, displayCurrency)}
                     </span>
                   </div>
-                )
+                );
               })}
               {accounts.length > 0 && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/15 border border-sky-500/25">
@@ -872,9 +982,13 @@ export default function App() {
                     width={14}
                     height={14}
                   />
-                  <span className="text-xs font-medium text-sky-400">Vaults</span>
+                  <span className="text-xs font-medium text-sky-400">
+                    {t("vaults:title")}
+                  </span>
                   <span className="text-xs text-muted-foreground/60">|</span>
-                  <span className="text-xs font-bold text-sky-400">{accounts.length}</span>
+                  <span className="text-xs font-bold text-sky-400">
+                    {accounts.length}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {formatCompactValue(vaultBadgeTotal, displayCurrency)}
                   </span>
@@ -905,7 +1019,9 @@ export default function App() {
         <div className="space-y-6 mb-8">
           <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Assets</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {t("assets:title")}
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -917,14 +1033,18 @@ export default function App() {
             </div>
             {filteredAssets.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-muted-foreground">No assets yet. Click + to add one.</p>
+                <p className="text-muted-foreground">{t("assets:noAssets")}</p>
               </div>
             ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
                 <TabsList className="h-auto bg-transparent p-0 flex justify-start gap-1 mb-4">
                   {ASSET_CATEGORIES.map((category) => {
-                    const categoryAssets = assetsByType[category.key]
-                    const hasAssets = categoryAssets.length > 0
+                    const categoryAssets = assetsByType[category.key];
+                    const hasAssets = categoryAssets.length > 0;
 
                     return (
                       <TabsTrigger
@@ -936,18 +1056,24 @@ export default function App() {
                         <span className="text-current">{category.icon}</span>
                         <span>{category.label}</span>
                         {hasAssets && (
-                          <span className="text-muted-foreground">{categoryAssets.length}</span>
+                          <span className="text-muted-foreground">
+                            {categoryAssets.length}
+                          </span>
                         )}
                       </TabsTrigger>
-                    )
+                    );
                   })}
                 </TabsList>
 
                 {ASSET_CATEGORIES.map((category) => {
-                  const categoryAssets = assetsByType[category.key]
+                  const categoryAssets = assetsByType[category.key];
 
                   return (
-                    <TabsContent key={category.key} value={category.key} className="mt-0">
+                    <TabsContent
+                      key={category.key}
+                      value={category.key}
+                      className="mt-0"
+                    >
                       <motion.div
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -955,7 +1081,9 @@ export default function App() {
                       >
                         {categoryAssets.length === 0 ? (
                           <div className="text-center py-12 text-muted-foreground">
-                            No {category.label.toLowerCase()} assets yet.
+                            {t("assets:noAssetsInCategory", {
+                              category: category.label.toLowerCase(),
+                            })}
                           </div>
                         ) : (
                           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -975,7 +1103,7 @@ export default function App() {
                         )}
                       </motion.div>
                     </TabsContent>
-                  )
+                  );
                 })}
               </Tabs>
             )}
@@ -983,7 +1111,9 @@ export default function App() {
 
           <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Vaults</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                {t("vaults:title")}
+              </h2>
               <Button
                 variant="ghost"
                 size="sm"
@@ -996,51 +1126,69 @@ export default function App() {
             {filteredAccounts.length === 0 ? (
               <div className="p-4">
                 <p className="text-muted-foreground text-center py-4">
-                  No vaults yet. Click + to add one.
+                  {t("vaults:noVaults")}
                 </p>
               </div>
             ) : (
               <Accordion type="multiple" className="space-y-3">
                 {filteredAccounts.map((account) => {
-                  const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
+                  const accountFlows = cashFlows.filter(
+                    (f) => f.accountId === account.id,
+                  );
                   const flowKey = accountFlows
-                    .map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`)
-                    .join(",")
-                  const hasActiveFlows = accountFlows.some((f) => f.isActive)
+                    .map(
+                      (f) =>
+                        `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`,
+                    )
+                    .join(",");
+                  const hasActiveFlows = accountFlows.some((f) => f.isActive);
 
                   const convertToDisplay = (amount: number): number => {
-                    let value = amount
-                    if (account.currency !== "USD" && exchangeRates[account.currency]) {
-                      value = value / exchangeRates[account.currency]
+                    let value = amount;
+                    if (
+                      account.currency !== "USD" &&
+                      exchangeRates[account.currency]
+                    ) {
+                      value = value / exchangeRates[account.currency];
                     }
-                    if (displayCurrency !== "USD" && exchangeRates[displayCurrency]) {
-                      return value * exchangeRates[displayCurrency]
+                    if (
+                      displayCurrency !== "USD" &&
+                      exchangeRates[displayCurrency]
+                    ) {
+                      return value * exchangeRates[displayCurrency];
                     }
-                    return value
-                  }
+                    return value;
+                  };
 
-                  const monthlyTotals = calculateMonthlyTotals(accountFlows)
-                  const monthlyNetDisplay = convertToDisplay(monthlyTotals.net)
+                  const monthlyTotals = calculateMonthlyTotals(accountFlows);
+                  const monthlyNetDisplay = convertToDisplay(monthlyTotals.net);
 
-                  const currentBalanceDisplay = getAccountValue(account)
-                  const projection1M = calculateProjection(account.balance, accountFlows, 1)
+                  const currentBalanceDisplay = getAccountValue(account);
+                  const projection1M = calculateProjection(
+                    account.balance,
+                    accountFlows,
+                    1,
+                  );
                   const projectedBalance =
                     projection1M.length > 0
                       ? projection1M[projection1M.length - 1].balance
-                      : account.balance
-                  const projectedBalanceDisplay = convertToDisplay(projectedBalance)
-                  const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
+                      : account.balance;
+                  const projectedBalanceDisplay =
+                    convertToDisplay(projectedBalance);
+                  const projectedChange =
+                    projectedBalanceDisplay - currentBalanceDisplay;
                   const projectedChangePct =
                     currentBalanceDisplay !== 0
-                      ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
-                      : 0
+                      ? (projectedChange / Math.abs(currentBalanceDisplay)) *
+                        100
+                      : 0;
 
                   const netColorClass =
                     monthlyTotals.net > 0
                       ? "text-emerald-400"
                       : monthlyTotals.net < 0
                         ? "text-red-400"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground";
 
                   return (
                     <AccordionItem
@@ -1051,7 +1199,9 @@ export default function App() {
                       <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
                         <div className="flex flex-1 items-center justify-between mr-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
+                            <span className="text-lg">
+                              {getCountryFlag(account.countryCode)}
+                            </span>
                             <span className="text-sm font-semibold text-foreground">
                               {account.name}
                             </span>
@@ -1063,23 +1213,31 @@ export default function App() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEditAccount(account)
+                                  e.stopPropagation();
+                                  handleEditAccount(account);
                                 }}
                                 className="h-6 w-6 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
                               >
-                                <Icon icon="solar:pen-linear" width={12} height={12} />
+                                <Icon
+                                  icon="solar:pen-linear"
+                                  width={12}
+                                  height={12}
+                                />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteAccountRequest(account)
+                                  e.stopPropagation();
+                                  handleDeleteAccountRequest(account);
                                 }}
                                 className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
                               >
-                                <Icon icon="solar:trash-bin-trash-linear" width={12} height={12} />
+                                <Icon
+                                  icon="solar:trash-bin-trash-linear"
+                                  width={12}
+                                  height={12}
+                                />
                               </Button>
                             </div>
                           </div>
@@ -1089,10 +1247,17 @@ export default function App() {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <span className="flex items-center gap-1.5 cursor-default">
-                                      <span className={`text-xs font-medium ${netColorClass}`}>
+                                      <span
+                                        className={`text-xs font-medium ${netColorClass}`}
+                                      >
                                         {monthlyTotals.net >= 0 ? "+" : ""}
-                                        {formatCurrency(monthlyNetDisplay, displayCurrency)}
-                                        <span className="text-muted-foreground">/mo</span>
+                                        {formatCurrency(
+                                          monthlyNetDisplay,
+                                          displayCurrency,
+                                        )}
+                                        <span className="text-muted-foreground">
+                                          {t("common:perMonth")}
+                                        </span>
                                       </span>
                                       <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
                                         <Icon
@@ -1110,18 +1275,21 @@ export default function App() {
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
-                                    <p>Projected monthly gain and % change</p>
+                                    <p>{t("common:projectedMonthlyGain")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <span className="text-sm font-bold text-accent cursor-default">
-                                    {formatCurrency(currentBalanceDisplay, displayCurrency)}
+                                    {formatCurrency(
+                                      currentBalanceDisplay,
+                                      displayCurrency,
+                                    )}
                                   </span>
                                 </TooltipTrigger>
                                 <TooltipContent side="top">
-                                  <p>Current balance</p>
+                                  <p>{t("common:currentBalance")}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </div>
@@ -1141,10 +1309,10 @@ export default function App() {
                             onDelete={handleDeleteCashFlow}
                             onToggle={handleToggleCashFlow}
                             onAddFlow={(flowType) => {
-                              setCashFlowAccountId(account.id)
-                              setEditingCashFlow(null)
-                              setDefaultFlowType(flowType)
-                              setCashFlowFormOpen(true)
+                              setCashFlowAccountId(account.id);
+                              setEditingCashFlow(null);
+                              setDefaultFlowType(flowType);
+                              setCashFlowFormOpen(true);
                             }}
                           />
                           <VaultProjectionChart
@@ -1157,7 +1325,7 @@ export default function App() {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
-                  )
+                  );
                 })}
               </Accordion>
             )}
@@ -1181,7 +1349,9 @@ export default function App() {
         <CashFlowForm
           cashFlow={editingCashFlow}
           accountId={cashFlowAccountId}
-          accountCurrency={accounts.find((a) => a.id === cashFlowAccountId)?.currency}
+          accountCurrency={
+            accounts.find((a) => a.id === cashFlowAccountId)?.currency
+          }
           defaultFlowType={defaultFlowType}
           open={cashFlowFormOpen}
           onOpenChange={handleCashFlowFormClose}
@@ -1200,10 +1370,14 @@ export default function App() {
           onOpenChange={setDeleteDialogOpen}
           entity={entityToDelete}
           associatedAssetCount={
-            entityToDelete ? assets.filter((a) => a.entityId === entityToDelete.id).length : 0
+            entityToDelete
+              ? assets.filter((a) => a.entityId === entityToDelete.id).length
+              : 0
           }
           associatedAccountCount={
-            entityToDelete ? accounts.filter((a) => a.entityId === entityToDelete.id).length : 0
+            entityToDelete
+              ? accounts.filter((a) => a.entityId === entityToDelete.id).length
+              : 0
           }
           onConfirm={handleConfirmDeleteEntity}
         />
@@ -1213,7 +1387,10 @@ export default function App() {
           onOpenChange={setDeleteAccountDialogOpen}
           account={accountToDelete}
           associatedCashFlowCount={
-            accountToDelete ? cashFlows.filter((f) => f.accountId === accountToDelete.id).length : 0
+            accountToDelete
+              ? cashFlows.filter((f) => f.accountId === accountToDelete.id)
+                  .length
+              : 0
           }
           onConfirm={handleConfirmDeleteAccount}
         />
@@ -1237,8 +1414,8 @@ export default function App() {
 
       <footer className="border-t border-border/30 py-3 relative">
         <p className="text-center text-xs text-muted-foreground/40">
-          v{__APP_VERSION__} &middot; &copy; {new Date().getFullYear()} All rights reserved &middot;
-          Made with love by{" "}
+          v{__APP_VERSION__} &middot; &copy; {new Date().getFullYear()}{" "}
+          {t("common:footer")} &middot; {t("common:madeWithLoveBy")}{" "}
           <a
             href="https://github.com/cosiato"
             target="_blank"
@@ -1255,11 +1432,11 @@ export default function App() {
         <OnboardingOverlay
           show={showOnboarding}
           onComplete={() => {
-            localStorage.setItem("fortuna_onboarding_completed", "true")
-            setShowOnboarding(false)
+            localStorage.setItem("fortuna_onboarding_completed", "true");
+            setShowOnboarding(false);
           }}
         />
       )}
     </div>
-  )
+  );
 }

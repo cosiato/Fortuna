@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import type { Entity } from "@/types/database"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { entitySchema, validateSchema } from "@/lib/validation"
+import { createEntitySchema, validateSchema } from "@/lib/validation"
 import { toast } from "sonner"
 
 interface EntityFormProps {
@@ -22,6 +23,7 @@ export default function EntityForm({
   onSubmit,
   onDelete,
 }: EntityFormProps) {
+  const { t } = useTranslation("entities")
   const [name, setName] = useState(entity?.name ?? "")
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function EntityForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const data = { name: name.trim() }
-    const result = validateSchema(entitySchema, data)
+    const result = validateSchema(createEntitySchema(), data)
     if (!result.success) {
       toast.error(result.error)
       return
@@ -56,17 +58,17 @@ export default function EntityForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Entity" : "Add New Company"}</DialogTitle>
+          <DialogTitle>{isEditing ? t("editEntity") : t("addCompany")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("name", { ns: "common" })}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={isEditing ? "" : "e.g., Acme Corp, My LLC"}
+              placeholder={isEditing ? "" : t("namePlaceholder")}
               required
             />
           </div>
@@ -74,7 +76,7 @@ export default function EntityForm({
           <div className="flex gap-3 pt-4">
             {isEditing && !isIndividual && onDelete && (
               <Button type="button" variant="destructive" className="flex-1" onClick={handleDelete}>
-                Delete
+                {t("delete", { ns: "common" })}
               </Button>
             )}
             <Button
@@ -83,10 +85,10 @@ export default function EntityForm({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
             <Button type="submit" variant="default" className="flex-1">
-              {isEditing ? "Update" : "Add New"}
+              {isEditing ? t("update", { ns: "common" }) : t("addBtn")}
             </Button>
           </div>
         </form>

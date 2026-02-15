@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import OnboardingStepAssets from "./OnboardingStepAssets";
@@ -23,6 +24,7 @@ export default function OnboardingOverlay({
   show,
   onComplete,
 }: OnboardingOverlayProps) {
+  const { t } = useTranslation(["onboarding", "common"]);
   const [currentStep, setCurrentStep] = useState(1);
   const [direction, setDirection] = useState(1);
 
@@ -94,7 +96,7 @@ export default function OnboardingOverlay({
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-background"
           role="dialog"
-          aria-label="Welcome to Fortuna"
+          aria-label={t("onboarding:welcomeAriaLabel")}
           aria-modal="true"
         >
           <div className="relative flex flex-col items-center gap-6 w-full max-w-4xl px-6">
@@ -138,7 +140,7 @@ export default function OnboardingOverlay({
                   onClick={handleBack}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  Back
+                  {t("common:back")}
                 </Button>
               ) : (
                 <div />
@@ -151,7 +153,7 @@ export default function OnboardingOverlay({
                   onClick={handleSkip}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  Skip
+                  {t("common:skip")}
                 </Button>
 
                 <Button
@@ -159,7 +161,9 @@ export default function OnboardingOverlay({
                   onClick={handleNext}
                   className="font-semibold px-6"
                 >
-                  {currentStep === TOTAL_STEPS ? "Begin Your Journey" : "Next"}
+                  {currentStep === TOTAL_STEPS
+                    ? t("onboarding:beginJourney")
+                    : t("common:next")}
                 </Button>
               </div>
             </div>

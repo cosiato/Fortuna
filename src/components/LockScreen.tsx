@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import PinInput from "@/components/PinInput";
 import { api } from "@/lib/api";
@@ -9,6 +10,7 @@ interface LockScreenProps {
 }
 
 export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
+  const { t } = useTranslation("settings");
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -45,7 +47,7 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
         onUnlock();
       } else {
         setError(true);
-        setErrorMessage("Incorrect PIN");
+        setErrorMessage(t("incorrectPin"));
         setPin("");
         if (errorTimeoutRef.current) {
           clearTimeout(errorTimeoutRef.current);
@@ -55,10 +57,12 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
     } catch (err) {
       setError(true);
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("Too many failed attempts")) {
-        setErrorMessage(message);
+      const secondsMatch = message.match(/(\d+) seconds/);
+      if (secondsMatch) {
+        const seconds = parseInt(secondsMatch[1], 10);
+        setErrorMessage(t("tooManyAttempts", { seconds }));
       } else {
-        setErrorMessage("Incorrect PIN");
+        setErrorMessage(t("incorrectPin"));
       }
       setPin("");
     } finally {
@@ -129,7 +133,7 @@ export default function LockScreen({ isLocked, onUnlock }: LockScreenProps) {
 
             <div className="flex flex-col items-center gap-4">
               <p className="text-muted-foreground text-sm">
-                Enter your PIN to unlock
+                {t("enterPinToUnlock")}
               </p>
 
               <motion.div

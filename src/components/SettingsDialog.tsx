@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react"
+import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import PinInput from "@/components/PinInput"
 import { api } from "@/lib/api"
+import { useLanguage } from "@/hooks/useLanguage"
+import { supportedLanguages, languageNames } from "@/lib/i18n"
 
 type SettingsView = "menu" | "set-pin" | "confirm-pin" | "verify-current" | "verify-for-disable"
 
@@ -26,6 +36,8 @@ export default function SettingsDialog({
   onLock,
   onResetAccount,
 }: SettingsDialogProps) {
+  const { t } = useTranslation("settings")
+  const { currentLanguage, changeLanguage } = useLanguage()
   const [view, setView] = useState<SettingsView>("menu")
   const [newPin, setNewPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
@@ -63,9 +75,9 @@ export default function SettingsDialog({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       if (errorMessage.includes("Invalid current PIN")) {
-        setError("Incorrect PIN")
+        setError(t("incorrectPin"))
       } else {
-        setError("Failed to remove PIN")
+        setError(t("failedToRemovePin"))
       }
       setNewPin("")
     } finally {
@@ -82,7 +94,7 @@ export default function SettingsDialog({
 
   const handleConfirmPinComplete = async (pin: string) => {
     if (pin !== newPin) {
-      setError("PINs do not match")
+      setError(t("pinMismatch"))
       setConfirmPin("")
       return
     }
@@ -95,7 +107,7 @@ export default function SettingsDialog({
       setNewPin("")
       setConfirmPin("")
     } catch {
-      setError("Failed to set PIN")
+      setError(t("failedToSetPin"))
     } finally {
       setIsLoading(false)
     }
@@ -116,11 +128,11 @@ export default function SettingsDialog({
         setNewPin("")
         setError("")
       } else {
-        setError("Incorrect PIN")
+        setError(t("incorrectPin"))
         setNewPin("")
       }
     } catch {
-      setError("Failed to verify PIN")
+      setError(t("failedToVerifyPin"))
     } finally {
       setIsLoading(false)
     }
@@ -143,7 +155,7 @@ export default function SettingsDialog({
       case "set-pin":
         return (
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-muted-foreground text-sm">Enter a 4-digit PIN</p>
+            <p className="text-muted-foreground text-sm">{t("enterPin")}</p>
             <PinInput
               value={newPin}
               onChange={setNewPin}
@@ -154,7 +166,7 @@ export default function SettingsDialog({
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button variant="ghost" size="sm" onClick={handleBack}>
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         )
@@ -162,7 +174,7 @@ export default function SettingsDialog({
       case "confirm-pin":
         return (
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-muted-foreground text-sm">Confirm your PIN</p>
+            <p className="text-muted-foreground text-sm">{t("confirmYourPin")}</p>
             <PinInput
               value={confirmPin}
               onChange={setConfirmPin}
@@ -173,7 +185,7 @@ export default function SettingsDialog({
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button variant="ghost" size="sm" onClick={handleBack}>
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         )
@@ -181,7 +193,7 @@ export default function SettingsDialog({
       case "verify-current":
         return (
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-muted-foreground text-sm">Enter your current PIN</p>
+            <p className="text-muted-foreground text-sm">{t("enterCurrentPin")}</p>
             <PinInput
               value={newPin}
               onChange={setNewPin}
@@ -192,7 +204,7 @@ export default function SettingsDialog({
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button variant="ghost" size="sm" onClick={handleBack}>
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         )
@@ -200,7 +212,7 @@ export default function SettingsDialog({
       case "verify-for-disable":
         return (
           <div className="flex flex-col items-center gap-6 py-4">
-            <p className="text-muted-foreground text-sm">Enter your PIN to disable</p>
+            <p className="text-muted-foreground text-sm">{t("enterPinToDisable")}</p>
             <PinInput
               value={newPin}
               onChange={setNewPin}
@@ -211,7 +223,7 @@ export default function SettingsDialog({
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button variant="ghost" size="sm" onClick={handleBack}>
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         )
@@ -221,19 +233,41 @@ export default function SettingsDialog({
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="pin-toggle" className="text-sm font-medium">
-                  PIN Lock
+                <Label htmlFor="language-select" className="text-sm font-medium">
+                  {t("language")}
                 </Label>
-                <p className="text-xs text-muted-foreground">
-                  Protect your data with a 4-digit PIN
-                </p>
               </div>
-              <Switch
-                id="pin-toggle"
-                checked={isPinEnabled}
-                onCheckedChange={handleTogglePin}
-                disabled={isLoading}
-              />
+              <Select value={currentLanguage} onValueChange={changeLanguage}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {supportedLanguages.map((lang) => (
+                    <SelectItem key={lang} value={lang}>
+                      {languageNames[lang]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="pin-toggle" className="text-sm font-medium">
+                    {t("pinLock")}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t("pinDescription")}
+                  </p>
+                </div>
+                <Switch
+                  id="pin-toggle"
+                  checked={isPinEnabled}
+                  onCheckedChange={handleTogglePin}
+                  disabled={isLoading}
+                />
+              </div>
             </div>
 
             {isPinEnabled && (
@@ -245,7 +279,7 @@ export default function SettingsDialog({
                     onClick={handleChangePin}
                   >
                     <Icon icon="solar:key-linear" width={16} height={16} />
-                    Change PIN
+                    {t("changePin")}
                   </Button>
 
                   <Button
@@ -254,7 +288,7 @@ export default function SettingsDialog({
                     onClick={handleLockNow}
                   >
                     <Icon icon="solar:lock-linear" width={16} height={16} />
-                    Lock Now
+                    {t("lockNow")}
                     <span className="ml-auto text-xs text-muted-foreground">
                       {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "Cmd" : "Ctrl"}+L
                     </span>
@@ -264,14 +298,14 @@ export default function SettingsDialog({
             )}
 
             <div className="border-t border-border pt-4">
-              <p className="text-xs text-muted-foreground mb-3">Danger Zone</p>
+              <p className="text-xs text-muted-foreground mb-3">{t("dangerZone")}</p>
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2 border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
                 onClick={onResetAccount}
               >
                 <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
-                Reset All Data
+                {t("resetAllData")}
               </Button>
             </div>
           </div>
@@ -282,15 +316,15 @@ export default function SettingsDialog({
   const getTitle = () => {
     switch (view) {
       case "set-pin":
-        return "Set PIN"
+        return t("setPin")
       case "confirm-pin":
-        return "Confirm PIN"
+        return t("confirmPin")
       case "verify-current":
-        return "Verify Current PIN"
+        return t("verifyCurrentPin")
       case "verify-for-disable":
-        return "Disable PIN"
+        return t("disablePin")
       default:
-        return "Settings"
+        return t("title")
     }
   }
 

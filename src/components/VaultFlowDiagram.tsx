@@ -11,6 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Icon } from "@iconify/react";
+import { useTranslation } from "react-i18next";
 import type { Account, CashFlow } from "@/types/database";
 import type { SupportedCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,7 @@ export default function VaultFlowDiagram({
   onToggle,
   onAddFlow,
 }: VaultFlowDiagramProps) {
+  const { t } = useTranslation("vaults");
   const inflows = useMemo(
     () => cashFlows.filter((f) => f.flowType === "inflow"),
     [cashFlows],
@@ -293,7 +295,7 @@ export default function VaultFlowDiagram({
             height={14}
             className="mr-1"
           />
-          <span className="text-xs">Add Flow</span>
+          <span className="text-xs">{t("cashFlow.addFlowBtn")}</span>
         </Button>
       </div>
       <ReactFlow

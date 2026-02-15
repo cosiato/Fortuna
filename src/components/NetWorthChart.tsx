@@ -7,8 +7,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import type { Snapshot } from "@/types/database";
-import { SupportedCurrency, formatCurrency } from "@/lib/currency";
+import {
+  SupportedCurrency,
+  formatCurrency,
+  getIntlLocale,
+} from "@/lib/currency";
 
 interface NetWorthChartProps {
   snapshots: Snapshot[];
@@ -45,18 +50,22 @@ export default function NetWorthChart({
   displayCurrency,
   exchangeRates,
 }: NetWorthChartProps) {
+  const { t } = useTranslation("common");
   const latestPerDay = new Map<string, Snapshot>();
   for (const snapshot of snapshots) {
-    const dayKey = new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const dayKey = new Date(snapshot.recordedAt).toLocaleDateString(
+      getIntlLocale(),
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      },
+    );
     latestPerDay.set(dayKey, snapshot);
   }
 
   const data = Array.from(latestPerDay.values()).map((snapshot) => ({
-    date: new Date(snapshot.recordedAt).toLocaleDateString("en-US", {
+    date: new Date(snapshot.recordedAt).toLocaleDateString(getIntlLocale(), {
       month: "short",
       day: "numeric",
     }),
@@ -71,7 +80,7 @@ export default function NetWorthChart({
   if (data.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">No history yet</p>
+        <p className="text-muted-foreground text-sm">{t("noHistoryYet")}</p>
       </div>
     );
   }
@@ -105,7 +114,7 @@ export default function NetWorthChart({
           tickFormatter={(value) =>
             displayCurrency === "BTC"
               ? `B${value.toFixed(2)}`
-              : new Intl.NumberFormat("en-US", {
+              : new Intl.NumberFormat(getIntlLocale(), {
                   style: "currency",
                   currency: displayCurrency,
                   notation: "compact",
@@ -124,7 +133,7 @@ export default function NetWorthChart({
           labelStyle={{ color: "#6B7280" }}
           formatter={(value) => [
             formatCurrency(value as number, displayCurrency),
-            "Net Worth",
+            t("netWorth"),
           ]}
         />
         <Area

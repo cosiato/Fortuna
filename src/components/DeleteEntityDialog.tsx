@@ -1,21 +1,22 @@
-import type { Entity } from "@/types/database"
+import type { Entity } from "@/types/database";
+import { Trans, useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Icon } from "@iconify/react"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@iconify/react";
 
 interface DeleteEntityDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  entity: Entity | null
-  associatedAssetCount: number
-  associatedAccountCount: number
-  onConfirm: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  entity: Entity | null;
+  associatedAssetCount: number;
+  associatedAccountCount: number;
+  onConfirm: () => void;
 }
 
 export default function DeleteEntityDialog({
@@ -26,9 +27,12 @@ export default function DeleteEntityDialog({
   associatedAccountCount,
   onConfirm,
 }: DeleteEntityDialogProps) {
-  if (!entity) return null
+  const { t } = useTranslation("dialogs");
 
-  const hasAssociatedData = associatedAssetCount > 0 || associatedAccountCount > 0
+  if (!entity) return null;
+
+  const hasAssociatedData =
+    associatedAssetCount > 0 || associatedAccountCount > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,9 +48,11 @@ export default function DeleteEntityDialog({
               />
             </div>
             <div>
-              <DialogTitle className="text-red-500">Delete Entity</DialogTitle>
+              <DialogTitle className="text-red-500">
+                {t("deleteEntity.title")}
+              </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                This action cannot be undone.
+                {t("deleteEntity.cannotBeUndone")}
               </DialogDescription>
             </div>
           </div>
@@ -54,7 +60,12 @@ export default function DeleteEntityDialog({
 
         <div className="space-y-4 pt-2">
           <p className="text-sm text-foreground">
-            Are you sure you want to delete <span className="font-semibold">{entity.name}</span>?
+            <Trans
+              ns="dialogs"
+              i18nKey="deleteEntity.confirmMessage"
+              values={{ name: entity.name }}
+              components={{ bold: <span className="font-semibold" /> }}
+            />
           </p>
 
           {hasAssociatedData && (
@@ -67,13 +78,17 @@ export default function DeleteEntityDialog({
                   className="text-red-500 mt-0.5 flex-shrink-0"
                 />
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-red-500">Warning: Data will be deleted</p>
+                  <p className="text-sm font-medium text-red-500">
+                    {t("deleteEntity.warningTitle")}
+                  </p>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     {associatedAssetCount > 0 && (
                       <li className="flex items-center gap-2">
                         <Icon icon="solar:box-linear" width={14} height={14} />
                         <span>
-                          {associatedAssetCount} asset{associatedAssetCount !== 1 ? "s" : ""}
+                          {t("deleteEntity.asset", {
+                            count: associatedAssetCount,
+                          })}
                         </span>
                       </li>
                     )}
@@ -81,7 +96,9 @@ export default function DeleteEntityDialog({
                       <li className="flex items-center gap-2">
                         <Icon icon="solar:safe-linear" width={14} height={14} />
                         <span>
-                          {associatedAccountCount} vault{associatedAccountCount !== 1 ? "s" : ""}
+                          {t("deleteEntity.vault", {
+                            count: associatedAccountCount,
+                          })}
                         </span>
                       </li>
                     )}
@@ -98,14 +115,19 @@ export default function DeleteEntityDialog({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
-            <Button type="button" variant="destructive" className="flex-1" onClick={onConfirm}>
-              Delete
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1"
+              onClick={onConfirm}
+            >
+              {t("delete", { ns: "common" })}
             </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

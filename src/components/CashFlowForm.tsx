@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   CashFlow,
   CashFlowType,
@@ -6,35 +7,35 @@ import type {
   CashFlowCategory,
   CreateCashFlowInput,
   UpdateCashFlowInput,
-} from '@/types/database';
+} from '@/types/database'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { getCategoriesByType } from '@/lib/cashFlowCategories';
-import { cashFlowSchema, validateSchema } from '@/lib/validation';
-import { toast } from 'sonner';
+} from '@/components/ui/select'
+import { getCategoriesByType } from '@/lib/cashFlowCategories'
+import { createCashFlowSchema, validateSchema } from '@/lib/validation'
+import { toast } from 'sonner'
 
 interface CashFlowFormProps {
-  cashFlow?: CashFlow | null;
-  accountId: string;
-  accountCurrency?: string;
-  defaultFlowType?: CashFlowType;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CreateCashFlowInput | UpdateCashFlowInput, isEdit: boolean) => void;
+  cashFlow?: CashFlow | null
+  accountId: string
+  accountCurrency?: string
+  defaultFlowType?: CashFlowType
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSubmit: (data: CreateCashFlowInput | UpdateCashFlowInput, isEdit: boolean) => void
 }
 
 export default function CashFlowForm({
@@ -46,50 +47,51 @@ export default function CashFlowForm({
   onOpenChange,
   onSubmit,
 }: CashFlowFormProps) {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [flowType, setFlowType] = useState<CashFlowType>('inflow');
-  const [frequency, setFrequency] = useState<CashFlowFrequency>('monthly');
-  const [category, setCategory] = useState<CashFlowCategory>('salary');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const { t } = useTranslation(['vaults', 'common'])
+  const [name, setName] = useState('')
+  const [amount, setAmount] = useState('')
+  const [flowType, setFlowType] = useState<CashFlowType>('inflow')
+  const [frequency, setFrequency] = useState<CashFlowFrequency>('monthly')
+  const [category, setCategory] = useState<CashFlowCategory>('salary')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   useEffect(() => {
     if (cashFlow) {
-      setName(cashFlow.name);
-      setAmount(cashFlow.amount.toString());
-      setFlowType(cashFlow.flowType);
-      setFrequency(cashFlow.frequency);
-      setCategory(cashFlow.category);
-      setStartDate(cashFlow.startDate);
-      setEndDate(cashFlow.endDate ?? '');
+      setName(cashFlow.name)
+      setAmount(cashFlow.amount.toString())
+      setFlowType(cashFlow.flowType)
+      setFrequency(cashFlow.frequency)
+      setCategory(cashFlow.category)
+      setStartDate(cashFlow.startDate)
+      setEndDate(cashFlow.endDate ?? '')
     } else {
-      const initialType = defaultFlowType ?? 'inflow';
-      setName('');
-      setAmount('');
-      setFlowType(initialType);
-      setFrequency('monthly');
-      setCategory(getCategoriesByType(initialType)[0]?.key ?? 'salary');
-      setStartDate(new Date().toISOString().split('T')[0]);
-      setEndDate('');
+      const initialType = defaultFlowType ?? 'inflow'
+      setName('')
+      setAmount('')
+      setFlowType(initialType)
+      setFrequency('monthly')
+      setCategory(getCategoriesByType(initialType)[0]?.key ?? 'salary')
+      setStartDate(new Date().toISOString().split('T')[0])
+      setEndDate('')
     }
-  }, [cashFlow, open, defaultFlowType]);
+  }, [cashFlow, open, defaultFlowType])
 
-  const isEditing = !!cashFlow;
-  const categories = getCategoriesByType(flowType);
+  const isEditing = !!cashFlow
+  const categories = getCategoriesByType(flowType)
 
   useEffect(() => {
-    const validKeys = categories.map((c) => c.key);
+    const validKeys = categories.map((c) => c.key)
     if (!validKeys.includes(category)) {
-      setCategory(categories[0]?.key ?? 'salary');
+      setCategory(categories[0]?.key ?? 'salary')
     }
-  }, [flowType, categories, category]);
+  }, [flowType, categories, category])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsedAmount = parseFloat(amount);
+    e.preventDefault()
+    const parsedAmount = parseFloat(amount)
 
-    const validation = validateSchema(cashFlowSchema, {
+    const validation = validateSchema(createCashFlowSchema(), {
       name: name.trim(),
       amount: isNaN(parsedAmount) ? 0 : parsedAmount,
       flowType,
@@ -97,10 +99,10 @@ export default function CashFlowForm({
       category,
       startDate,
       endDate: endDate || null,
-    });
+    })
     if (!validation.success) {
-      toast.error(validation.error);
-      return;
+      toast.error(validation.error)
+      return
     }
 
     if (isEditing) {
@@ -112,8 +114,8 @@ export default function CashFlowForm({
         category,
         startDate,
         endDate: endDate || null,
-      };
-      onSubmit(updateData, true);
+      }
+      onSubmit(updateData, true)
     } else {
       const createData: CreateCashFlowInput = {
         accountId,
@@ -124,35 +126,35 @@ export default function CashFlowForm({
         category,
         startDate,
         endDate: endDate || null,
-      };
-      onSubmit(createData, false);
+      }
+      onSubmit(createData, false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Cash Flow' : 'Add Cash Flow'}
+            {isEditing ? t('vaults:cashFlow.editTitle') : t('vaults:cashFlow.title')}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cf-name">Name</Label>
+            <Label htmlFor="cf-name">{t('common:name')}</Label>
             <Input
               id="cf-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Monthly Salary, Netflix"
+              placeholder={t('vaults:cashFlow.namePlaceholder')}
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-amount">Amount</Label>
+              <Label htmlFor="cf-amount">{t('vaults:cashFlow.amount')}</Label>
               <div className="relative">
                 <Input
                   id="cf-amount"
@@ -174,16 +176,16 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-frequency">Frequency</Label>
+              <Label htmlFor="cf-frequency">{t('vaults:cashFlow.frequency')}</Label>
               <Select value={frequency} onValueChange={(v) => setFrequency(v as CashFlowFrequency)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
-                  <SelectItem value="yearly">Yearly</SelectItem>
+                  <SelectItem value="daily">{t('common:frequency.daily')}</SelectItem>
+                  <SelectItem value="weekly">{t('common:frequency.weekly')}</SelectItem>
+                  <SelectItem value="monthly">{t('common:frequency.monthly')}</SelectItem>
+                  <SelectItem value="yearly">{t('common:frequency.yearly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -191,7 +193,7 @@ export default function CashFlowForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-flow-type">Type</Label>
+              <Label htmlFor="cf-flow-type">{t('vaults:cashFlow.type')}</Label>
               <Select value={flowType} onValueChange={(v) => setFlowType(v as CashFlowType)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -200,13 +202,13 @@ export default function CashFlowForm({
                   <SelectItem value="inflow">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-green-500" />
-                      Inflow
+                      {t('common:flowType.inflow')}
                     </span>
                   </SelectItem>
                   <SelectItem value="outflow">
                     <span className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-red-500" />
-                      Outflow
+                      {t('common:flowType.outflow')}
                     </span>
                   </SelectItem>
                 </SelectContent>
@@ -214,7 +216,7 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-category">Category</Label>
+              <Label htmlFor="cf-category">{t('vaults:cashFlow.category')}</Label>
               <Select value={category} onValueChange={(v) => setCategory(v as CashFlowCategory)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -232,7 +234,7 @@ export default function CashFlowForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="cf-start-date">Start Date</Label>
+              <Label htmlFor="cf-start-date">{t('vaults:cashFlow.startDate')}</Label>
               <Input
                 id="cf-start-date"
                 type="date"
@@ -243,7 +245,7 @@ export default function CashFlowForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cf-end-date">End Date (optional)</Label>
+              <Label htmlFor="cf-end-date">{t('vaults:cashFlow.endDate')}</Label>
               <Input
                 id="cf-end-date"
                 type="date"
@@ -260,14 +262,14 @@ export default function CashFlowForm({
               className="flex-1"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('common:cancel')}
             </Button>
             <Button type="submit" variant="default" className="flex-1">
-              {isEditing ? 'Update' : 'Add Flow'}
+              {isEditing ? t('common:update') : t('vaults:cashFlow.addBtn')}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
