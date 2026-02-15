@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import type { Asset } from "@/types/database"
 import { api } from "@/lib/api"
@@ -25,9 +25,31 @@ export function useAssetCrud({
 
   const { t } = useTranslation(["errors"])
 
+  const fetchPriceAndSyncCurrency = useCallback(
+    async (assetId: string, symbol: string, type: "stock" | "crypto", storedCurrency?: string) => {
+      try {
+        const priceResult = await fetchSinglePrice(symbol, type)
+        if (priceResult.price > 0) {
+          setPrices((prev) => ({
+            ...prev,
+            [priceResult.symbol.toLowerCase()]: priceResult,
+            [priceResult.symbol.toUpperCase()]: priceResult,
+          }))
+          if (priceResult.currency !== storedCurrency) {
+            await api.assets.update(assetId, { currency: priceResult.currency })
+            await fetchDataOnly()
+          }
+        }
+      } catch {
+        // Price fetch is best-effort; the asset was already saved
+      }
+    },
+    [setPrices, fetchDataOnly],
+  )
+
   const handleAddAsset = async (data: Partial<Asset>) => {
     try {
-      await api.assets.create({
+      const created = await api.assets.create({
         name: data.name!,
         type: data.type as Asset["type"],
         symbol: data.symbol,
@@ -41,14 +63,12 @@ export function useAssetCrud({
       requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
-        if (priceResult.price > 0) {
-          setPrices((prev) => ({
-            ...prev,
-            [priceResult.symbol.toLowerCase()]: priceResult,
-            [priceResult.symbol.toUpperCase()]: priceResult,
-          }))
-        }
+        await fetchPriceAndSyncCurrency(
+          created.id,
+          data.symbol,
+          data.type,
+          data.currency,
+        )
       }
     } catch (error) {
       showErrorToast(error, t("errors:failedToCreateAsset"))
@@ -77,14 +97,12 @@ export function useAssetCrud({
       requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        const priceResult = await fetchSinglePrice(data.symbol, data.type as "stock" | "crypto")
-        if (priceResult.price > 0) {
-          setPrices((prev) => ({
-            ...prev,
-            [priceResult.symbol.toLowerCase()]: priceResult,
-            [priceResult.symbol.toUpperCase()]: priceResult,
-          }))
-        }
+        await fetchPriceAndSyncCurrency(
+          editingAsset.id,
+          data.symbol,
+          data.type,
+          data.currency,
+        )
       }
     } catch (error) {
       showErrorToast(error, t("errors:failedToUpdateAsset"))
