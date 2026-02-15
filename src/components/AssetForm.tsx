@@ -101,6 +101,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setResolvedName("")
     } else {
       setResolvedName(info.name)
+      setCurrency(info.currency)
       setNameError(null)
     }
   }, [])
@@ -196,6 +197,9 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
                 if (val !== "stock" && val !== "crypto") {
                   setSymbol("")
                 }
+                if (val === "crypto" || val === "stock") {
+                  setCurrency("USD")
+                }
               }}
             >
               <SelectTrigger>
@@ -283,29 +287,31 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="currency">{t("currency")}</Label>
-            <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger>
-                <SelectValue>
-                  <span className="flex items-center gap-2">
-                    <span>{CURRENCY_INFO[currency as SupportedCurrency]?.flag}</span>
-                    <span>{currency}</span>
-                  </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {SUPPORTED_CURRENCIES.filter((c) => c !== "BTC").map((c) => (
-                  <SelectItem key={c} value={c}>
+          {requiresManualPrice && (
+            <div className="space-y-2">
+              <Label htmlFor="currency">{t("currency")}</Label>
+              <Select value={currency} onValueChange={setCurrency}>
+                <SelectTrigger>
+                  <SelectValue>
                     <span className="flex items-center gap-2">
-                      <span>{CURRENCY_INFO[c].flag}</span>
-                      <span>{c}</span>
+                      <span>{CURRENCY_INFO[currency as SupportedCurrency]?.flag}</span>
+                      <span>{currency}</span>
                     </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.filter((c) => c !== "BTC").map((c) => (
+                    <SelectItem key={c} value={c}>
+                      <span className="flex items-center gap-2">
+                        <span>{CURRENCY_INFO[c].flag}</span>
+                        <span>{c}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <Button
