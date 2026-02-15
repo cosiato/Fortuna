@@ -1,53 +1,64 @@
-import { z } from "zod"
+import { z } from "zod";
+import i18n from "@/lib/i18n";
 
-const nameField = z.string().min(1, "Name is required").max(255, "Name is too long (max 255)")
+const t = (key: string) => i18n.t(key as any, { ns: "validation" });
 
-export const assetSchema = z.object({
-  name: nameField,
-  type: z.enum(["stock", "crypto", "real_estate", "cash", "other"]),
-  symbol: z.string().max(20).nullable().optional(),
-  quantity: z.number().min(0, "Quantity must be 0 or greater"),
-  manualPrice: z.number().min(0, "Price must be 0 or greater").nullable().optional(),
-  currency: z.string().length(3, "Currency must be a 3-letter code"),
-})
+const nameField = () =>
+  z.string().min(1, t("nameRequired")).max(255, t("nameTooLong"));
 
-export const accountSchema = z.object({
-  name: nameField,
-  balance: z.number().min(0, "Balance must be 0 or greater"),
-  currency: z.string().length(3, "Currency must be a 3-letter code"),
-  countryCode: z
-    .string()
-    .length(2, "Country code must be a 2-letter code")
-    .regex(/^[A-Z]{2}$/, "Country code must be uppercase letters"),
-})
+export const createAssetSchema = () =>
+  z.object({
+    name: nameField(),
+    type: z.enum(["stock", "crypto", "real_estate", "cash", "other"]),
+    symbol: z.string().max(20).nullable().optional(),
+    quantity: z.number().min(0, t("quantityMin")),
+    manualPrice: z.number().min(0, t("priceMin")).nullable().optional(),
+    currency: z.string().length(3, t("currencyCode")),
+  });
 
-export const entitySchema = z.object({
-  name: nameField,
-})
+export const createAccountSchema = () =>
+  z.object({
+    name: nameField(),
+    balance: z.number().min(0, t("balanceMin")),
+    currency: z.string().length(3, t("currencyCode")),
+    countryCode: z
+      .string()
+      .length(2, t("countryCodeLength"))
+      .regex(/^[A-Z]{2}$/, t("countryCodeFormat")),
+  });
 
-export const cashFlowSchema = z
-  .object({
-    name: nameField,
-    amount: z.number().positive("Amount must be greater than 0"),
-    flowType: z.enum(["inflow", "outflow"]),
-    frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
-    category: z.string().min(1, "Category is required"),
-    startDate: z.string().min(1, "Start date is required"),
-    endDate: z.string().nullable().optional(),
-  })
-  .refine(
-    (data) => !data.endDate || data.endDate >= data.startDate,
-    { message: "End date must be after start date", path: ["endDate"] },
-  )
+export const createEntitySchema = () =>
+  z.object({
+    name: nameField(),
+  });
+
+export const createCashFlowSchema = () =>
+  z
+    .object({
+      name: nameField(),
+      amount: z.number().positive(t("amountPositive")),
+      flowType: z.enum(["inflow", "outflow"]),
+      frequency: z.enum(["daily", "weekly", "monthly", "yearly"]),
+      category: z.string().min(1, t("categoryRequired")),
+      startDate: z.string().min(1, t("startDateRequired")),
+      endDate: z.string().nullable().optional(),
+    })
+    .refine((data) => !data.endDate || data.endDate >= data.startDate, {
+      message: t("endDateAfterStart"),
+      path: ["endDate"],
+    });
 
 export function validateSchema<T>(
   schema: z.ZodType<T>,
   data: unknown,
 ): { success: true; data: T } | { success: false; error: string } {
-  const result = schema.safeParse(data)
+  const result = schema.safeParse(data);
   if (result.success) {
-    return { success: true, data: result.data }
+    return { success: true, data: result.data };
   }
-  const firstIssue = result.error.issues[0]
-  return { success: false, error: firstIssue?.message ?? "Validation failed" }
+  const firstIssue = result.error.issues[0];
+  return {
+    success: false,
+    error: firstIssue?.message ?? t("validationFailed"),
+  };
 }
