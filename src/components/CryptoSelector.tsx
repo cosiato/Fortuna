@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Icon } from "@iconify/react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,7 +46,12 @@ export default function CryptoSelector({ value, onChange }: CryptoSelectorProps)
           ) : (
             <span className="text-muted-foreground">{t("selectCryptocurrency")}</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <Icon
+            icon="solar:sort-vertical-linear"
+            width={16}
+            height={16}
+            className="ml-2 shrink-0 opacity-50"
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
@@ -64,7 +69,10 @@ export default function CryptoSelector({ value, onChange }: CryptoSelectorProps)
                     setOpen(false)
                   }}
                 >
-                  <Check
+                  <Icon
+                    icon="solar:check-circle-linear"
+                    width={16}
+                    height={16}
                     className={cn(
                       "mr-2 h-4 w-4",
                       value.toUpperCase() === crypto.symbol.toUpperCase()

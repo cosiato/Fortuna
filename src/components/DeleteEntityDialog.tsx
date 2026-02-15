@@ -91,7 +91,7 @@ export default function DeleteEntityDialog({
                     )}
                     {associatedAccountCount > 0 && (
                       <li className="flex items-center gap-2">
-                        <Icon icon="solar:safe-linear" width={14} height={14} />
+                        <Icon icon="solar:safe-2-linear" width={14} height={14} />
                         <span>
                           {t("deleteEntity.vault", {
                             count: associatedAccountCount,
