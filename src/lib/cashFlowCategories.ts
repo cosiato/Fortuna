@@ -81,10 +81,6 @@ export const CASH_FLOW_CATEGORIES: Record<CashFlowCategory, CategoryInfo> = {
   },
 }
 
-export function getCategoryLabel(category: CashFlowCategory): string {
-  return i18n.t(`categories:${CASH_FLOW_CATEGORIES[category].labelKey}` as any)
-}
-
 export function getCategoriesByType(flowType: CashFlowType): Array<{
   key: CashFlowCategory
   label: string
