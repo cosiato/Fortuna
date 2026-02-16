@@ -130,6 +130,32 @@ npm run tauri:build:windows
 
 Release builds are also automated via GitHub Actions -- push a `v*` tag to trigger cross-platform builds and a draft GitHub Release.
 
+### Releasing a New Version
+
+1. **Bump the version** (updates `package.json`, `tauri.conf.json`, and `Cargo.toml`):
+
+   ```bash
+   npm run version:bump patch   # 0.1.0 -> 0.1.1
+   npm run version:bump minor   # 0.1.0 -> 0.2.0
+   npm run version:bump major   # 0.1.0 -> 1.0.0
+   ```
+
+2. **Commit the version change:**
+
+   ```bash
+   git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml
+   git commit -m "chore: bump version to <new-version>"
+   ```
+
+3. **Create and push the tag:**
+
+   ```bash
+   git tag v<new-version>
+   git push && git push --tags
+   ```
+
+Pushing the tag triggers the GitHub Actions release workflow, which builds for macOS (aarch64 + x86_64) and Windows, then creates a **draft release** on GitHub. Review the draft and publish it when ready.
+
 ### macOS Notarization
 
 To produce a notarized DMG, create a `src-tauri/.env` file with your Apple App Store Connect API credentials:
