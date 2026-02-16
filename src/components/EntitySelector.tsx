@@ -228,7 +228,7 @@ export default function EntitySelector({
           onClick={onAddCompany}
         >
           <Icon icon="solar:add-circle-linear" width={16} height={16} />
-          <span className="text-xs">{t("common:add")}</span>
+          <span className="text-xs">{t("entities:addCompany")}</span>
         </Button>
       </div>
     </div>
