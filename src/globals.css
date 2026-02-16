@@ -140,6 +140,20 @@
   }
 }
 
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-gentle-bounce {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
 @keyframes lockscreen-glow-gold {
   0% {
     transform: translate(0, 0) scale(1);

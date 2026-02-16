@@ -292,9 +292,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <img src="/logo.png" alt="Fortuna" className="w-24 h-24" />
-        <div className="text-foreground text-2xl">{t("common:loading")}</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce" />
       </div>
     )
   }
