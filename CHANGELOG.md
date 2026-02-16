@@ -5,6 +5,14 @@ All notable changes to Fortuna will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+
+## [0.1.9] - 2026-02-16
+
+### Added
+
+- **updater**: add client-side update notification with download progress
+- **release**: add full release automation script and update version bumping command
+
 ## [0.1.3] - 2026-02-15
 
 Initial public release. Versions prior to 0.1.3 were pre-releases.
