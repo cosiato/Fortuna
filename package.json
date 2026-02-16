@@ -21,7 +21,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "version:bump": "node scripts/bump-version.mjs"
+    "release:new": "bash scripts/release.sh"
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",

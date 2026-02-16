@@ -55,8 +55,9 @@ Use the following tech stack:
 |-- workflows/
 |   |-- release.yml               # CI/CD: cross-platform build + GitHub Release
 scripts/
-|-- bump-version.mjs              # Version bumping script
+|-- bump-version.mjs              # Version bumping script (version numbers only)
 |-- generate-icons.mjs            # Extracts used Solar icons into src/lib/icons.ts
+|-- release.sh                    # Full release automation (bump + changelog + commit + tag)
 src-tauri/                        # Tauri backend (Rust)
 |-- Cargo.toml                    # Rust dependencies
 |-- tauri.conf.json               # Tauri configuration
