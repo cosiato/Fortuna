@@ -306,6 +306,18 @@ export default function SettingsDialog({
                 {t("resetAllData")}
               </Button>
             </div>
+
+            <p className="text-center text-xs text-muted-foreground/40 pt-2">
+              v{__APP_VERSION__} · {t("madeWithLoveBy", { ns: "common" })}{" "}
+              <a
+                href="https://github.com/cosiato"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-muted-foreground/50 transition-colors"
+              >
+                cosiato
+              </a>
+            </p>
           </div>
         )
     }

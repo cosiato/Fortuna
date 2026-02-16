@@ -755,21 +755,6 @@ export default function App() {
         />
       </main>
 
-      <footer className="border-t border-border/30 py-3 relative">
-        <p className="text-center text-xs text-muted-foreground/40">
-          v{__APP_VERSION__} &middot; &copy; {new Date().getFullYear()} {t("common:footer")}{" "}
-          &middot; {t("common:madeWithLoveBy")}{" "}
-          <a
-            href="https://github.com/cosiato"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-muted-foreground/60 transition-colors"
-          >
-            cosiato
-          </a>
-        </p>
-      </footer>
-
       <LockScreen isLocked={isLocked} onUnlock={handleUnlock} />
       {!isLocked && (
         <OnboardingOverlay
