@@ -113,6 +113,7 @@ src/
 |   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- LockScreen.tsx            # Full-screen PIN lock overlay
 |   |-- SlotMachineNumber.tsx     # Animated digit roller for currency values
+|   |-- UpdateNotification.tsx   # Floating notification for app updates (download + restart)
 |   |-- NetWorthChart.tsx         # Net worth over time chart
 |   |-- PinInput.tsx              # 4-digit PIN input component
 |   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
@@ -133,6 +134,7 @@ src/
 |   |-- useEntityCrud.ts          # Entity CRUD operations and form state
 |   |-- useLanguage.ts            # Language management hook (syncs i18n + SQLite)
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
+|   |-- useUpdater.ts            # Auto-update check, download, install, and relaunch
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
