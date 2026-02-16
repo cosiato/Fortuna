@@ -227,7 +227,7 @@ export default function EntitySelector({
           className="h-auto py-2 px-3 text-muted-foreground hover:text-accent hover:bg-accent/10 flex items-center gap-1.5"
           onClick={onAddCompany}
         >
-          <Icon icon="solar:add-circle-linear" width={16} height={16} />
+          <span className="text-base leading-none font-medium">+</span>
           <span className="text-xs">{t("entities:addCompany")}</span>
         </Button>
       </div>
