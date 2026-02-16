@@ -296,7 +296,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce" />
+        <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce-lg" />
       </div>
     )
   }
@@ -427,7 +427,11 @@ export default function App() {
                 className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
                 onClick={() => assetCrud.setAssetFormOpen(true)}
               >
-                <span className="text-xl leading-none">+</span>
+                <span
+                  className={`text-xl leading-none ${filteredAssets.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
+                >
+                  +
+                </span>
               </Button>
             </div>
             {filteredAssets.length === 0 ? (
@@ -507,7 +511,11 @@ export default function App() {
                 className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
                 onClick={() => vaultCrud.setAccountFormOpen(true)}
               >
-                <span className="text-xl leading-none">+</span>
+                <span
+                  className={`text-xl leading-none ${filteredAccounts.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
+                >
+                  +
+                </span>
               </Button>
             </div>
             {filteredAccounts.length === 0 ? (
