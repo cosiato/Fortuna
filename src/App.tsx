@@ -23,6 +23,7 @@ import DeleteAccountDialog from "@/components/DeleteAccountDialog"
 import ResetAccountDialog from "@/components/ResetAccountDialog"
 import LockScreen from "@/components/LockScreen"
 import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
+import UpdateNotification from "@/components/UpdateNotification"
 import SettingsDialog from "@/components/SettingsDialog"
 import {
   Accordion,
@@ -41,6 +42,7 @@ import { useAppData } from "@/hooks/useAppData"
 import { useAssetCrud } from "@/hooks/useAssetCrud"
 import { useVaultCrud } from "@/hooks/useVaultCrud"
 import { useEntityCrud } from "@/hooks/useEntityCrud"
+import { useUpdater } from "@/hooks/useUpdater"
 
 const CATEGORY_BADGE_CONFIG: Record<
   string,
@@ -93,6 +95,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const { t } = useTranslation(["common", "assets", "vaults", "errors"])
+  const updater = useUpdater()
 
   const { state: appData, actions: appActions, initMetadata } = useAppData()
   const {
@@ -570,28 +573,40 @@ export default function App() {
                               {account.currency}
                             </span>
                             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                              <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   vaultCrud.handleEditAccount(account)
                                 }}
-                                className="h-6 w-6 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.stopPropagation()
+                                    vaultCrud.handleEditAccount(account)
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-accent hover:bg-accent/10 cursor-pointer"
                               >
                                 <Icon icon="solar:pen-linear" width={12} height={12} />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
+                              </div>
+                              <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   vaultCrud.handleDeleteAccountRequest(account)
                                 }}
-                                className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.stopPropagation()
+                                    vaultCrud.handleDeleteAccountRequest(account)
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 cursor-pointer"
                               >
                                 <Icon icon="solar:trash-bin-trash-linear" width={12} height={12} />
-                              </Button>
+                              </div>
                             </div>
                           </div>
                           <TooltipProvider delayDuration={300}>
@@ -755,6 +770,14 @@ export default function App() {
         />
       </main>
 
+      <UpdateNotification
+        status={updater.status}
+        version={updater.updateInfo?.version ?? null}
+        progress={updater.progress}
+        onDownload={updater.downloadAndInstall}
+        onRestart={updater.restartApp}
+        onDismiss={updater.dismiss}
+      />
       <LockScreen isLocked={isLocked} onUnlock={handleUnlock} />
       {!isLocked && (
         <OnboardingOverlay

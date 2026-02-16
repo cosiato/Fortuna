@@ -59,5 +59,11 @@
   "searchByCodeOrName": "Rechercher par code ou nom...",
   "noCurrenciesMatch": "Aucune devise ne correspond a votre recherche.",
   "scrollLeft": "Defiler a gauche",
-  "scrollRight": "Defiler a droite"
+  "scrollRight": "Defiler a droite",
+  "updateAvailable": "La version {{version}} est disponible",
+  "updateNow": "Mettre a jour",
+  "later": "Plus tard",
+  "downloadingUpdate": "Telechargement de la mise a jour...",
+  "updateReady": "Mise a jour installee. Redemarrez pour appliquer.",
+  "restartNow": "Redemarrer"
 }

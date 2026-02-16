@@ -1,7 +1,6 @@
 mod commands;
 mod database;
             
-use tauri_plugin_updater::UpdaterExt;
 use commands::entities::DbConnection;
 use commands::settings::LockState;
 use rusqlite::Connection;
@@ -14,6 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
 
             let db_path = database::get_db_path(&app.handle());
@@ -22,17 +22,6 @@ pub fn run() {
             let conn = Connection::open(&db_path).expect("Failed to open database connection");
             app.manage(DbConnection(Mutex::new(conn)));
             app.manage(LockState(Mutex::new(false)));
-
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                let updater = match handle.updater() {
-                    Ok(u) => u,
-                    Err(_) => return,
-                };
-                if let Ok(Some(update)) = updater.check().await {
-                    let _ = update.download_and_install(|_, _| {}, || {}).await;
-                }
-            });
 
             Ok(())
         })

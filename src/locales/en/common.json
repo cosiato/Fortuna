@@ -59,5 +59,11 @@
   "searchByCodeOrName": "Search by code or name...",
   "noCurrenciesMatch": "No currencies match your search.",
   "scrollLeft": "Scroll left",
-  "scrollRight": "Scroll right"
+  "scrollRight": "Scroll right",
+  "updateAvailable": "Version {{version}} is available",
+  "updateNow": "Update now",
+  "later": "Later",
+  "downloadingUpdate": "Downloading update...",
+  "updateReady": "Update installed. Restart to apply.",
+  "restartNow": "Restart now"
 }
