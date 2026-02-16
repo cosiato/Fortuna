@@ -361,7 +361,7 @@ pub const ALLOWED_CURRENCIES: &[&str] = &[
     // North America
     "USD", "CAD", "MXN",
     // South America
-    "BRL", "ARS", "CLP", "COP", "PEN",
+    "BRL", "ARS", "CLP", "COP", "PEN", "PYG",
     // Europe
     "EUR", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "RUB", "ISK",
     // Asia

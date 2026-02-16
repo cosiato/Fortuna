@@ -66,6 +66,7 @@ export const SUPPORTED_CURRENCIES = [
   "CLP",
   "COP",
   "PEN",
+  "PYG",
   // Europe
   "EUR",
   "GBP",
@@ -135,7 +136,7 @@ export const CURRENCY_GROUPS: readonly CurrencyGroup[] = [
   { continent: "North America", currencies: ["USD", "CAD", "MXN"] },
   {
     continent: "South America",
-    currencies: ["BRL", "ARS", "CLP", "COP", "PEN"],
+    currencies: ["BRL", "ARS", "CLP", "COP", "PEN", "PYG"],
   },
   {
     continent: "Europe",
@@ -197,6 +198,7 @@ export const CURRENCY_INFO: Record<SupportedCurrency, { flag: string; name: stri
   CLP: { flag: "\u{1F1E8}\u{1F1F1}", name: "Chilean Peso" },
   COP: { flag: "\u{1F1E8}\u{1F1F4}", name: "Colombian Peso" },
   PEN: { flag: "\u{1F1F5}\u{1F1EA}", name: "Peruvian Sol" },
+  PYG: { flag: "\u{1F1F5}\u{1F1FE}", name: "Paraguayan Guarani" },
   // Europe
   EUR: { flag: "\u{1F1EA}\u{1F1FA}", name: "Euro" },
   GBP: { flag: "\u{1F1EC}\u{1F1E7}", name: "British Pound" },
@@ -255,6 +257,7 @@ export const FALLBACK_RATES: Record<SupportedCurrency, number> = {
   CLP: 900,
   COP: 3950,
   PEN: 3.72,
+  PYG: 7300,
   EUR: 0.92,
   GBP: 0.79,
   CHF: 0.88,
