@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.1.12] - 2026-02-17
+
+### Fixed
+
+- **ui**: portal currency picker overlay to fix z-index
+
+### Changed
+
+- **ui**: launch window maximized on macOS
+- **ui**: use fixed viewport layout with sticky header and custom scrollbar
+
 ## [0.1.11] - 2026-02-16
 
 ### Fixed
