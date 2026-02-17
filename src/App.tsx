@@ -96,7 +96,6 @@ export default function App() {
 
   const { t } = useTranslation(["common", "assets", "vaults", "errors"])
   const updater = useUpdater()
-
   const { state: appData, actions: appActions, initMetadata } = useAppData()
   const {
     assets,
@@ -783,7 +782,6 @@ export default function App() {
         version={updater.updateInfo?.version ?? null}
         progress={updater.progress}
         onDownload={updater.downloadAndInstall}
-        onRestart={updater.restartApp}
         onDismiss={updater.dismiss}
       />
       <LockScreen isLocked={isLocked} onUnlock={handleUnlock} />

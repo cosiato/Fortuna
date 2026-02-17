@@ -8,7 +8,6 @@ interface UpdateNotificationProps {
   version: string | null
   progress: { downloaded: number; total: number }
   onDownload: () => void
-  onRestart: () => void
   onDismiss: () => void
 }
 
@@ -24,7 +23,6 @@ export default function UpdateNotification({
   version,
   progress,
   onDownload,
-  onRestart,
   onDismiss,
 }: UpdateNotificationProps) {
   const { t } = useTranslation("common")
@@ -82,37 +80,16 @@ export default function UpdateNotification({
                 </div>
               </>
             )}
-
-            {status === "ready" && (
-              <>
-                <p className="text-sm font-medium text-foreground">{t("updateReady")}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Button
-                    size="sm"
-                    className="h-7 px-3 text-xs bg-accent text-background hover:bg-accent/90"
-                    onClick={onRestart}
-                  >
-                    {t("restartNow")}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                    onClick={onDismiss}
-                  >
-                    {t("later")}
-                  </Button>
-                </div>
-              </>
-            )}
           </div>
 
-          <button
-            onClick={onDismiss}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Icon icon="solar:close-circle-linear" width={16} height={16} />
-          </button>
+          {status !== "downloading" && (
+            <button
+              onClick={onDismiss}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Icon icon="solar:close-circle-linear" width={16} height={16} />
+            </button>
+          )}
         </div>
       </div>
     </div>

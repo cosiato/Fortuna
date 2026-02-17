@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react"
 import { check } from "@tauri-apps/plugin-updater"
 import { relaunch } from "@tauri-apps/plugin-process"
 
-export type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "ready" | "error"
+export type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "error"
 
 interface UpdateInfo {
   version: string
@@ -19,7 +19,6 @@ interface UseUpdaterReturn {
   updateInfo: UpdateInfo | null
   progress: UpdateProgress
   downloadAndInstall: () => Promise<void>
-  restartApp: () => Promise<void>
   dismiss: () => void
 }
 
@@ -85,14 +84,12 @@ export function useUpdater(): UseUpdaterReturn {
         }
       })
 
-      setStatus("ready")
+      if (updateRef.current) {
+        await relaunch()
+      }
     } catch {
       setStatus("error")
     }
-  }, [])
-
-  const restartApp = useCallback(async () => {
-    await relaunch()
   }, [])
 
   const dismiss = useCallback(() => {
@@ -106,7 +103,6 @@ export function useUpdater(): UseUpdaterReturn {
     updateInfo,
     progress,
     downloadAndInstall,
-    restartApp,
     dismiss,
   }
 }
