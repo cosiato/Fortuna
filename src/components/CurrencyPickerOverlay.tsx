@@ -88,8 +88,11 @@ export default function CurrencyPickerOverlay({
           aria-label={t("selectCurrency")}
           aria-modal="true"
         >
+          {/* Traffic-light safe zone */}
+          <div className="shrink-0 h-11" data-tauri-drag-region />
+
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center justify-between px-6 pb-4 border-b border-border">
             <h2 className="text-lg font-semibold text-foreground">{t("selectCurrency")}</h2>
             <button
               onClick={onClose}

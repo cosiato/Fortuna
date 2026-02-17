@@ -35,7 +35,7 @@ export default function UpdateNotification({
     progress.total > 0 ? Math.round((progress.downloaded / progress.total) * 100) : 0
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300">
+    <div className="fixed bottom-4 left-4 z-50 max-w-sm animate-in slide-in-from-bottom-4 fade-in duration-300">
       <div className="rounded-lg border border-accent/30 bg-background/95 backdrop-blur-sm shadow-lg shadow-accent/10 p-4">
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
