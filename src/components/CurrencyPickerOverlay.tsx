@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react"
+import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { Icon } from "@iconify/react"
@@ -73,7 +74,7 @@ export default function CurrencyPickerOverlay({
     onClose()
   }
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -119,7 +120,7 @@ export default function CurrencyPickerOverlay({
           </div>
 
           {/* Currency grid */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
             {filteredGroups.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 {t("noCurrenciesMatch")}
@@ -170,6 +171,7 @@ export default function CurrencyPickerOverlay({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
