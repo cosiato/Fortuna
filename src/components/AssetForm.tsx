@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SUPPORTED_CURRENCIES, CURRENCY_INFO, SupportedCurrency } from "@/lib/currency"
+import CurrencyCombobox from "@/components/CurrencyCombobox"
 import CryptoSelector from "@/components/CryptoSelector"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { getStockInfo } from "@/lib/prices"
@@ -290,26 +290,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
           {requiresManualPrice && (
             <div className="space-y-2">
               <Label htmlFor="currency">{t("currency")}</Label>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger>
-                  <SelectValue>
-                    <span className="flex items-center gap-2">
-                      <span>{CURRENCY_INFO[currency as SupportedCurrency]?.flag}</span>
-                      <span>{currency}</span>
-                    </span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {SUPPORTED_CURRENCIES.filter((c) => c !== "BTC").map((c) => (
-                    <SelectItem key={c} value={c}>
-                      <span className="flex items-center gap-2">
-                        <span>{CURRENCY_INFO[c].flag}</span>
-                        <span>{c}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CurrencyCombobox value={currency} onChange={setCurrency} exclude={["BTC"]} />
             </div>
           )}
 
