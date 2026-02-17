@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.2.0] - 2026-02-17
+
+### Fixed
+
+- **ci**: restore macOS and Windows targets in release workflow
+
 ## [0.1.12] - 2026-02-17
 
 ### Fixed
