@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.1.11] - 2026-02-16
+
+### Fixed
+
+- **UpdateNotification**: move useTranslation hook before early return
+- **updater**: relaunch immediately after downloadAndInstall
+
+### Changed
+
+- **i18n**: remove dead update translation keys
+
 ## [0.1.10] - 2026-02-16
 
 ### Changed
