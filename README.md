@@ -1,178 +1,96 @@
-# Fortuna
+<div align="center">
+  <a href="https://github.com/cosiato/Fortuna">
+    <img src="public/app-icon.png" alt="Fortuna" width="100" height="100" style="border-radius: 20px;">
+  </a>
+
+  <h3 align="center">Fortuna</h3>
+
+  <p align="center">
+    Offline personal wealth management with an RPG twist.
+    <br />
+    <br />
+    <a href="https://github.com/cosiato/Fortuna/releases">Download</a>
+    &middot;
+    <a href="https://github.com/cosiato/Fortuna/issues">Report Bug</a>
+    &middot;
+    <a href="https://github.com/cosiato/Fortuna/issues">Request Feature</a>
+  </p>
+</div>
+
+<div align="center">
 
 [![Release](https://img.shields.io/github/v/release/cosiato/Fortuna?style=flat-square)](https://github.com/cosiato/Fortuna/releases)
 [![Build](https://img.shields.io/github/actions/workflow/status/cosiato/Fortuna/release.yml?style=flat-square&label=build)](https://github.com/cosiato/Fortuna/actions/workflows/release.yml)
-[![Tauri](https://img.shields.io/badge/tauri-v2-24C8D8?style=flat-square&logo=tauri&logoColor=white)](https://v2.tauri.app)
-[![React](https://img.shields.io/badge/react-19-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
-[![TypeScript](https://img.shields.io/badge/typescript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Rust](https://img.shields.io/badge/rust-2021-DEA584?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-858585?style=flat-square)]()
+[![License](https://img.shields.io/badge/license-proprietary-blue?style=flat-square)]()
 
-Offline-first personal wealth management desktop app with a gamified, RPG-inspired visual identity.
+</div>
 
-Track assets, bank accounts, cash flows, and net worth -- all data stays on your machine.
+<br />
+
+<!-- Add a screenshot here: ![Screenshot](public/screenshot.webp) -->
+
+## About
+
+**Fortuna** is an offline-first desktop app for tracking your personal wealth -- assets, bank accounts, cash flows, and net worth -- with a dark, gamified, RPG-inspired visual identity. Think "Hades meets fintech."
+
+All your data stays on your machine. No account required, no cloud sync.
 
 ## Features
 
-- **Asset tracking** -- stocks, crypto, real estate, cash, and custom assets with live price fetching
-- **Bank accounts** -- multi-currency vaults with country metadata
-- **Cash flow management** -- recurring inflows/outflows with projection charts
-- **Net worth snapshots** -- automatic recording with historical chart
-- **Multi-entity support** -- manage finances for individuals and companies
-- **Activity log** -- audit trail for all asset mutations
-- **Onboarding flow** -- guided first-time setup
-- **Offline-first** -- no account required, no cloud sync, everything stored locally in SQLite
+- **Asset tracking** -- Stocks, crypto, real estate, cash, and custom assets with live price fetching (Yahoo Finance, CoinGecko)
+- **Bank accounts** -- Multi-currency vaults with country metadata and balance projection charts
+- **Cash flow management** -- Recurring inflows/outflows with visual flow diagrams
+- **Net worth snapshots** -- Automatic recording with historical chart
+- **Multi-entity support** -- Manage finances for individuals and companies separately
+- **Activity log** -- Full audit trail for every mutation
+- **Multi-language** -- English, French, Spanish, and Portuguese
+- **PIN lock** -- Optional PIN protection for privacy
+- **Auto-updates** -- In-app update notifications with one-click install
+- **Fully offline** -- SQLite database, no cloud dependencies
+
+## Download
+
+Grab the latest release for your platform:
+
+| Platform | Link |
+| --- | --- |
+| macOS (Apple Silicon) | [Download .dmg](https://github.com/cosiato/Fortuna/releases/latest) |
+| macOS (Intel) | [Download .dmg](https://github.com/cosiato/Fortuna/releases/latest) |
+| Windows | [Download .exe](https://github.com/cosiato/Fortuna/releases/latest) |
+
+Or browse all releases on the [Releases page](https://github.com/cosiato/Fortuna/releases).
 
 ## Tech Stack
 
-| Layer    | Technology                                  |
-| -------- | ------------------------------------------- |
-| Desktop  | Tauri v2 (Rust backend + Vite frontend)     |
-| Frontend | React 19, TypeScript, TailwindCSS           |
-| UI       | Shadcn, Framer Motion, Recharts, React Flow |
-| Icons    | Iconify (Solar linear set)                  |
-| Database | SQLite (rusqlite)                           |
-| Prices   | Yahoo Finance, CoinGecko                    |
+| Layer    | Technology                              |
+| -------- | --------------------------------------- |
+| Desktop  | Tauri v2 (Rust + Vite)                  |
+| Frontend | React 19, TypeScript, TailwindCSS       |
+| UI       | Shadcn, Framer Motion, Recharts         |
+| Database | SQLite (rusqlite)                       |
+| Prices   | Yahoo Finance, CoinGecko                |
 
-## Prerequisites
+## Building from Source
 
-- [Node.js](https://nodejs.org/) (LTS)
-- [Rust](https://www.rust-lang.org/tools/install) (stable)
-- Tauri v2 system dependencies -- see the [Tauri prerequisites guide](https://v2.tauri.app/start/prerequisites/)
-
-## Getting Started
+Requires [Node.js](https://nodejs.org/) (LTS), [Rust](https://www.rust-lang.org/tools/install) (stable), and [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/).
 
 ```bash
-# Clone the repository
-git clone https://github.com/<owner>/fortuna.git
-cd fortuna
-
-# Install frontend dependencies
+git clone https://github.com/cosiato/Fortuna.git
+cd Fortuna
 npm install
-
-# Start the development app (Vite + Tauri)
 npm run tauri dev
 ```
 
-The app opens a native window at 1200x800. Hot-reload is enabled for the frontend; Rust changes trigger a recompile.
+## Contributing
 
-## Scripts
+Contributions are welcome! Please open an issue first to discuss what you'd like to change.
 
-| Command                     | Description                         |
-| --------------------------- | ----------------------------------- |
-| `npm run tauri dev`         | Start the app in development mode   |
-| `npm run tauri build`       | Build a production release          |
-| `npm run build`             | Type-check and build the frontend   |
-| `npm run lint`              | Lint TypeScript/React files         |
-| `npm run test`              | Run tests in watch mode             |
-| `npm run test:run`          | Run tests once                      |
-| `npm run test:coverage`     | Run tests with coverage report      |
-
-## Project Structure
-
-```
-src-tauri/                    # Tauri backend (Rust)
-  src/
-    main.rs                   # Entry point
-    lib.rs                    # App setup and command registration
-    database.rs               # SQLite schema and initialization
-    commands/                 # Tauri IPC commands
-      accounts.rs             # Account CRUD
-      activity_log.rs         # Activity log queries
-      assets.rs               # Asset CRUD
-      cash_flows.rs           # Cash flow CRUD
-      entities.rs             # Entity CRUD
-      snapshots.rs            # Snapshot CRUD
-
-src/                          # React frontend
-  App.tsx                     # Main dashboard
-  components/                 # UI components
-    ui/                       # Shadcn primitives
-    onboarding/               # First-time user flow
-  hooks/                      # Custom React hooks
-  lib/                        # Utilities (API layer, formatting, validation)
-  types/                      # TypeScript type definitions
-  config/                     # Static data (cryptocurrency list)
-```
-
-## Inspecting the Database
-
-Fortuna stores all data in a local SQLite file named `fortuna.db`. The file is created automatically on first launch inside the Tauri app data directory:
-
-| OS      | Path                                                            |
-| ------- | --------------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/com.fortuna.app/fortuna.db`      |
-| Windows | `C:\Users\<user>\AppData\Roaming\com.fortuna.app\fortuna.db`   |
-| Linux   | `~/.local/share/com.fortuna.app/fortuna.db`                     |
-
-### Opening with DB Browser for SQLite
-
-1. Download and install [DB Browser for SQLite](https://sqlitebrowser.org/dl/)
-2. Open DB Browser and click **Open Database**
-3. Navigate to the `fortuna.db` path listed above for your OS
-4. Browse the tables (`entities`, `assets`, `accounts`, `snapshots`, `cash_flows`, `activity_log`, `settings`) in the **Browse Data** tab
-5. Run custom queries in the **Execute SQL** tab
-
-> **Note:** Close Fortuna before opening the database in DB Browser to avoid file lock conflicts.
-
-## Building for Production
-
-```bash
-# macOS (Apple Silicon)
-npm run tauri:build:mac
-
-# macOS (Intel)
-npm run tauri:build:mac-intel
-
-# Windows
-npm run tauri:build:windows
-```
-
-Release builds are also automated via GitHub Actions -- push a `v*` tag to trigger cross-platform builds and a draft GitHub Release.
-
-### Releasing a New Version
-
-1. **Bump the version** (updates `package.json`, `tauri.conf.json`, and `Cargo.toml`):
-
-   ```bash
-   npm run version:bump patch   # 0.1.0 -> 0.1.1
-   npm run version:bump minor   # 0.1.0 -> 0.2.0
-   npm run version:bump major   # 0.1.0 -> 1.0.0
-   ```
-
-2. **Commit the version change:**
-
-   ```bash
-   git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml
-   git commit -m "chore: bump version to <new-version>"
-   ```
-
-3. **Create and push the tag:**
-
-   ```bash
-   git tag v<new-version>
-   git push && git push --tags
-   ```
-
-Pushing the tag triggers the GitHub Actions release workflow, which builds for macOS (aarch64 + x86_64) and Windows, then creates a **draft release** on GitHub. Review the draft and publish it when ready.
-
-### macOS Notarization
-
-To produce a notarized DMG, create a `src-tauri/.env` file with your Apple App Store Connect API credentials:
-
-```env
-APPLE_API_ISSUER="<your-issuer-id>"
-APPLE_API_KEY="<your-key-id>"
-APPLE_API_KEY_PATH="/full/path/to/AuthKey_<key-id>.p8"
-```
-
-Then load the environment variables before building:
-
-```bash
-set -a && source src-tauri/.env && set +a && npm run tauri build -- --bundles dmg
-```
-
-> **Note:** Use the full absolute path for `APPLE_API_KEY_PATH` -- tilde (`~`) does not expand inside double quotes.
+1. Fork the repository
+2. Create your branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'feat: add my feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a pull request
 
 ## License
 
