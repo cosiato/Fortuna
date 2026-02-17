@@ -294,16 +294,16 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-screen bg-background flex items-center justify-center">
         <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce-lg" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="h-screen flex flex-col bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-vignette pointer-events-none" />
-      <header className="border-b border-border px-6 py-4 relative">
+      <header className="shrink-0 border-b border-border px-6 py-4 relative z-10 bg-background">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Fortuna" className="w-7 h-7 logo-hover" />
@@ -352,429 +352,437 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8 relative">
-        <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
-          <CardContent className="relative z-10 px-6 pt-6 pb-3">
-            <SlotMachineNumber
-              value={formatCurrency(netWorth, displayCurrency)}
-              className="text-4xl font-bold text-accent font-serif"
-              duration={700}
-            />
-            <div className="flex flex-wrap items-center gap-2 mt-3 mb-8">
-              {categoryBadgeData.map((cat) => {
-                const colors = CATEGORY_BADGE_CONFIG[cat.key]
-                return (
-                  <div
-                    key={cat.key}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${colors.bg} border ${colors.border}`}
-                  >
-                    <Icon icon={colors.icon} className={colors.text} width={14} height={14} />
-                    <span className={`text-xs font-medium ${colors.text}`}>{cat.label}</span>
-                    <span className="text-xs text-muted-foreground/60">|</span>
-                    <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatCompactValue(cat.total, displayCurrency)}
-                    </span>
-                  </div>
-                )
-              })}
-              {accounts.length > 0 && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/15 border border-sky-500/25">
-                  <Icon
-                    icon="solar:safe-2-linear"
-                    className="text-sky-400"
-                    width={14}
-                    height={14}
-                  />
-                  <span className="text-xs font-medium text-sky-400">{t("vaults:title")}</span>
-                  <span className="text-xs text-muted-foreground/60">|</span>
-                  <span className="text-xs font-bold text-sky-400">{accounts.length}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatCompactValue(vaultBadgeTotal, displayCurrency)}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="h-36 -mx-2">
-              <NetWorthChart
-                snapshots={snapshots}
-                displayCurrency={displayCurrency}
-                exchangeRates={exchangeRates}
+      <main className="flex-1 overflow-y-auto overscroll-none relative custom-scrollbar">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
+            <CardContent className="relative z-10 px-6 pt-6 pb-3">
+              <SlotMachineNumber
+                value={formatCurrency(netWorth, displayCurrency)}
+                className="text-4xl font-bold text-accent font-serif"
+                duration={700}
               />
-            </div>
-          </CardContent>
-        </Card>
-
-        <EntitySelector
-          entities={entities}
-          selectedEntityId={entityCrud.selectedEntityId}
-          onSelect={entityCrud.setSelectedEntityId}
-          onAddCompany={() => entityCrud.setEntityFormOpen(true)}
-          onEditEntity={entityCrud.handleEditEntity}
-          onDeleteEntity={entityCrud.handleDeleteEntityRequest}
-          entityTotals={entityTotals}
-          displayCurrency={displayCurrency}
-        />
-
-        <div className="space-y-6 mb-8">
-          <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">{t("assets:title")}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                onClick={() => assetCrud.setAssetFormOpen(true)}
-              >
-                <span
-                  className={`text-xl leading-none ${filteredAssets.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
-                >
-                  +
-                </span>
-              </Button>
-            </div>
-            {filteredAssets.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-muted-foreground">{t("assets:noAssets")}</p>
-              </div>
-            ) : (
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="h-auto bg-transparent p-0 flex justify-start gap-1 mb-4">
-                  {ASSET_CATEGORIES.map((category) => {
-                    const categoryAssets = assetsByType[category.key]
-                    const hasAssets = categoryAssets.length > 0
-
-                    return (
-                      <TabsTrigger
-                        key={category.key}
-                        value={category.key}
-                        disabled={!hasAssets}
-                        className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                      >
-                        <span className="text-current">{category.icon}</span>
-                        <span>{category.label}</span>
-                        {hasAssets && (
-                          <span className="text-muted-foreground">{categoryAssets.length}</span>
-                        )}
-                      </TabsTrigger>
-                    )
-                  })}
-                </TabsList>
-
-                {ASSET_CATEGORIES.map((category) => {
-                  const categoryAssets = assetsByType[category.key]
-
+              <div className="flex flex-wrap items-center gap-2 mt-3 mb-8">
+                {categoryBadgeData.map((cat) => {
+                  const colors = CATEGORY_BADGE_CONFIG[cat.key]
                   return (
-                    <TabsContent key={category.key} value={category.key} className="mt-0">
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                      >
-                        {categoryAssets.length === 0 ? (
-                          <div className="text-center py-12 text-muted-foreground">
-                            {t("assets:noAssetsInCategory", {
-                              category: category.label.toLowerCase(),
-                            })}
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                            {categoryAssets.map((asset) => (
-                              <AssetTile
-                                key={asset.id}
-                                asset={asset}
-                                displayValue={getAssetValue(asset)}
-                                displayCurrency={displayCurrency}
-                                categoryStyle={CATEGORY_STYLES[category.key]}
-                                onEdit={assetCrud.handleEditAsset}
-                                onDelete={assetCrud.handleDeleteAsset}
-                                onQuantityChange={assetCrud.handleQuantityChange}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </motion.div>
-                    </TabsContent>
+                    <div
+                      key={cat.key}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${colors.bg} border ${colors.border}`}
+                    >
+                      <Icon icon={colors.icon} className={colors.text} width={14} height={14} />
+                      <span className={`text-xs font-medium ${colors.text}`}>{cat.label}</span>
+                      <span className="text-xs text-muted-foreground/60">|</span>
+                      <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatCompactValue(cat.total, displayCurrency)}
+                      </span>
+                    </div>
                   )
                 })}
-              </Tabs>
-            )}
-          </div>
-
-          <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">{t("vaults:title")}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                onClick={() => vaultCrud.setAccountFormOpen(true)}
-              >
-                <span
-                  className={`text-xl leading-none ${filteredAccounts.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
-                >
-                  +
-                </span>
-              </Button>
-            </div>
-            {filteredAccounts.length === 0 ? (
-              <div className="p-4">
-                <p className="text-muted-foreground text-center py-4">{t("vaults:noVaults")}</p>
+                {accounts.length > 0 && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/15 border border-sky-500/25">
+                    <Icon
+                      icon="solar:safe-2-linear"
+                      className="text-sky-400"
+                      width={14}
+                      height={14}
+                    />
+                    <span className="text-xs font-medium text-sky-400">{t("vaults:title")}</span>
+                    <span className="text-xs text-muted-foreground/60">|</span>
+                    <span className="text-xs font-bold text-sky-400">{accounts.length}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatCompactValue(vaultBadgeTotal, displayCurrency)}
+                    </span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <Accordion type="multiple" className="space-y-3">
-                {filteredAccounts.map((account) => {
-                  const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
-                  const flowKey = accountFlows
-                    .map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`)
-                    .join(",")
-                  const hasActiveFlows = accountFlows.some((f) => f.isActive)
+              <div className="h-36 -mx-2">
+                <NetWorthChart
+                  snapshots={snapshots}
+                  displayCurrency={displayCurrency}
+                  exchangeRates={exchangeRates}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-                  const monthlyTotals = calculateMonthlyTotals(accountFlows)
-                  const monthlyNetDisplay = toDisplayCurrency(
-                    monthlyTotals.net,
-                    account.currency,
-                    displayCurrency,
-                    exchangeRates,
-                  )
+          <EntitySelector
+            entities={entities}
+            selectedEntityId={entityCrud.selectedEntityId}
+            onSelect={entityCrud.setSelectedEntityId}
+            onAddCompany={() => entityCrud.setEntityFormOpen(true)}
+            onEditEntity={entityCrud.handleEditEntity}
+            onDeleteEntity={entityCrud.handleDeleteEntityRequest}
+            entityTotals={entityTotals}
+            displayCurrency={displayCurrency}
+          />
 
-                  const currentBalanceDisplay = getAccountValue(account)
-                  const projection1M = calculateProjection(account.balance, accountFlows, 1)
-                  const projectedBalance =
-                    projection1M.length > 0
-                      ? projection1M[projection1M.length - 1].balance
-                      : account.balance
-                  const projectedBalanceDisplay = toDisplayCurrency(
-                    projectedBalance,
-                    account.currency,
-                    displayCurrency,
-                    exchangeRates,
-                  )
-                  const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
-                  const projectedChangePct =
-                    currentBalanceDisplay !== 0
-                      ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
-                      : 0
+          <div className="space-y-6 mb-8">
+            <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">{t("assets:title")}</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                  onClick={() => assetCrud.setAssetFormOpen(true)}
+                >
+                  <span
+                    className={`text-xl leading-none ${filteredAssets.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
+                  >
+                    +
+                  </span>
+                </Button>
+              </div>
+              {filteredAssets.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-muted-foreground">{t("assets:noAssets")}</p>
+                </div>
+              ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="h-auto bg-transparent p-0 flex justify-start gap-1 mb-4">
+                    {ASSET_CATEGORIES.map((category) => {
+                      const categoryAssets = assetsByType[category.key]
+                      const hasAssets = categoryAssets.length > 0
 
-                  const netColorClass =
-                    monthlyTotals.net > 0
-                      ? "text-emerald-400"
-                      : monthlyTotals.net < 0
-                        ? "text-red-400"
-                        : "text-muted-foreground"
+                      return (
+                        <TabsTrigger
+                          key={category.key}
+                          value={category.key}
+                          disabled={!hasAssets}
+                          className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                        >
+                          <span className="text-current">{category.icon}</span>
+                          <span>{category.label}</span>
+                          {hasAssets && (
+                            <span className="text-muted-foreground">{categoryAssets.length}</span>
+                          )}
+                        </TabsTrigger>
+                      )
+                    })}
+                  </TabsList>
 
-                  return (
-                    <AccordionItem
-                      key={account.id}
-                      value={account.id}
-                      className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
-                    >
-                      <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
-                        <div className="flex flex-1 items-center justify-between mr-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
-                            <span className="text-sm font-semibold text-foreground">
-                              {account.name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {account.currency}
-                            </span>
-                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  vaultCrud.handleEditAccount(account)
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
+                  {ASSET_CATEGORIES.map((category) => {
+                    const categoryAssets = assetsByType[category.key]
+
+                    return (
+                      <TabsContent key={category.key} value={category.key} className="mt-0">
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                        >
+                          {categoryAssets.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground">
+                              {t("assets:noAssetsInCategory", {
+                                category: category.label.toLowerCase(),
+                              })}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                              {categoryAssets.map((asset) => (
+                                <AssetTile
+                                  key={asset.id}
+                                  asset={asset}
+                                  displayValue={getAssetValue(asset)}
+                                  displayCurrency={displayCurrency}
+                                  categoryStyle={CATEGORY_STYLES[category.key]}
+                                  onEdit={assetCrud.handleEditAsset}
+                                  onDelete={assetCrud.handleDeleteAsset}
+                                  onQuantityChange={assetCrud.handleQuantityChange}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </motion.div>
+                      </TabsContent>
+                    )
+                  })}
+                </Tabs>
+              )}
+            </div>
+
+            <div className="rounded-xl bg-[rgba(23,20,43,0.4)] border border-slate-800/50 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">{t("vaults:title")}</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
+                  onClick={() => vaultCrud.setAccountFormOpen(true)}
+                >
+                  <span
+                    className={`text-xl leading-none ${filteredAccounts.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
+                  >
+                    +
+                  </span>
+                </Button>
+              </div>
+              {filteredAccounts.length === 0 ? (
+                <div className="p-4">
+                  <p className="text-muted-foreground text-center py-4">{t("vaults:noVaults")}</p>
+                </div>
+              ) : (
+                <Accordion type="multiple" className="space-y-3">
+                  {filteredAccounts.map((account) => {
+                    const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
+                    const flowKey = accountFlows
+                      .map((f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`)
+                      .join(",")
+                    const hasActiveFlows = accountFlows.some((f) => f.isActive)
+
+                    const monthlyTotals = calculateMonthlyTotals(accountFlows)
+                    const monthlyNetDisplay = toDisplayCurrency(
+                      monthlyTotals.net,
+                      account.currency,
+                      displayCurrency,
+                      exchangeRates,
+                    )
+
+                    const currentBalanceDisplay = getAccountValue(account)
+                    const projection1M = calculateProjection(account.balance, accountFlows, 1)
+                    const projectedBalance =
+                      projection1M.length > 0
+                        ? projection1M[projection1M.length - 1].balance
+                        : account.balance
+                    const projectedBalanceDisplay = toDisplayCurrency(
+                      projectedBalance,
+                      account.currency,
+                      displayCurrency,
+                      exchangeRates,
+                    )
+                    const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
+                    const projectedChangePct =
+                      currentBalanceDisplay !== 0
+                        ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
+                        : 0
+
+                    const netColorClass =
+                      monthlyTotals.net > 0
+                        ? "text-emerald-400"
+                        : monthlyTotals.net < 0
+                          ? "text-red-400"
+                          : "text-muted-foreground"
+
+                    return (
+                      <AccordionItem
+                        key={account.id}
+                        value={account.id}
+                        className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
+                      >
+                        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
+                          <div className="flex flex-1 items-center justify-between mr-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
+                              <span className="text-sm font-semibold text-foreground">
+                                {account.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {account.currency}
+                              </span>
+                              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={(e) => {
                                     e.stopPropagation()
                                     vaultCrud.handleEditAccount(account)
-                                  }
-                                }}
-                                className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-accent hover:bg-accent/10 cursor-pointer"
-                              >
-                                <Icon icon="solar:pen-linear" width={12} height={12} />
-                              </div>
-                              <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  vaultCrud.handleDeleteAccountRequest(account)
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                      e.stopPropagation()
+                                      vaultCrud.handleEditAccount(account)
+                                    }
+                                  }}
+                                  className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-accent hover:bg-accent/10 cursor-pointer"
+                                >
+                                  <Icon icon="solar:pen-linear" width={12} height={12} />
+                                </div>
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={(e) => {
                                     e.stopPropagation()
                                     vaultCrud.handleDeleteAccountRequest(account)
-                                  }
-                                }}
-                                className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 cursor-pointer"
-                              >
-                                <Icon icon="solar:trash-bin-trash-linear" width={12} height={12} />
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                      e.stopPropagation()
+                                      vaultCrud.handleDeleteAccountRequest(account)
+                                    }
+                                  }}
+                                  className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 cursor-pointer"
+                                >
+                                  <Icon
+                                    icon="solar:trash-bin-trash-linear"
+                                    width={12}
+                                    height={12}
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <TooltipProvider delayDuration={300}>
-                            <div className="flex items-center gap-3">
-                              {hasActiveFlows && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="flex items-center gap-1.5 cursor-default">
-                                      <span className={`text-xs font-medium ${netColorClass}`}>
-                                        {monthlyTotals.net >= 0 ? "+" : ""}
-                                        {formatCurrency(monthlyNetDisplay, displayCurrency)}
-                                        <span className="text-muted-foreground">
-                                          {t("common:perMonth")}
+                            <TooltipProvider delayDuration={300}>
+                              <div className="flex items-center gap-3">
+                                {hasActiveFlows && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="flex items-center gap-1.5 cursor-default">
+                                        <span className={`text-xs font-medium ${netColorClass}`}>
+                                          {monthlyTotals.net >= 0 ? "+" : ""}
+                                          {formatCurrency(monthlyNetDisplay, displayCurrency)}
+                                          <span className="text-muted-foreground">
+                                            {t("common:perMonth")}
+                                          </span>
+                                        </span>
+                                        <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
+                                          <Icon
+                                            icon={
+                                              projectedChange >= 0
+                                                ? "solar:arrow-up-linear"
+                                                : "solar:arrow-down-linear"
+                                            }
+                                            width={10}
+                                            height={10}
+                                          />
+                                          {projectedChange >= 0 ? "+" : ""}
+                                          {projectedChangePct.toFixed(1)}%
                                         </span>
                                       </span>
-                                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
-                                        <Icon
-                                          icon={
-                                            projectedChange >= 0
-                                              ? "solar:arrow-up-linear"
-                                              : "solar:arrow-down-linear"
-                                          }
-                                          width={10}
-                                          height={10}
-                                        />
-                                        {projectedChange >= 0 ? "+" : ""}
-                                        {projectedChangePct.toFixed(1)}%
-                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      <p>{t("common:projectedMonthlyGain")}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-sm font-bold text-accent cursor-default">
+                                      {formatCurrency(currentBalanceDisplay, displayCurrency)}
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent side="top">
-                                    <p>{t("common:projectedMonthlyGain")}</p>
+                                    <p>{t("common:currentBalance")}</p>
                                   </TooltipContent>
                                 </Tooltip>
-                              )}
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="text-sm font-bold text-accent cursor-default">
-                                    {formatCurrency(currentBalanceDisplay, displayCurrency)}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                  <p>{t("common:currentBalance")}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </TooltipProvider>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-4 pb-4">
-                        <div className="space-y-4">
-                          <VaultFlowDiagram
-                            key={`${account.id}-${flowKey}`}
-                            account={account}
-                            cashFlows={accountFlows}
-                            displayCurrency={displayCurrency}
-                            displayBalance={getAccountValue(account)}
-                            exchangeRates={exchangeRates}
-                            onEdit={vaultCrud.handleEditCashFlow}
-                            onDelete={vaultCrud.handleDeleteCashFlow}
-                            onToggle={vaultCrud.handleToggleCashFlow}
-                            onAddFlow={(flowType) =>
-                              vaultCrud.openAddFlow(account.id, flowType ?? "inflow")
-                            }
-                          />
-                          <VaultProjectionChart
-                            currentBalance={getAccountValue(account)}
-                            cashFlows={accountFlows}
-                            displayCurrency={displayCurrency}
-                            accountCurrency={account.currency}
-                            exchangeRates={exchangeRates}
-                          />
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
-                })}
-              </Accordion>
-            )}
+                              </div>
+                            </TooltipProvider>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-4 pb-4">
+                          <div className="space-y-4">
+                            <VaultFlowDiagram
+                              key={`${account.id}-${flowKey}`}
+                              account={account}
+                              cashFlows={accountFlows}
+                              displayCurrency={displayCurrency}
+                              displayBalance={getAccountValue(account)}
+                              exchangeRates={exchangeRates}
+                              onEdit={vaultCrud.handleEditCashFlow}
+                              onDelete={vaultCrud.handleDeleteCashFlow}
+                              onToggle={vaultCrud.handleToggleCashFlow}
+                              onAddFlow={(flowType) =>
+                                vaultCrud.openAddFlow(account.id, flowType ?? "inflow")
+                              }
+                            />
+                            <VaultProjectionChart
+                              currentBalance={getAccountValue(account)}
+                              cashFlows={accountFlows}
+                              displayCurrency={displayCurrency}
+                              accountCurrency={account.currency}
+                              exchangeRates={exchangeRates}
+                            />
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )
+                  })}
+                </Accordion>
+              )}
+            </div>
           </div>
+
+          <AssetForm
+            asset={assetCrud.editingAsset}
+            open={assetCrud.assetFormOpen}
+            onOpenChange={assetCrud.handleAssetFormClose}
+            onSubmit={
+              assetCrud.editingAsset ? assetCrud.handleUpdateAsset : assetCrud.handleAddAsset
+            }
+          />
+
+          <AccountForm
+            account={vaultCrud.editingAccount}
+            open={vaultCrud.accountFormOpen}
+            onOpenChange={vaultCrud.handleAccountFormClose}
+            onSubmit={
+              vaultCrud.editingAccount ? vaultCrud.handleUpdateAccount : vaultCrud.handleAddAccount
+            }
+          />
+
+          <CashFlowForm
+            cashFlow={vaultCrud.editingCashFlow}
+            accountId={vaultCrud.cashFlowAccountId}
+            accountCurrency={accounts.find((a) => a.id === vaultCrud.cashFlowAccountId)?.currency}
+            defaultFlowType={vaultCrud.defaultFlowType}
+            open={vaultCrud.cashFlowFormOpen}
+            onOpenChange={vaultCrud.handleCashFlowFormClose}
+            onSubmit={vaultCrud.handleAddCashFlow}
+          />
+
+          <EntityForm
+            entity={entityCrud.editingEntity}
+            open={entityCrud.entityFormOpen}
+            onOpenChange={entityCrud.handleEntityFormClose}
+            onSubmit={
+              entityCrud.editingEntity ? entityCrud.handleUpdateEntity : entityCrud.handleAddCompany
+            }
+          />
+
+          <DeleteEntityDialog
+            open={entityCrud.deleteDialogOpen}
+            onOpenChange={entityCrud.setDeleteDialogOpen}
+            entity={entityCrud.entityToDelete}
+            associatedAssetCount={
+              entityCrud.entityToDelete
+                ? assets.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
+                : 0
+            }
+            associatedAccountCount={
+              entityCrud.entityToDelete
+                ? accounts.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
+                : 0
+            }
+            onConfirm={entityCrud.handleConfirmDeleteEntity}
+          />
+
+          <DeleteAccountDialog
+            open={vaultCrud.deleteAccountDialogOpen}
+            onOpenChange={vaultCrud.setDeleteAccountDialogOpen}
+            account={vaultCrud.accountToDelete}
+            associatedCashFlowCount={
+              vaultCrud.accountToDelete
+                ? cashFlows.filter((f) => f.accountId === vaultCrud.accountToDelete!.id).length
+                : 0
+            }
+            onConfirm={vaultCrud.handleConfirmDeleteAccount}
+          />
+
+          <SettingsDialog
+            open={settingsOpen}
+            onOpenChange={setSettingsOpen}
+            isPinEnabled={isPinEnabled}
+            onPinStatusChange={setIsPinEnabled}
+            onLock={handleLock}
+            onResetAccount={() => setResetDialogOpen(true)}
+          />
+
+          <ResetAccountDialog
+            open={resetDialogOpen}
+            onOpenChange={setResetDialogOpen}
+            onConfirm={handleResetAccount}
+            pinEnabled={isPinEnabled}
+          />
         </div>
-
-        <AssetForm
-          asset={assetCrud.editingAsset}
-          open={assetCrud.assetFormOpen}
-          onOpenChange={assetCrud.handleAssetFormClose}
-          onSubmit={assetCrud.editingAsset ? assetCrud.handleUpdateAsset : assetCrud.handleAddAsset}
-        />
-
-        <AccountForm
-          account={vaultCrud.editingAccount}
-          open={vaultCrud.accountFormOpen}
-          onOpenChange={vaultCrud.handleAccountFormClose}
-          onSubmit={
-            vaultCrud.editingAccount ? vaultCrud.handleUpdateAccount : vaultCrud.handleAddAccount
-          }
-        />
-
-        <CashFlowForm
-          cashFlow={vaultCrud.editingCashFlow}
-          accountId={vaultCrud.cashFlowAccountId}
-          accountCurrency={accounts.find((a) => a.id === vaultCrud.cashFlowAccountId)?.currency}
-          defaultFlowType={vaultCrud.defaultFlowType}
-          open={vaultCrud.cashFlowFormOpen}
-          onOpenChange={vaultCrud.handleCashFlowFormClose}
-          onSubmit={vaultCrud.handleAddCashFlow}
-        />
-
-        <EntityForm
-          entity={entityCrud.editingEntity}
-          open={entityCrud.entityFormOpen}
-          onOpenChange={entityCrud.handleEntityFormClose}
-          onSubmit={
-            entityCrud.editingEntity ? entityCrud.handleUpdateEntity : entityCrud.handleAddCompany
-          }
-        />
-
-        <DeleteEntityDialog
-          open={entityCrud.deleteDialogOpen}
-          onOpenChange={entityCrud.setDeleteDialogOpen}
-          entity={entityCrud.entityToDelete}
-          associatedAssetCount={
-            entityCrud.entityToDelete
-              ? assets.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
-              : 0
-          }
-          associatedAccountCount={
-            entityCrud.entityToDelete
-              ? accounts.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
-              : 0
-          }
-          onConfirm={entityCrud.handleConfirmDeleteEntity}
-        />
-
-        <DeleteAccountDialog
-          open={vaultCrud.deleteAccountDialogOpen}
-          onOpenChange={vaultCrud.setDeleteAccountDialogOpen}
-          account={vaultCrud.accountToDelete}
-          associatedCashFlowCount={
-            vaultCrud.accountToDelete
-              ? cashFlows.filter((f) => f.accountId === vaultCrud.accountToDelete!.id).length
-              : 0
-          }
-          onConfirm={vaultCrud.handleConfirmDeleteAccount}
-        />
-
-        <SettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          isPinEnabled={isPinEnabled}
-          onPinStatusChange={setIsPinEnabled}
-          onLock={handleLock}
-          onResetAccount={() => setResetDialogOpen(true)}
-        />
-
-        <ResetAccountDialog
-          open={resetDialogOpen}
-          onOpenChange={setResetDialogOpen}
-          onConfirm={handleResetAccount}
-          pinEnabled={isPinEnabled}
-        />
       </main>
 
       <UpdateNotification

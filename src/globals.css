@@ -50,6 +50,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
+    overscroll-behavior: none;
   }
   h1,
   h2,
@@ -131,6 +132,23 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(260 30% 30%) hsl(240 20% 12%);
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(240 20% 12%);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(260 30% 30%);
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(260 30% 40%);
   }
   .logo-hover {
     transition: transform 0.4s ease-in-out;
