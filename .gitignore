@@ -24,6 +24,7 @@ yarn-error.log*
 
 # local env files
 .env
+.env.*
 .env*.local
 
 # typescript
@@ -31,6 +32,9 @@ yarn-error.log*
 
 # database
 /data/
+*.db
+*.sqlite
+*.sqlite3
 .claude/settings.local.json
 
 # Tauri
@@ -40,7 +44,16 @@ yarn-error.log*
 # Build artifacts
 /.next/
 
+# certificates and keys
+*.p12
+*.pfx
+*.cer
+*.der
+*.crt
+*.key
+
 # local files
 PRD.md
 TODOS.md
 LANDING_PAGE.md
+NOTES.md
