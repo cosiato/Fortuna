@@ -20,7 +20,10 @@
         "resizable": true,
         "fullscreen": false,
         "maximized": true,
-        "center": true
+        "center": true,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay",
+        "trafficLightPosition": { "x": 16, "y": 18 }
       }
     ],
     "security": {
@@ -30,11 +33,7 @@
   "bundle": {
     "createUpdaterArtifacts": true,
     "active": true,
-    "targets": [
-      "app",
-      "dmg",
-      "nsis"
-    ],
+    "targets": ["app", "dmg", "nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -73,9 +72,7 @@
   },
   "plugins": {
     "updater": {
-      "endpoints": [
-        "https://github.com/cosiato/Fortuna/releases/latest/download/latest.json"
-      ],
+      "endpoints": ["https://github.com/cosiato/Fortuna/releases/latest/download/latest.json"],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzOEY5Qzc4RDhFQUMzMTcKUldRWHcrclllSnlQRS9UTnJxc0hINEQvVExib3RZL2FKSmxmMmcvbGJqSXN6Q0xsTUJ0OWJMNGMK"
     }
   }
