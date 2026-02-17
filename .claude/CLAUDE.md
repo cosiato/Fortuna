@@ -98,6 +98,7 @@ src/
 |   |   |-- tooltip.tsx
 |   |-- AccountForm.tsx           # Form for adding/editing accounts
 |   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
+|   |-- AppSidebar.tsx            # Collapsible sidebar (entities, actions, update notification)
 |   |-- AssetForm.tsx             # Form for adding/editing assets
 |   |-- AssetTile.tsx             # Tile for displaying assets
 |   |-- CashFlowForm.tsx          # Form for adding/editing cash flows
@@ -113,10 +114,11 @@ src/
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
 |   |-- SettingsDialog.tsx        # Settings dialog with PIN management
 |   |-- EntityForm.tsx            # Form for adding/editing entities
-|   |-- EntitySelector.tsx        # Entity tabs for switching views
 |   |-- LockScreen.tsx            # Full-screen PIN lock overlay
 |   |-- SlotMachineNumber.tsx     # Animated digit roller for currency values
-|   |-- UpdateNotification.tsx   # Floating notification for app updates (download + restart)
+|   |-- SidebarActions.tsx        # Sidebar bottom action buttons (refresh, currency, settings, toggle)
+|   |-- SidebarEntityList.tsx     # Vertical entity list for sidebar (expanded/collapsed variants)
+|   |-- UpdateNotification.tsx   # App update notification (floating or inline variant)
 |   |-- NetWorthChart.tsx         # Net worth over time chart
 |   |-- PinInput.tsx              # 4-digit PIN input component
 |   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
@@ -137,6 +139,7 @@ src/
 |   |-- useEntityCrud.ts          # Entity CRUD operations and form state
 |   |-- useLanguage.ts            # Language management hook (syncs i18n + SQLite)
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
+|   |-- useSidebar.ts             # Sidebar collapse state with localStorage persistence + Cmd+B shortcut
 |   |-- useUpdater.ts            # Auto-update check, download, install, and relaunch
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
