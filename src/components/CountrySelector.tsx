@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { COUNTRIES } from "@/lib/countries"
+import CountryFlag from "@/components/CountryFlag"
 
 const sortedCountries = [...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name))
 
@@ -37,8 +38,8 @@ export default function CountrySelector({ value, onChange }: CountrySelectorProp
         >
           {selectedCountry ? (
             <span className="flex items-center gap-2">
-              <span>{selectedCountry.flag}</span>
-              <span>{selectedCountry.name}</span>
+              <CountryFlag code={selectedCountry.code} />
+              <span className="mt-px">{selectedCountry.name}</span>
             </span>
           ) : (
             <span className="text-muted-foreground">{t("selectCountry")}</span>
@@ -76,8 +77,8 @@ export default function CountrySelector({ value, onChange }: CountrySelectorProp
                     )}
                   />
                   <span className="flex items-center gap-2">
-                    <span>{country.flag}</span>
-                    <span>{country.name}</span>
+                    <CountryFlag code={country.code} />
+                    <span className="mt-0.5">{country.name}</span>
                   </span>
                 </CommandItem>
               ))}

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { Icon } from "@iconify/react"
 import { CURRENCY_GROUPS, CURRENCY_INFO, type SupportedCurrency } from "@/lib/currency"
+import CountryFlag from "@/components/CountryFlag"
 
 interface CurrencyPickerOverlayProps {
   open: boolean
@@ -147,7 +148,9 @@ export default function CurrencyPickerOverlay({
                                 : "border-slate-800/50 bg-slate-900/20 hover:bg-slate-800/40 hover:border-slate-700/50"
                             }`}
                           >
-                            <span className="text-lg leading-none shrink-0">{info.flag}</span>
+                            <span className="leading-none shrink-0">
+                              <CountryFlag code={info.flagCode} />
+                            </span>
                             <div className="min-w-0">
                               <span
                                 className={`text-sm font-semibold block ${

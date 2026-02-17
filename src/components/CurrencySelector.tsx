@@ -2,6 +2,7 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import CurrencyPickerOverlay from "@/components/CurrencyPickerOverlay"
 import { CURRENCY_INFO, type SupportedCurrency } from "@/lib/currency"
+import CountryFlag from "@/components/CountryFlag"
 
 interface CurrencySelectorProps {
   value: SupportedCurrency
@@ -21,8 +22,8 @@ export default function CurrencySelector({ value, onChange }: CurrencySelectorPr
         onClick={() => setOpen(true)}
       >
         <span className="flex items-center gap-1.5">
-          <span>{CURRENCY_INFO[value].flag}</span>
-          <span className="text-sm font-medium">{value}</span>
+          <CountryFlag code={CURRENCY_INFO[value].flagCode} />
+          <span className="mt-1 text-sm font-medium">{value}</span>
         </span>
       </Button>
       <CurrencyPickerOverlay open={open} value={value} onSelect={onChange} onClose={handleClose} />

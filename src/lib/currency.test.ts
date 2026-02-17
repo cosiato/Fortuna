@@ -370,7 +370,7 @@ describe("currency", () => {
       for (const currency of SUPPORTED_CURRENCIES) {
         expect(CURRENCY_INFO[currency]).toBeDefined()
         expect(CURRENCY_INFO[currency].name).toBeDefined()
-        expect(CURRENCY_INFO[currency].flag).toBeDefined()
+        expect(CURRENCY_INFO[currency].flagCode).toBeDefined()
       }
     })
   })

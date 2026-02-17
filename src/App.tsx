@@ -31,7 +31,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion"
-import { getCountryFlag } from "@/lib/countries"
+import CountryFlag from "@/components/CountryFlag"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
@@ -573,7 +573,7 @@ export default function App() {
                         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
                           <div className="flex flex-1 items-center justify-between mr-2">
                             <div className="flex items-center gap-2">
-                              <span className="text-lg">{getCountryFlag(account.countryCode)}</span>
+                              <CountryFlag code={account.countryCode} />
                               <span className="text-sm font-semibold text-foreground">
                                 {account.name}
                               </span>
