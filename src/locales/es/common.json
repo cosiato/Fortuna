@@ -63,7 +63,5 @@
   "updateAvailable": "La version {{version}} esta disponible",
   "updateNow": "Actualizar ahora",
   "later": "Mas tarde",
-  "downloadingUpdate": "Descargando actualizacion...",
-  "updateReady": "Actualizacion instalada. Reinicia para aplicar.",
-  "restartNow": "Reiniciar ahora"
+  "downloadingUpdate": "Descargando actualizacion..."
 }
