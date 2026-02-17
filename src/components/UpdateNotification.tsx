@@ -27,11 +27,11 @@ export default function UpdateNotification({
   onRestart,
   onDismiss,
 }: UpdateNotificationProps) {
+  const { t } = useTranslation("common")
+
   if (status === "idle" || status === "checking" || status === "error") {
     return null
   }
-
-  const { t } = useTranslation("common")
 
   const percentage =
     progress.total > 0 ? Math.round((progress.downloaded / progress.total) * 100) : 0
