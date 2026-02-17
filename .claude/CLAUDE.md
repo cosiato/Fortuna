@@ -56,7 +56,7 @@ Use the following tech stack:
 |   |-- release.yml               # CI/CD: cross-platform build + GitHub Release
 scripts/
 |-- bump-version.mjs              # Version bumping script (version numbers only)
-|-- generate-icons.mjs            # Extracts used Solar icons into src/lib/icons.ts
+|-- generate-icons.mjs            # Extracts used Solar + circle-flags icons into src/lib/icons.ts
 |-- release.sh                    # Full release automation (bump + changelog + commit + tag)
 src-tauri/                        # Tauri backend (Rust)
 |-- Cargo.toml                    # Rust dependencies
@@ -102,8 +102,10 @@ src/
 |   |-- AssetTile.tsx             # Tile for displaying assets
 |   |-- CashFlowForm.tsx          # Form for adding/editing cash flows
 |   |-- CashFlowNode.tsx          # React Flow node for cash flow entries
+|   |-- CountryFlag.tsx            # SVG flag icon via circle-flags (cross-platform)
 |   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
+|   |-- CurrencyCombobox.tsx      # Searchable currency combobox (Popover+Command, grouped by continent)
 |   |-- CurrencyPickerOverlay.tsx  # Fullscreen currency picker grouped by continent
 |   |-- CurrencySelector.tsx      # Currency picker button (opens overlay)
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
