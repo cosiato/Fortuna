@@ -71,5 +71,7 @@
   "updateAvailable": "A versao {{version}} esta disponivel",
   "updateNow": "Atualizar agora",
   "later": "Mais tarde",
-  "downloadingUpdate": "Baixando atualizacao..."
+  "downloadingUpdate": "Baixando atualizacao...",
+  "collapseSidebar": "Recolher barra lateral",
+  "expandSidebar": "Expandir barra lateral"
 }

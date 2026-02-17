@@ -71,5 +71,7 @@
   "updateAvailable": "Version {{version}} is available",
   "updateNow": "Update now",
   "later": "Later",
-  "downloadingUpdate": "Downloading update..."
+  "downloadingUpdate": "Downloading update...",
+  "collapseSidebar": "Collapse sidebar",
+  "expandSidebar": "Expand sidebar"
 }
