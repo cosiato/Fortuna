@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+
+## [0.1.10] - 2026-02-16
+
+### Changed
+
+- add gentle pulse animation to empty section add buttons
+- **entities**: replace add company icon with '+' text
+
 ## [0.1.9] - 2026-02-16
 
 ### Added
