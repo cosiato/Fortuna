@@ -177,9 +177,13 @@ export default function CashFlowForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">{t("common:frequency.none")}</SelectItem>
                   <SelectItem value="daily">{t("common:frequency.daily")}</SelectItem>
                   <SelectItem value="weekly">{t("common:frequency.weekly")}</SelectItem>
                   <SelectItem value="monthly">{t("common:frequency.monthly")}</SelectItem>
+                  <SelectItem value="quarterly">{t("common:frequency.quarterly")}</SelectItem>
+                  <SelectItem value="trimester">{t("common:frequency.trimester")}</SelectItem>
+                  <SelectItem value="semester">{t("common:frequency.semester")}</SelectItem>
                   <SelectItem value="yearly">{t("common:frequency.yearly")}</SelectItem>
                 </SelectContent>
               </Select>

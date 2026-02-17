@@ -79,7 +79,15 @@ export interface UpdateAccountInput {
 
 export type CashFlowType = "inflow" | "outflow"
 
-export type CashFlowFrequency = "daily" | "weekly" | "monthly" | "yearly"
+export type CashFlowFrequency =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "trimester"
+  | "semester"
+  | "yearly"
 
 export type CashFlowCategory =
   | "salary"

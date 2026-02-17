@@ -27,6 +27,10 @@ function makeCashFlow(overrides: Partial<CashFlow> = {}): CashFlow {
 }
 
 describe("normalizeToMonthly", () => {
+  it("returns 0 for one-time (none) frequency", () => {
+    expect(normalizeToMonthly(5000, "none")).toBe(0)
+  })
+
   it("returns same amount for monthly frequency", () => {
     expect(normalizeToMonthly(1000, "monthly")).toBe(1000)
   })
@@ -34,6 +38,18 @@ describe("normalizeToMonthly", () => {
   it("converts weekly to monthly (weekly * 52/12)", () => {
     const result = normalizeToMonthly(100, "weekly")
     expect(result).toBeCloseTo(433.33, 1)
+  })
+
+  it("converts quarterly to monthly (amount / 3)", () => {
+    expect(normalizeToMonthly(3000, "quarterly")).toBe(1000)
+  })
+
+  it("converts trimester to monthly (amount / 4)", () => {
+    expect(normalizeToMonthly(4000, "trimester")).toBe(1000)
+  })
+
+  it("converts semester to monthly (amount / 6)", () => {
+    expect(normalizeToMonthly(6000, "semester")).toBe(1000)
   })
 
   it("converts yearly to monthly (yearly / 12)", () => {
@@ -122,6 +138,57 @@ describe("getFlowOccurrences", () => {
     expect(dates[0].getFullYear()).toBe(2024)
     expect(dates[1].getFullYear()).toBe(2025)
     expect(dates[2].getFullYear()).toBe(2026)
+  })
+
+  it("returns single occurrence for none (one-time) frequency", () => {
+    const flow = makeCashFlow({ startDate: "2024-03-15", frequency: "none" })
+    const windowStart = new Date(2024, 0, 1)
+    const windowEnd = new Date(2024, 11, 31)
+    const dates = getFlowOccurrences(flow, windowStart, windowEnd)
+    expect(dates).toHaveLength(1)
+    expect(dates[0].getMonth()).toBe(2)
+    expect(dates[0].getDate()).toBe(15)
+  })
+
+  it("returns empty for none frequency outside window", () => {
+    const flow = makeCashFlow({ startDate: "2023-06-01", frequency: "none" })
+    const windowStart = new Date(2024, 0, 1)
+    const windowEnd = new Date(2024, 11, 31)
+    const dates = getFlowOccurrences(flow, windowStart, windowEnd)
+    expect(dates).toHaveLength(0)
+  })
+
+  it("returns quarterly occurrences every 3 months", () => {
+    const flow = makeCashFlow({ startDate: "2024-01-15", frequency: "quarterly" })
+    const windowStart = new Date(2024, 0, 1)
+    const windowEnd = new Date(2024, 11, 31)
+    const dates = getFlowOccurrences(flow, windowStart, windowEnd)
+    expect(dates).toHaveLength(4)
+    expect(dates[0].getMonth()).toBe(0) // Jan
+    expect(dates[1].getMonth()).toBe(3) // Apr
+    expect(dates[2].getMonth()).toBe(6) // Jul
+    expect(dates[3].getMonth()).toBe(9) // Oct
+  })
+
+  it("returns trimester occurrences every 4 months", () => {
+    const flow = makeCashFlow({ startDate: "2024-01-15", frequency: "trimester" })
+    const windowStart = new Date(2024, 0, 1)
+    const windowEnd = new Date(2024, 11, 31)
+    const dates = getFlowOccurrences(flow, windowStart, windowEnd)
+    expect(dates).toHaveLength(3)
+    expect(dates[0].getMonth()).toBe(0) // Jan
+    expect(dates[1].getMonth()).toBe(4) // May
+    expect(dates[2].getMonth()).toBe(8) // Sep
+  })
+
+  it("returns semester occurrences every 6 months", () => {
+    const flow = makeCashFlow({ startDate: "2024-01-15", frequency: "semester" })
+    const windowStart = new Date(2024, 0, 1)
+    const windowEnd = new Date(2024, 11, 31)
+    const dates = getFlowOccurrences(flow, windowStart, windowEnd)
+    expect(dates).toHaveLength(2)
+    expect(dates[0].getMonth()).toBe(0) // Jan
+    expect(dates[1].getMonth()).toBe(6) // Jul
   })
 
   it("returns empty array for inactive flows", () => {
@@ -317,5 +384,45 @@ describe("calculateMonthlyTotals", () => {
     ]
     const result = calculateMonthlyTotals(flows)
     expect(result.totalInflow).toBe(5000)
+  })
+
+  it("includes one-time flow in its start month", () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2024, 2, 10))
+
+    const flows = [
+      makeCashFlow({
+        id: "1",
+        amount: 2000,
+        flowType: "inflow",
+        frequency: "none",
+        startDate: "2024-03-15",
+      }),
+    ]
+    const result = calculateMonthlyTotals(flows)
+    expect(result.totalInflow).toBe(2000)
+    expect(result.net).toBe(2000)
+
+    vi.useRealTimers()
+  })
+
+  it("excludes one-time flow from other months", () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2024, 5, 10))
+
+    const flows = [
+      makeCashFlow({
+        id: "1",
+        amount: 2000,
+        flowType: "inflow",
+        frequency: "none",
+        startDate: "2024-03-15",
+      }),
+    ]
+    const result = calculateMonthlyTotals(flows)
+    expect(result.totalInflow).toBe(0)
+    expect(result.net).toBe(0)
+
+    vi.useRealTimers()
   })
 })

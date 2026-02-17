@@ -31,16 +31,24 @@
     "digital": "Digital"
   },
   "frequency": {
+    "none": "Puntual",
     "daily": "Diario",
     "weekly": "Semanal",
     "monthly": "Mensual",
+    "quarterly": "Trimestral",
+    "trimester": "Cuatrimestral",
+    "semester": "Semestral",
     "yearly": "Anual"
   },
   "frequencyShort": {
-    "daily": "/día",
+    "none": "unico",
+    "daily": "/dia",
     "weekly": "/sem",
     "monthly": "/mes",
-    "yearly": "/año"
+    "quarterly": "/trim",
+    "trimester": "/cuatr",
+    "semester": "/sem",
+    "yearly": "/ano"
   },
   "flowType": {
     "inflow": "Ingreso",

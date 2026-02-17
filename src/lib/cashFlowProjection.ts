@@ -65,6 +65,13 @@ export function getFlowOccurrences(
   const flowEnd = flow.endDate ? parseDate(flow.endDate) : null
   const occurrences: Date[] = []
 
+  if (flow.frequency === "none") {
+    if (flowStart >= windowStart && flowStart <= windowEnd && (!flowEnd || flowStart <= flowEnd)) {
+      occurrences.push(new Date(flowStart))
+    }
+    return occurrences
+  }
+
   let current = new Date(flowStart)
   current.setHours(0, 0, 0, 0)
   let iteration = 0
@@ -84,6 +91,15 @@ export function getFlowOccurrences(
         break
       case "monthly":
         current = addMonths(flowStart, iteration)
+        break
+      case "quarterly":
+        current = addMonths(flowStart, iteration * 3)
+        break
+      case "trimester":
+        current = addMonths(flowStart, iteration * 4)
+        break
+      case "semester":
+        current = addMonths(flowStart, iteration * 6)
         break
       case "yearly":
         current = addYears(flowStart, iteration)
@@ -165,12 +181,20 @@ export function calculateProjection(
 
 export function normalizeToMonthly(amount: number, frequency: CashFlowFrequency): number {
   switch (frequency) {
+    case "none":
+      return 0
     case "daily":
       return amount * (365 / 12)
     case "weekly":
       return amount * (52 / 12)
     case "monthly":
       return amount
+    case "quarterly":
+      return amount / 3
+    case "trimester":
+      return amount / 4
+    case "semester":
+      return amount / 6
     case "yearly":
       return amount / 12
   }
@@ -209,6 +233,21 @@ export function calculateMonthlyTotals(cashFlows: readonly CashFlow[]): {
   let totalOutflow = 0
 
   for (const flow of cashFlows) {
+    if (!flow.isActive) continue
+
+    if (flow.frequency === "none") {
+      const start = parseYearMonth(flow.startDate)
+      if (start.year !== currentMonth.getFullYear() || start.month !== currentMonth.getMonth())
+        continue
+
+      if (flow.flowType === "inflow") {
+        totalInflow += flow.amount
+      } else {
+        totalOutflow += flow.amount
+      }
+      continue
+    }
+
     if (!isFlowActiveInMonth(flow, currentMonth)) continue
 
     const monthlyAmount = normalizeToMonthly(flow.amount, flow.frequency)

@@ -31,15 +31,23 @@
     "digital": "Digital"
   },
   "frequency": {
+    "none": "One-time",
     "daily": "Daily",
     "weekly": "Weekly",
     "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "trimester": "Trimester",
+    "semester": "Semester",
     "yearly": "Yearly"
   },
   "frequencyShort": {
+    "none": "once",
     "daily": "/day",
     "weekly": "/wk",
     "monthly": "/mo",
+    "quarterly": "/qtr",
+    "trimester": "/tri",
+    "semester": "/sem",
     "yearly": "/yr"
   },
   "flowType": {

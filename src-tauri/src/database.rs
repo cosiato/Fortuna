@@ -96,7 +96,7 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
             name TEXT NOT NULL,
             amount REAL NOT NULL CHECK(amount > 0),
             flow_type TEXT NOT NULL CHECK(flow_type IN ('inflow', 'outflow')),
-            frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly', 'yearly')),
+            frequency TEXT NOT NULL CHECK(frequency IN ('none', 'daily', 'weekly', 'monthly', 'quarterly', 'trimester', 'semester', 'yearly')),
             category TEXT NOT NULL CHECK(category IN (
                 'salary', 'freelance', 'investment_income', 'rental_income', 'other_income',
                 'rent', 'mortgage', 'subscription', 'utilities', 'insurance',
@@ -117,6 +117,65 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
     )?;
 
     ensure_individual_entity(&conn)?;
+    migrate_cash_flow_frequencies(&conn)?;
+
+    Ok(())
+}
+
+fn migrate_cash_flow_frequencies(conn: &Connection) -> Result<()> {
+    let needs_migration: bool = conn.query_row(
+        "SELECT sql LIKE '%daily%weekly%monthly%yearly%' AND sql NOT LIKE '%none%'
+         FROM sqlite_master WHERE type='table' AND name='cash_flows'",
+        [],
+        |row| row.get(0),
+    ).unwrap_or(false);
+
+    if !needs_migration {
+        return Ok(());
+    }
+
+    // SQLite requires foreign_keys OFF for table-swap migrations.
+    // Must be set outside a transaction.
+    conn.execute_batch("PRAGMA foreign_keys = OFF;")?;
+
+    let tx = conn.unchecked_transaction()?;
+
+    tx.execute_batch(
+        "
+        CREATE TABLE cash_flows_new (
+            id TEXT PRIMARY KEY,
+            account_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            amount REAL NOT NULL CHECK(amount > 0),
+            flow_type TEXT NOT NULL CHECK(flow_type IN ('inflow', 'outflow')),
+            frequency TEXT NOT NULL CHECK(frequency IN ('none', 'daily', 'weekly', 'monthly', 'quarterly', 'trimester', 'semester', 'yearly')),
+            category TEXT NOT NULL CHECK(category IN (
+                'salary', 'freelance', 'investment_income', 'rental_income', 'other_income',
+                'rent', 'mortgage', 'subscription', 'utilities', 'insurance',
+                'groceries', 'transport', 'entertainment', 'savings_transfer', 'other_expense'
+            )),
+            start_date TEXT NOT NULL,
+            end_date TEXT,
+            is_active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+        );
+
+        INSERT INTO cash_flows_new SELECT * FROM cash_flows;
+        DROP TABLE cash_flows;
+        ALTER TABLE cash_flows_new RENAME TO cash_flows;
+
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_account_id ON cash_flows(account_id);
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_flow_type ON cash_flows(flow_type);
+        CREATE INDEX IF NOT EXISTS idx_cash_flows_is_active ON cash_flows(is_active);
+        ",
+    )?;
+
+    tx.execute_batch("PRAGMA foreign_key_check;")?;
+    tx.commit()?;
+
+    conn.execute_batch("PRAGMA foreign_keys = ON;")?;
 
     Ok(())
 }

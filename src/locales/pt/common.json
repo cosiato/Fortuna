@@ -31,15 +31,23 @@
     "digital": "Digital"
   },
   "frequency": {
+    "none": "Pontual",
     "daily": "Diário",
     "weekly": "Semanal",
     "monthly": "Mensal",
+    "quarterly": "Trimestral",
+    "trimester": "Quadrimestral",
+    "semester": "Semestral",
     "yearly": "Anual"
   },
   "frequencyShort": {
+    "none": "unico",
     "daily": "/dia",
     "weekly": "/sem",
-    "monthly": "/mês",
+    "monthly": "/mes",
+    "quarterly": "/trim",
+    "trimester": "/quad",
+    "semester": "/sem",
     "yearly": "/ano"
   },
   "flowType": {
