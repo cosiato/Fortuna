@@ -43,26 +43,24 @@ export default function SettingsData({ onResetAccount, onRestoreBackup }: Settin
         <h3 className="text-lg font-semibold mb-6">{t("sections.data")}</h3>
       </div>
 
-      <div className="border border-border rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">{t("data.exportData")}</p>
-            <p className="text-xs text-muted-foreground">{t("data.exportDescription")}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleExport}
-            disabled={exporting}
-          >
-            <Icon icon="solar:export-linear" width={16} height={16} />
-            {t("data.exportButton")}
-          </Button>
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <p className="text-sm font-medium">{t("data.exportData")}</p>
+          <p className="text-xs text-muted-foreground">{t("data.exportDescription")}</p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={handleExport}
+          disabled={exporting}
+        >
+          <Icon icon="solar:export-linear" width={16} height={16} />
+          {t("data.exportButton")}
+        </Button>
       </div>
 
-      <div className="border border-border rounded-lg p-4">
+      <div className="border-t border-border pt-6">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <p className="text-sm font-medium">{t("data.importData")}</p>

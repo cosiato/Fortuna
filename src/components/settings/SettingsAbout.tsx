@@ -26,14 +26,7 @@ export default function SettingsAbout() {
     <div className="space-y-8">
       <div>
         <h3 className="text-lg font-semibold mb-1">{t("sections.about")}</h3>
-        <p className="text-sm text-muted-foreground mt-2">
-          {t("about.description")}
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{t("about.version")}</span>
-        <span className="text-sm font-medium">v{__APP_VERSION__}</span>
+        <p className="text-sm text-muted-foreground mt-2">{t("about.description")}</p>
       </div>
 
       <div className="border-t border-border pt-6">
@@ -70,7 +63,8 @@ export default function SettingsAbout() {
             className="underline hover:text-muted-foreground/80 transition-colors"
           >
             cosiato
-          </a>
+          </a>{" "}
+          &middot; v{__APP_VERSION__}
         </p>
       </div>
     </div>
