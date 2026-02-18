@@ -244,43 +244,6 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
             </div>
           )}
 
-          {type === "crypto" && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="staking-toggle">{t("markAsStaked")}</Label>
-                <Switch id="staking-toggle" checked={isStaked} onCheckedChange={setIsStaked} />
-              </div>
-              {isStaked && (
-                <div className="space-y-3 pl-1">
-                  <div className="space-y-2">
-                    <Label htmlFor="stakedQuantity">{t("stakedQuantity")}</Label>
-                    <Input
-                      id="stakedQuantity"
-                      type="number"
-                      value={stakedQuantity}
-                      onChange={(e) => setStakedQuantity(e.target.value)}
-                      step="any"
-                      min="0"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cooldownDays">{t("withdrawalCooldown")}</Label>
-                    <Input
-                      id="cooldownDays"
-                      type="number"
-                      value={cooldownDays}
-                      onChange={(e) => setCooldownDays(e.target.value)}
-                      step="1"
-                      min="0"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           {type === "stock" && (
             <div className="space-y-2">
               <Label htmlFor="symbol">{t("tickerSymbol")}</Label>
@@ -322,12 +285,78 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               id="quantity"
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              onChange={(e) => {
+                const newQuantity = e.target.value
+                setQuantity(newQuantity)
+                const parsedQuantity = parseFloat(newQuantity) || 0
+                if (parsedQuantity <= 0) {
+                  setIsStaked(false)
+                  setStakedQuantity("")
+                } else {
+                  const parsedStaked = parseFloat(stakedQuantity) || 0
+                  if (parsedStaked > parsedQuantity) {
+                    setStakedQuantity(newQuantity)
+                  }
+                }
+              }}
               step="any"
               min="0"
               required
             />
           </div>
+
+          {type === "crypto" && (
+            <div className="space-y-3 rounded-lg bg-white/5 p-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="staking-toggle">{t("markAsStaked")}</Label>
+                <Switch
+                  id="staking-toggle"
+                  checked={isStaked}
+                  onCheckedChange={setIsStaked}
+                  disabled={!quantity || parseFloat(quantity) <= 0}
+                />
+              </div>
+              {isStaked && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="stakedQuantity"
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      {t("stakedQuantity")}
+                    </label>
+                    <Input
+                      id="stakedQuantity"
+                      type="number"
+                      value={stakedQuantity}
+                      onChange={(e) => setStakedQuantity(e.target.value)}
+                      step="any"
+                      min="0"
+                      max={quantity}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="cooldownDays"
+                      className="text-xs font-normal text-muted-foreground"
+                    >
+                      {t("cooldownDays")}
+                    </label>
+                    <Input
+                      id="cooldownDays"
+                      type="number"
+                      value={cooldownDays}
+                      onChange={(e) => setCooldownDays(e.target.value)}
+                      step="1"
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {requiresManualPrice && (
             <div className="space-y-2">

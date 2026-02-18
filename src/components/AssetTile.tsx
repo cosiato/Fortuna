@@ -146,7 +146,7 @@ export default function AssetTile({
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <div className="flex items-start gap-2">
               {asset.type === "crypto" && asset.symbol && <CryptoAvatar symbol={asset.symbol} />}
               <div className="min-w-0 flex-1">
@@ -216,20 +216,20 @@ export default function AssetTile({
                 {asset.type === "crypto" &&
                   asset.stakedQuantity != null &&
                   asset.stakedQuantity > 0 && (
-                    <div className="flex items-center gap-1 mt-0.5">
+                    <div className="flex items-center gap-1">
                       <Icon
                         icon="solar:lock-linear"
                         width={10}
                         height={10}
                         className="text-muted-foreground"
                       />
-                      <span className="text-[9px] text-muted-foreground">
+                      <div className="text-[9px] text-muted-foreground mt-0.5">
                         {t("assets:stakedOf", {
                           staked: asset.stakedQuantity.toLocaleString(undefined, {
                             maximumFractionDigits: 4,
                           }),
                         })}
-                      </span>
+                      </div>
                     </div>
                   )}
               </div>

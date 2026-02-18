@@ -34,7 +34,7 @@
   "addBtn": "Ajouter l'actif",
   "markAsStaked": "Marquer comme stake",
   "stakedQuantity": "Quantite stakee",
-  "withdrawalCooldown": "Delai de retrait (jours)",
+  "cooldownDays": "Cooldown (jours)",
   "staked": "Stake",
   "stakedOf": "{{staked}} stake(s)"
 }

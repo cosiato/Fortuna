@@ -34,7 +34,7 @@
   "addBtn": "Agregar Activo",
   "markAsStaked": "Marcar como staked",
   "stakedQuantity": "Cantidad en staking",
-  "withdrawalCooldown": "Periodo de retiro (dias)",
+  "cooldownDays": "Cooldown (dias)",
   "staked": "Staked",
   "stakedOf": "{{staked}} en staking"
 }

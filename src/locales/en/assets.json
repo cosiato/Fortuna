@@ -34,7 +34,7 @@
   "addBtn": "Add Asset",
   "markAsStaked": "Mark as staked",
   "stakedQuantity": "Staked quantity",
-  "withdrawalCooldown": "Withdrawal cooldown (days)",
+  "cooldownDays": "Cooldown (days)",
   "staked": "Staked",
   "stakedOf": "{{staked}} staked"
 }
