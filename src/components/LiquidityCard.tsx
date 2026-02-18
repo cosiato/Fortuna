@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { SupportedCurrency } from "@/lib/currency"
-import { formatCompactValue } from "@/components/DashboardView"
+import { formatCompactValue } from "@/lib/dashboardUtils"
 
 interface LiquidityCardProps {
   liquidTotal: number

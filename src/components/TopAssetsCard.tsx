@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
-import { CATEGORY_BADGE_CONFIG, formatCompactValue } from "@/components/DashboardView"
+import { CATEGORY_BADGE_CONFIG, formatCompactValue } from "@/lib/dashboardUtils"
 import type { Asset } from "@/types/database"
 import { SupportedCurrency } from "@/lib/currency"
 

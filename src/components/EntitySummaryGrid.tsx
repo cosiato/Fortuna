@@ -114,7 +114,7 @@ export default function EntitySummaryGrid({
                   return (
                     <span
                       key={cat.key}
-                      className={`inline-flex alig items-center gap-1 px-1.5 py-0.5 rounded ${config.bg}`}
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${config.bg}`}
                     >
                       <Icon icon={config.icon} className={config.text} width={11} height={11} />
                       <div className={`text-[10px] font-semibold mt-0.5 ${config.text}`}>

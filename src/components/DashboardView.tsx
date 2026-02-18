@@ -10,56 +10,8 @@ import TopAssetsCard from "@/components/TopAssetsCard"
 import LiquidityCard from "@/components/LiquidityCard"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Account, Asset, Entity, Snapshot } from "@/types/database"
-import { SupportedCurrency, formatCurrency, getIntlLocale } from "@/lib/currency"
-
-export const CATEGORY_BADGE_CONFIG: Record<
-  string,
-  { bg: string; text: string; border: string; icon: string }
-> = {
-  stock: {
-    bg: "bg-amber-500/15",
-    text: "text-amber-400",
-    border: "border-amber-500/25",
-    icon: "solar:chart-linear",
-  },
-  crypto: {
-    bg: "bg-purple-500/15",
-    text: "text-purple-400",
-    border: "border-purple-500/25",
-    icon: "solar:money-bag-linear",
-  },
-  real_estate: {
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-400",
-    border: "border-emerald-500/25",
-    icon: "solar:home-linear",
-  },
-  other: {
-    bg: "bg-slate-400/15",
-    text: "text-slate-400",
-    border: "border-slate-400/25",
-    icon: "solar:box-linear",
-  },
-}
-
-export function formatCompactValue(value: number, currency: SupportedCurrency): string {
-  if (currency === "BTC") {
-    return value >= 1 ? `${value.toFixed(2)} BTC` : `${value.toFixed(4)} BTC`
-  }
-  return new Intl.NumberFormat(getIntlLocale(), {
-    style: "currency",
-    currency,
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value)
-}
-
-export interface CategoryBadge {
-  key: string
-  label: string
-  count: number
-  total: number
-}
+import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import { CATEGORY_BADGE_CONFIG, formatCompactValue, type CategoryBadge } from "@/lib/dashboardUtils"
 
 interface MonthlyTotals {
   totalInflow: number
@@ -162,7 +114,7 @@ export default function DashboardView({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <EntitySummaryGrid
           entities={entities}
           entityTotals={entityTotals}
@@ -178,9 +130,15 @@ export default function DashboardView({
           getAssetValue={getAssetValue}
           displayCurrency={displayCurrency}
         />
+        <AssetDiversityChart
+          categoryData={categoryBadgeData}
+          vaultTotal={vaultBadgeTotal}
+          vaultCount={accountCount}
+          displayCurrency={displayCurrency}
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <MonthlyCashFlowCard
           totalInflow={monthlyTotals.totalInflow}
           totalOutflow={monthlyTotals.totalOutflow}
@@ -190,12 +148,6 @@ export default function DashboardView({
         <LiquidityCard
           liquidTotal={liquidTotal}
           illiquidTotal={illiquidTotal}
-          displayCurrency={displayCurrency}
-        />
-        <AssetDiversityChart
-          categoryData={categoryBadgeData}
-          vaultTotal={vaultBadgeTotal}
-          vaultCount={accountCount}
           displayCurrency={displayCurrency}
         />
       </div>

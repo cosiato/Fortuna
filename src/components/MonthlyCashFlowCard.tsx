@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
 import { SupportedCurrency } from "@/lib/currency"
-import { formatCompactValue } from "@/components/DashboardView"
+import { formatCompactValue } from "@/lib/dashboardUtils"
 
 interface MonthlyCashFlowCardProps {
   totalInflow: number

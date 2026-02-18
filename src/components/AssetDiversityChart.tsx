@@ -1,9 +1,8 @@
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Icon } from "@iconify/react"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import { SupportedCurrency } from "@/lib/currency"
-import { formatCompactValue } from "@/components/DashboardView"
+import { formatCompactValue } from "@/lib/dashboardUtils"
 
 interface CategoryBadge {
   key: string
@@ -25,7 +24,6 @@ interface SliceData {
   value: number
   count: number
   color: string
-  icon: string
 }
 
 const SLICE_COLORS: Record<string, string> = {
@@ -34,14 +32,6 @@ const SLICE_COLORS: Record<string, string> = {
   real_estate: "#10B981",
   other: "#94A3B8",
   vaults: "#0EA5E9",
-}
-
-const SLICE_ICONS: Record<string, string> = {
-  stock: "solar:chart-linear",
-  crypto: "solar:money-bag-linear",
-  real_estate: "solar:home-linear",
-  other: "solar:box-linear",
-  vaults: "solar:safe-2-linear",
 }
 
 function CustomTooltip({
@@ -91,7 +81,6 @@ export default function AssetDiversityChart({
         value: cat.total,
         count: cat.count,
         color: SLICE_COLORS[cat.key] ?? "#94A3B8",
-        icon: SLICE_ICONS[cat.key] ?? "solar:box-linear",
       })
     }
 
@@ -102,7 +91,6 @@ export default function AssetDiversityChart({
         value: vaultTotal,
         count: vaultCount,
         color: SLICE_COLORS.vaults,
-        icon: SLICE_ICONS.vaults,
       })
     }
 
@@ -116,8 +104,8 @@ export default function AssetDiversityChart({
   return (
     <div className="rounded-xl bg-background border border-border p-5">
       <h2 className="text-sm font-semibold text-foreground mb-3">{t("common:assetDiversity")}</h2>
-      <div className="flex flex-col sm:flex-row items-center gap-4">
-        <div className="w-48 h-48 shrink-0">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-40 h-40 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -126,8 +114,8 @@ export default function AssetDiversityChart({
                 nameKey="label"
                 cx="50%"
                 cy="50%"
-                innerRadius={45}
-                outerRadius={75}
+                innerRadius={40}
+                outerRadius={68}
                 paddingAngle={2}
                 strokeWidth={0}
               >
@@ -140,29 +128,16 @@ export default function AssetDiversityChart({
           </ResponsiveContainer>
         </div>
 
-        <div className="flex flex-col gap-2 flex-1 min-w-0">
-          {slices.map((slice) => {
-            const percentage = ((slice.value / grandTotal) * 100).toFixed(1)
-            return (
-              <div key={slice.key} className="flex items-center gap-3">
-                <div
-                  className="w-3 h-3 rounded-full shrink-0"
-                  style={{ backgroundColor: slice.color }}
-                />
-                <Icon
-                  icon={slice.icon}
-                  width={16}
-                  height={16}
-                  className="shrink-0"
-                  style={{ color: slice.color }}
-                />
-                <span className="text-xs text-foreground font-medium truncate">{slice.label}</span>
-                <span className="text-xs text-muted-foreground ml-auto shrink-0">
-                  {percentage}% - {formatCompactValue(slice.value, displayCurrency)}
-                </span>
-              </div>
-            )
-          })}
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5">
+          {slices.map((slice) => (
+            <div key={slice.key} className="flex items-center gap-1.5">
+              <div
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: slice.color }}
+              />
+              <span className="text-xs text-muted-foreground">{slice.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
