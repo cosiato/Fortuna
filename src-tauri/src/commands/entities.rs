@@ -258,75 +258,64 @@ pub fn delete_entity_cascade(
         return Err("Cannot delete the Individual entity".to_string());
     }
 
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let mut conn = db.0.lock().map_err(|e| e.to_string())?;
 
-    conn.execute("BEGIN TRANSACTION", [])
-        .map_err(|e| e.to_string())?;
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    let result = (|| -> Result<(), String> {
-        // Fetch and log activity for each asset before deletion
-        let mut stmt = conn
+    // Fetch and log activity for each asset before deletion
+    let asset_rows: Vec<(String, String, String, f64, String)> = {
+        let mut stmt = tx
             .prepare(
                 "SELECT id, name, type, quantity, currency FROM assets WHERE entity_id = ?",
             )
             .map_err(|e| e.to_string())?;
 
-        let asset_rows: Vec<(String, String, String, f64, String)> = stmt
-            .query_map(params![id], |row| {
-                Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, f64>(3)?,
-                    row.get::<_, String>(4)?,
-                ))
-            })
-            .map_err(|e| e.to_string())?
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|e| e.to_string())?;
+        let rows = stmt.query_map(params![id], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, f64>(3)?,
+                row.get::<_, String>(4)?,
+            ))
+        })
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
+        rows
+    };
 
-        for (asset_id, name, asset_type, quantity, currency) in &asset_rows {
-            let _ = log_activity(
-                &conn,
-                "asset_deleted",
-                asset_id,
-                name,
-                asset_type,
-                id,
-                Some(*quantity),
-                None,
-                Some(currency),
-            );
-        }
-
-        conn.execute("DELETE FROM assets WHERE entity_id = ?", params![id])
-            .map_err(|e| e.to_string())?;
-
-        // cash_flows cascade via ON DELETE CASCADE on accounts
-        conn.execute("DELETE FROM accounts WHERE entity_id = ?", params![id])
-            .map_err(|e| e.to_string())?;
-
-        let affected = conn
-            .execute("DELETE FROM entities WHERE id = ?", params![id])
-            .map_err(|e| e.to_string())?;
-
-        if affected == 0 {
-            return Err("Entity not found".to_string());
-        }
-
-        Ok(())
-    })();
-
-    match result {
-        Ok(()) => {
-            conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
-            Ok(())
-        }
-        Err(e) => {
-            let _ = conn.execute("ROLLBACK", []);
-            Err(e)
-        }
+    for (asset_id, name, asset_type, quantity, currency) in &asset_rows {
+        let _ = log_activity(
+            &tx,
+            "asset_deleted",
+            asset_id,
+            name,
+            asset_type,
+            id,
+            Some(*quantity),
+            None,
+            Some(currency),
+        );
     }
+
+    tx.execute("DELETE FROM assets WHERE entity_id = ?", params![id])
+        .map_err(|e| e.to_string())?;
+
+    // cash_flows cascade via ON DELETE CASCADE on accounts
+    tx.execute("DELETE FROM accounts WHERE entity_id = ?", params![id])
+        .map_err(|e| e.to_string())?;
+
+    let affected = tx
+        .execute("DELETE FROM entities WHERE id = ?", params![id])
+        .map_err(|e| e.to_string())?;
+
+    if affected == 0 {
+        return Err("Entity not found".to_string());
+    }
+
+    tx.commit().map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
