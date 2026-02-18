@@ -1,6 +1,7 @@
 use rand::Rng;
 use sha2::{Digest, Sha256};
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::State;
 
 use super::entities::DbConnection;
@@ -85,6 +86,47 @@ fn clear_lockout_data(conn: &rusqlite::Connection) -> Result<(), String> {
         [],
     )
     .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+fn verify_pin_with_rate_limit(conn: &rusqlite::Connection, pin: &str) -> Result<(), String> {
+    if let Some(lockout_until) = get_lockout_until(conn) {
+        let now = current_timestamp();
+        if now < lockout_until {
+            let remaining = lockout_until - now;
+            return Err(format!(
+                "Too many failed attempts. Try again in {} seconds.",
+                remaining
+            ));
+        }
+    }
+
+    let stored_data: String = conn
+        .query_row(
+            "SELECT value FROM settings WHERE key = 'pin_hash'",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+
+    let (salt, stored_hash) =
+        decode_pin_data(&stored_data).ok_or("Invalid stored PIN data")?;
+    let input_hash = hash_pin_with_salt(pin, &salt);
+
+    if stored_hash != input_hash {
+        let attempts = get_failed_attempts(conn) + 1;
+        set_failed_attempts(conn, attempts)?;
+
+        if attempts >= MAX_FAILED_ATTEMPTS {
+            let lockout_time = current_timestamp() + LOCKOUT_DURATION_SECS;
+            set_lockout_until(conn, lockout_time)?;
+            set_failed_attempts(conn, 0)?;
+        }
+
+        return Err("Invalid PIN".to_string());
+    }
+
+    clear_lockout_data(conn)?;
     Ok(())
 }
 
@@ -235,21 +277,7 @@ pub fn reset_all_data(db: State<DbConnection>, lock: State<LockState>, pin: Opti
 
     if pin_enabled {
         let pin = pin.ok_or("PIN required to reset data")?;
-        let stored_data: String = conn
-            .query_row(
-                "SELECT value FROM settings WHERE key = 'pin_hash'",
-                [],
-                |row| row.get(0),
-            )
-            .map_err(|e| e.to_string())?;
-
-        let (salt, stored_hash) =
-            decode_pin_data(&stored_data).ok_or("Invalid stored PIN data")?;
-        let input_hash = hash_pin_with_salt(&pin, &salt);
-
-        if stored_hash != input_hash {
-            return Err("Invalid PIN".to_string());
-        }
+        verify_pin_with_rate_limit(&conn, &pin)?;
     }
 
     conn.execute_batch(
@@ -415,6 +443,121 @@ pub fn set_currency_preference(db: State<DbConnection>, currency: String) -> Res
         [&currency],
     )
     .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub fn export_database(
+    db: State<DbConnection>,
+    lock: State<LockState>,
+    destination: String,
+) -> Result<(), String> {
+    check_not_locked(&lock)?;
+
+    let dest_path = std::path::Path::new(&destination);
+
+    match dest_path.extension().and_then(|e| e.to_str()) {
+        Some("db") => {}
+        _ => return Err("Export path must have a .db extension".to_string()),
+    }
+
+    if let Some(parent) = dest_path.parent() {
+        if !parent.exists() {
+            return Err("Destination directory does not exist".to_string());
+        }
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    if dest_path.exists() {
+        std::fs::remove_file(dest_path)
+            .map_err(|e| format!("Failed to overwrite existing file: {}", e))?;
+    }
+
+    conn.execute("VACUUM INTO ?1", [&destination])
+        .map_err(|e| format!("Failed to export database: {}", e))?;
+
+    Ok(())
+}
+
+const REQUIRED_TABLES: &[&str] = &[
+    "entities",
+    "assets",
+    "accounts",
+    "settings",
+    "snapshots",
+    "activity_log",
+    "cash_flows",
+];
+
+#[tauri::command]
+pub fn import_database(
+    db: State<DbConnection>,
+    lock: State<LockState>,
+    source: String,
+    pin: Option<String>,
+) -> Result<(), String> {
+    check_not_locked(&lock)?;
+
+    let mut conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let pin_enabled: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM settings WHERE key = 'pin_hash')",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+
+    if pin_enabled {
+        let pin = pin.ok_or("PIN required to restore data")?;
+        verify_pin_with_rate_limit(&conn, &pin)?;
+    }
+
+    let source_path = std::path::Path::new(&source)
+        .canonicalize()
+        .map_err(|e| format!("Invalid backup path: {}", e))?;
+
+    match source_path.extension().and_then(|e| e.to_str()) {
+        Some("db") => {}
+        _ => return Err("Backup file must have a .db extension".to_string()),
+    }
+
+    let source_conn = rusqlite::Connection::open_with_flags(
+        &source_path,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+    )
+    .map_err(|e| format!("Failed to open backup file: {}", e))?;
+
+    let missing_tables: Vec<&str> = REQUIRED_TABLES
+        .iter()
+        .filter(|table| {
+            source_conn
+                .query_row(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?1",
+                    [**table],
+                    |row| row.get::<_, i32>(0),
+                )
+                .unwrap_or(0)
+                == 0
+        })
+        .copied()
+        .collect();
+
+    if !missing_tables.is_empty() {
+        return Err(format!(
+            "Invalid backup: missing tables: {}",
+            missing_tables.join(", ")
+        ));
+    }
+
+    let backup = rusqlite::backup::Backup::new(&source_conn, &mut *conn)
+        .map_err(|e| format!("Failed to initialize restore: {}", e))?;
+
+    backup
+        .run_to_completion(5, Duration::from_millis(250), None)
+        .map_err(|e| format!("Failed to restore database: {}", e))?;
 
     Ok(())
 }
