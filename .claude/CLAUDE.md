@@ -79,7 +79,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
 |-- main.tsx                      # React entry point
-|-- App.tsx                       # Root component with view routing (dashboard/entity)
+|-- App.tsx                       # Root component with view routing (dashboard/entity/settings)
 |-- globals.css                   # Global styles
 |-- components/                   # Reusable UI components
 |   |-- ui/                       # Shadcn UI primitives
@@ -116,8 +116,15 @@ src/
 |   |-- CurrencyPickerOverlay.tsx  # Fullscreen currency picker grouped by continent
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
+|   |-- EmptyStateCard.tsx        # Reusable empty-state placeholder (icon + title + subtitle)
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
-|   |-- SettingsDialog.tsx        # Settings dialog with PIN management
+|   |-- settings/                 # Dedicated settings page
+|       |-- SettingsView.tsx      # Root settings container with section routing
+|       |-- SettingsSidebar.tsx   # Non-collapsible category navigation sidebar
+|       |-- SettingsGeneral.tsx   # Language and currency preferences
+|       |-- SettingsSecurity.tsx  # PIN lock management (enable/disable/change)
+|       |-- SettingsData.tsx      # Data management (reset, export placeholder)
+|       |-- SettingsAbout.tsx     # App version and credits
 |   |-- EntitySummaryGrid.tsx      # Responsive grid of entity cards for dashboard
 |   |-- EntityView.tsx            # Entity page: assets tabs, vaults accordion with flows
 |   |-- EntityForm.tsx            # Form for adding/editing entities
