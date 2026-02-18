@@ -9,7 +9,7 @@ import SidebarActions from "@/components/SidebarActions"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const EXPANDED_WIDTH = 260
-const COLLAPSED_WIDTH = 76
+const COLLAPSED_WIDTH = 70
 
 async function toggleMaximize() {
   const win = getCurrentWindow()
