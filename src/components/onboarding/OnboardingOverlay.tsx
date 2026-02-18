@@ -92,15 +92,17 @@ export default function OnboardingOverlay({ show, onComplete }: OnboardingOverla
           aria-label={t("onboarding:welcomeAriaLabel")}
           aria-modal="true"
         >
-          <div className="relative flex flex-col items-center gap-6 w-full max-w-4xl px-6">
-            <div className="flex flex-col items-center gap-2 -mt-12">
+          <div className="relative flex flex-col items-center w-full max-w-5xl px-4">
+            <div className="flex flex-col items-center gap-2">
               <img src="/logo.png" alt="Fortuna" className="w-16 h-16 drop-shadow-lg" />
               <h1 className="text-2xl font-bold text-accent font-serif">Fortuna</h1>
             </div>
 
-            <OnboardingStepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+            <div className="mt-3">
+              <OnboardingStepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
+            </div>
 
-            <div className="w-full overflow-hidden mt-2">
+            <div className="w-full overflow-hidden mt-10">
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={currentStep}
@@ -116,7 +118,7 @@ export default function OnboardingOverlay({ show, onComplete }: OnboardingOverla
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center justify-between w-full mt-4">
+            <div className="flex items-center justify-between w-full mt-8">
               {currentStep > 1 ? (
                 <Button
                   variant="ghost"

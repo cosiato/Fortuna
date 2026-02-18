@@ -18,8 +18,8 @@ export default function OnboardingStepLayout({
   screenshotAlt,
 }: OnboardingStepLayoutProps) {
   return (
-    <div className="flex items-center gap-10 max-w-3xl mx-auto">
-      <div className="flex flex-col gap-4 flex-shrink-0 w-[280px]">
+    <div className="flex items-center gap-8 max-w-4xl mx-auto">
+      <div className="flex flex-col gap-4 flex-shrink-0 w-[320px]">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
           <Icon icon={icon} width={24} height={24} className="text-accent" />
         </div>
