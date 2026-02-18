@@ -15,6 +15,7 @@ interface SettingsViewProps {
   onPinStatusChange: (enabled: boolean) => void
   onLock: () => void
   onResetAccount: () => void
+  onRestoreBackup: () => void
 }
 
 export default function SettingsView({
@@ -24,6 +25,7 @@ export default function SettingsView({
   onPinStatusChange,
   onLock,
   onResetAccount,
+  onRestoreBackup,
 }: SettingsViewProps) {
   const { t } = useTranslation("settings")
   const [activeSection, setActiveSection] = useState<SettingsSection>("general")
@@ -43,7 +45,7 @@ export default function SettingsView({
           />
         )
       case "data":
-        return <SettingsData onResetAccount={onResetAccount} />
+        return <SettingsData onResetAccount={onResetAccount} onRestoreBackup={onRestoreBackup} />
       case "about":
         return <SettingsAbout />
       default:

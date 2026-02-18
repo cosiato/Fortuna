@@ -1,13 +1,41 @@
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
+import { save } from "@tauri-apps/plugin-dialog"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { api } from "@/lib/api"
+import { showErrorToast } from "@/lib/errorHandling"
 
 interface SettingsDataProps {
   onResetAccount: () => void
+  onRestoreBackup: () => void
 }
 
-export default function SettingsData({ onResetAccount }: SettingsDataProps) {
+export default function SettingsData({ onResetAccount, onRestoreBackup }: SettingsDataProps) {
   const { t } = useTranslation("settings")
+  const { t: tErrors } = useTranslation("errors")
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      const destination = await save({
+        defaultPath: `fortuna-backup-${today}.db`,
+        filters: [{ name: "SQLite Database", extensions: ["db"] }],
+      })
+
+      if (!destination) return
+
+      setExporting(true)
+      await api.settings.exportDatabase(destination)
+      toast.success(t("data.exportSuccess"))
+    } catch (error) {
+      showErrorToast(error, tErrors("failedToExportData"))
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -21,9 +49,29 @@ export default function SettingsData({ onResetAccount }: SettingsDataProps) {
             <p className="text-sm font-medium">{t("data.exportData")}</p>
             <p className="text-xs text-muted-foreground">{t("data.exportDescription")}</p>
           </div>
-          <span className="text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
-            {t("data.comingSoon")}
-          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            <Icon icon="solar:export-linear" width={16} height={16} />
+            {t("data.exportButton")}
+          </Button>
+        </div>
+      </div>
+
+      <div className="border border-border rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">{t("data.importData")}</p>
+            <p className="text-xs text-muted-foreground">{t("data.importDescription")}</p>
+          </div>
+          <Button variant="outline" size="sm" className="gap-2" onClick={onRestoreBackup}>
+            <Icon icon="solar:import-linear" width={16} height={16} />
+            {t("data.importButton")}
+          </Button>
         </div>
       </div>
 

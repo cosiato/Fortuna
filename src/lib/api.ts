@@ -68,5 +68,8 @@ export const api = {
       invoke<void>("set_currency_preference", { currency }),
     getLocalePreference: () => invoke<string>("get_locale_preference"),
     setLocalePreference: (locale: string) => invoke<void>("set_locale_preference", { locale }),
+    exportDatabase: (destination: string) => invoke<void>("export_database", { destination }),
+    importDatabase: (source: string, pin?: string) =>
+      invoke<void>("import_database", { source, pin: pin || null }),
   },
 }

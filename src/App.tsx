@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react"
 import { getCurrentWindow } from "@tauri-apps/api/window"
+import { open } from "@tauri-apps/plugin-dialog"
+import { relaunch } from "@tauri-apps/plugin-process"
 import { useTranslation } from "react-i18next"
 import DashboardView from "@/components/DashboardView"
 import EntityView from "@/components/EntityView"
@@ -15,6 +17,7 @@ import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import DeleteAccountDialog from "@/components/DeleteAccountDialog"
 import ResetAccountDialog from "@/components/ResetAccountDialog"
+import RestoreBackupDialog from "@/components/RestoreBackupDialog"
 import LockScreen from "@/components/LockScreen"
 import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
 import UpdateNotification from "@/components/UpdateNotification"
@@ -38,6 +41,8 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
+  const [restoreFilePath, setRestoreFilePath] = useState("")
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [currencyPickerOpen, setCurrencyPickerOpen] = useState(false)
@@ -109,6 +114,32 @@ export default function App() {
       await appActions.fetchDataOnly()
     } catch (error) {
       showErrorToast(error, t("errors:failedToResetData"))
+    }
+  }
+
+  const handleRestoreBackup = async () => {
+    try {
+      const selected = await open({
+        filters: [{ name: "SQLite Database", extensions: ["db"] }],
+        multiple: false,
+        directory: false,
+      })
+
+      if (!selected) return
+
+      setRestoreFilePath(selected)
+      setRestoreDialogOpen(true)
+    } catch (error) {
+      showErrorToast(error, t("errors:failedToImportData"))
+    }
+  }
+
+  const handleConfirmRestore = async (pin?: string) => {
+    try {
+      await api.settings.importDatabase(restoreFilePath, pin)
+      await relaunch()
+    } catch (error) {
+      showErrorToast(error, t("errors:failedToImportData"))
     }
   }
 
@@ -346,6 +377,7 @@ export default function App() {
                 onPinStatusChange={setIsPinEnabled}
                 onLock={handleLock}
                 onResetAccount={() => setResetDialogOpen(true)}
+                onRestoreBackup={handleRestoreBackup}
               />
             ) : currentView === "dashboard" ? (
               <DashboardView
@@ -471,6 +503,17 @@ export default function App() {
               onOpenChange={setResetDialogOpen}
               onConfirm={handleResetAccount}
               pinEnabled={isPinEnabled}
+            />
+
+            <RestoreBackupDialog
+              open={restoreDialogOpen}
+              onOpenChange={(open) => {
+                setRestoreDialogOpen(open)
+                if (!open) setRestoreFilePath("")
+              }}
+              onConfirm={handleConfirmRestore}
+              pinEnabled={isPinEnabled}
+              selectedFile={restoreFilePath}
             />
           </div>
         </div>
