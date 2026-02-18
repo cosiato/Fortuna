@@ -1,8 +1,8 @@
 {
-  "title": "Configuración",
+  "title": "Configuracion",
   "language": "Idioma",
   "pinLock": "Bloqueo con PIN",
-  "pinDescription": "Protege tus datos con un PIN de 4 dígitos",
+  "pinDescription": "Protege tus datos con un PIN de 4 digitos",
   "changePin": "Cambiar PIN",
   "lockNow": "Bloquear Ahora",
   "dangerZone": "Zona de Peligro",
@@ -11,7 +11,7 @@
   "confirmPin": "Confirmar PIN",
   "verifyCurrentPin": "Verificar PIN Actual",
   "disablePin": "Desactivar PIN",
-  "enterPin": "Ingresa un PIN de 4 dígitos",
+  "enterPin": "Ingresa un PIN de 4 digitos",
   "confirmYourPin": "Confirma tu PIN",
   "enterCurrentPin": "Ingresa tu PIN actual",
   "enterPinToDisable": "Ingresa tu PIN para desactivar",
@@ -21,5 +21,32 @@
   "failedToSetPin": "Error al establecer el PIN",
   "failedToRemovePin": "Error al eliminar el PIN",
   "failedToVerifyPin": "Error al verificar el PIN",
-  "tooManyAttempts": "Demasiados intentos fallidos. Inténtalo de nuevo en {{seconds}} segundos."
+  "tooManyAttempts": "Demasiados intentos fallidos. Intentalo de nuevo en {{seconds}} segundos.",
+  "sections": {
+    "general": "General",
+    "security": "Seguridad",
+    "data": "Datos",
+    "about": "Acerca de"
+  },
+  "general": {
+    "languageDescription": "Elige tu idioma preferido",
+    "currencyPreference": "Moneda de visualizacion",
+    "currencyDescription": "Moneda utilizada para mostrar todos los valores",
+    "changeCurrency": "Cambiar"
+  },
+  "data": {
+    "resetDescription": "Eliminar permanentemente todos tus datos. Esta accion no se puede deshacer.",
+    "exportData": "Exportar datos",
+    "exportDescription": "Descargar una copia de todos tus datos",
+    "comingSoon": "Proximamente"
+  },
+  "about": {
+    "version": "Version",
+    "description": "Fortuna es una aplicacion de gestion de patrimonio personal sin conexion. Rastrea tus activos, cuentas bancarias, flujos de efectivo y patrimonio neto -- todos los datos permanecen en tu maquina.",
+    "links": "Enlaces",
+    "website": "Sitio web",
+    "sourceCode": "Codigo fuente",
+    "reportBug": "Reportar un error",
+    "madeWith": "Hecho con amor por"
+  }
 }

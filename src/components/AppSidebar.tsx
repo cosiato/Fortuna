@@ -37,7 +37,7 @@ interface AppSidebarProps {
   refreshCooldown: boolean
   onCurrencyClick: () => void
   onSettingsClick: () => void
-  currentView: "dashboard" | "entity"
+  currentView: "dashboard" | "entity" | "settings"
   onNavigateDashboard: () => void
 }
 
@@ -182,6 +182,7 @@ export default function AppSidebar({
           displayCurrency={displayCurrency}
           onCurrencyClick={onCurrencyClick}
           onSettingsClick={onSettingsClick}
+          isSettingsActive={currentView === "settings"}
         />
       </div>
     </motion.aside>

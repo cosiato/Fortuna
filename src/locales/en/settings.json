@@ -21,5 +21,32 @@
   "failedToSetPin": "Failed to set PIN",
   "failedToRemovePin": "Failed to remove PIN",
   "failedToVerifyPin": "Failed to verify PIN",
-  "tooManyAttempts": "Too many failed attempts. Try again in {{seconds}} seconds."
+  "tooManyAttempts": "Too many failed attempts. Try again in {{seconds}} seconds.",
+  "sections": {
+    "general": "General",
+    "security": "Security",
+    "data": "Data",
+    "about": "About"
+  },
+  "general": {
+    "languageDescription": "Choose your preferred language",
+    "currencyPreference": "Display Currency",
+    "currencyDescription": "Currency used to display all values",
+    "changeCurrency": "Change"
+  },
+  "data": {
+    "resetDescription": "Permanently delete all your data. This action cannot be undone.",
+    "exportData": "Export Data",
+    "exportDescription": "Download a copy of all your data",
+    "comingSoon": "Coming Soon"
+  },
+  "about": {
+    "version": "Version",
+    "description": "Fortuna is an offline-first personal wealth management app. Track your assets, bank accounts, cash flows, and net worth -- all data stays on your machine.",
+    "links": "Links",
+    "website": "Website",
+    "sourceCode": "Source Code",
+    "reportBug": "Report a Bug",
+    "madeWith": "Made with love by"
+  }
 }

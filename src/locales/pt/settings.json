@@ -1,8 +1,8 @@
 {
-  "title": "Configurações",
+  "title": "Configuracoes",
   "language": "Idioma",
   "pinLock": "Bloqueio por PIN",
-  "pinDescription": "Proteja seus dados com um PIN de 4 dígitos",
+  "pinDescription": "Proteja seus dados com um PIN de 4 digitos",
   "changePin": "Alterar PIN",
   "lockNow": "Bloquear Agora",
   "dangerZone": "Zona de Perigo",
@@ -11,15 +11,42 @@
   "confirmPin": "Confirmar PIN",
   "verifyCurrentPin": "Verificar PIN Atual",
   "disablePin": "Desativar PIN",
-  "enterPin": "Digite um PIN de 4 dígitos",
+  "enterPin": "Digite um PIN de 4 digitos",
   "confirmYourPin": "Confirme seu PIN",
   "enterCurrentPin": "Digite seu PIN atual",
   "enterPinToDisable": "Digite seu PIN para desativar",
   "enterPinToUnlock": "Digite seu PIN para desbloquear",
-  "pinMismatch": "Os PINs não correspondem",
+  "pinMismatch": "Os PINs nao correspondem",
   "incorrectPin": "PIN incorreto",
   "failedToSetPin": "Falha ao definir o PIN",
   "failedToRemovePin": "Falha ao remover o PIN",
   "failedToVerifyPin": "Falha ao verificar o PIN",
-  "tooManyAttempts": "Muitas tentativas falhas. Tente novamente em {{seconds}} segundos."
+  "tooManyAttempts": "Muitas tentativas falhas. Tente novamente em {{seconds}} segundos.",
+  "sections": {
+    "general": "Geral",
+    "security": "Seguranca",
+    "data": "Dados",
+    "about": "Sobre"
+  },
+  "general": {
+    "languageDescription": "Escolha seu idioma preferido",
+    "currencyPreference": "Moeda de exibicao",
+    "currencyDescription": "Moeda usada para exibir todos os valores",
+    "changeCurrency": "Alterar"
+  },
+  "data": {
+    "resetDescription": "Excluir permanentemente todos os seus dados. Esta acao nao pode ser desfeita.",
+    "exportData": "Exportar dados",
+    "exportDescription": "Baixar uma copia de todos os seus dados",
+    "comingSoon": "Em breve"
+  },
+  "about": {
+    "version": "Versao",
+    "description": "Fortuna e um aplicativo de gestao de patrimonio pessoal offline. Acompanhe seus ativos, contas bancarias, fluxos de caixa e patrimonio liquido -- todos os dados ficam na sua maquina.",
+    "links": "Links",
+    "website": "Site",
+    "sourceCode": "Codigo fonte",
+    "reportBug": "Reportar um bug",
+    "madeWith": "Feito com amor por"
+  }
 }

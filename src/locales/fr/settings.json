@@ -21,5 +21,32 @@
   "failedToSetPin": "Echec de la definition du PIN",
   "failedToRemovePin": "Echec de la suppression du PIN",
   "failedToVerifyPin": "Echec de la verification du PIN",
-  "tooManyAttempts": "Trop de tentatives echouees. Reessayez dans {{seconds}} secondes."
+  "tooManyAttempts": "Trop de tentatives echouees. Reessayez dans {{seconds}} secondes.",
+  "sections": {
+    "general": "General",
+    "security": "Securite",
+    "data": "Donnees",
+    "about": "A propos"
+  },
+  "general": {
+    "languageDescription": "Choisissez votre langue preferee",
+    "currencyPreference": "Devise d'affichage",
+    "currencyDescription": "Devise utilisee pour afficher toutes les valeurs",
+    "changeCurrency": "Changer"
+  },
+  "data": {
+    "resetDescription": "Supprimer definitivement toutes vos donnees. Cette action est irreversible.",
+    "exportData": "Exporter les donnees",
+    "exportDescription": "Telecharger une copie de toutes vos donnees",
+    "comingSoon": "Bientot disponible"
+  },
+  "about": {
+    "version": "Version",
+    "description": "Fortuna est une application de gestion de patrimoine personnelle hors ligne. Suivez vos actifs, comptes bancaires, flux de tresorerie et patrimoine net -- toutes les donnees restent sur votre machine.",
+    "links": "Liens",
+    "website": "Site web",
+    "sourceCode": "Code source",
+    "reportBug": "Signaler un bug",
+    "madeWith": "Fait avec amour par"
+  }
 }

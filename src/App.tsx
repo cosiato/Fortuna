@@ -18,7 +18,7 @@ import ResetAccountDialog from "@/components/ResetAccountDialog"
 import LockScreen from "@/components/LockScreen"
 import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
 import UpdateNotification from "@/components/UpdateNotification"
-import SettingsDialog from "@/components/SettingsDialog"
+import SettingsView from "@/components/settings/SettingsView"
 import { showErrorToast } from "@/lib/errorHandling"
 import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 import { getAssetValueInUsd, toUsd, fromUsd, toDisplayCurrency } from "@/lib/currencyConversion"
@@ -30,14 +30,13 @@ import { useEntityCrud } from "@/hooks/useEntityCrud"
 import { useUpdater } from "@/hooks/useUpdater"
 import { useSidebar } from "@/hooks/useSidebar"
 
-type CurrentView = "dashboard" | "entity"
+type CurrentView = "dashboard" | "entity" | "settings"
 
 export default function App() {
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [currentView, setCurrentView] = useState<CurrentView>("dashboard")
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
@@ -105,7 +104,6 @@ export default function App() {
       setCurrentView("dashboard")
       entityCrud.setSelectedEntityId(0)
       setResetDialogOpen(false)
-      setSettingsOpen(false)
       localStorage.removeItem("fortuna_onboarding_completed")
       setShowOnboarding(true)
       await appActions.fetchDataOnly()
@@ -148,6 +146,11 @@ export default function App() {
 
   const handleNavigateDashboard = useCallback(() => {
     setCurrentView("dashboard")
+    entityCrud.setSelectedEntityId(0)
+  }, [entityCrud.setSelectedEntityId])
+
+  const handleNavigateSettings = useCallback(() => {
+    setCurrentView("settings")
     entityCrud.setSelectedEntityId(0)
   }, [entityCrud.setSelectedEntityId])
 
@@ -230,7 +233,7 @@ export default function App() {
 
   // Compute liquid vs illiquid totals
   const liquidityTotals = useMemo(() => {
-    const liquidAssetTypes = new Set(["stock", "crypto", "cash"])
+    const liquidAssetTypes = new Set(["stock", "cash"])
     const illiquidAssetTypes = new Set(["real_estate", "other"])
 
     let liquid = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
@@ -238,7 +241,13 @@ export default function App() {
 
     for (const asset of assets) {
       const value = getAssetValue(asset)
-      if (liquidAssetTypes.has(asset.type)) {
+      if (asset.type === "crypto" && asset.stakedQuantity && asset.quantity > 0) {
+        const clampedStaked = Math.min(asset.stakedQuantity, asset.quantity)
+        const stakedFraction = clampedStaked / asset.quantity
+        const stakedValue = value * stakedFraction
+        liquid += value - stakedValue
+        illiquid += stakedValue
+      } else if (asset.type === "crypto" || liquidAssetTypes.has(asset.type)) {
         liquid += value
       } else if (illiquidAssetTypes.has(asset.type)) {
         illiquid += value
@@ -321,7 +330,7 @@ export default function App() {
         isRefreshing={isRefreshing}
         refreshCooldown={refreshCooldown}
         onCurrencyClick={() => setCurrencyPickerOpen(true)}
-        onSettingsClick={() => setSettingsOpen(true)}
+        onSettingsClick={handleNavigateSettings}
         currentView={currentView}
         onNavigateDashboard={handleNavigateDashboard}
       />
@@ -329,7 +338,16 @@ export default function App() {
       <main className="flex-1 flex flex-col overflow-hidden pt-9">
         <div className="flex-1 overflow-y-auto overscroll-none custom-scrollbar relative">
           <div className="max-w-7xl mx-auto px-6 py-6">
-            {currentView === "dashboard" ? (
+            {currentView === "settings" ? (
+              <SettingsView
+                displayCurrency={displayCurrency}
+                onCurrencyClick={() => setCurrencyPickerOpen(true)}
+                isPinEnabled={isPinEnabled}
+                onPinStatusChange={setIsPinEnabled}
+                onLock={handleLock}
+                onResetAccount={() => setResetDialogOpen(true)}
+              />
+            ) : currentView === "dashboard" ? (
               <DashboardView
                 netWorth={netWorth}
                 netWorthUsd={netWorthUsd}
@@ -446,15 +464,6 @@ export default function App() {
                   : 0
               }
               onConfirm={vaultCrud.handleConfirmDeleteAccount}
-            />
-
-            <SettingsDialog
-              open={settingsOpen}
-              onOpenChange={setSettingsOpen}
-              isPinEnabled={isPinEnabled}
-              onPinStatusChange={setIsPinEnabled}
-              onLock={handleLock}
-              onResetAccount={() => setResetDialogOpen(true)}
             />
 
             <ResetAccountDialog

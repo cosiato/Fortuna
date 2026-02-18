@@ -14,6 +14,7 @@ interface SidebarActionsProps {
   displayCurrency: SupportedCurrency
   onCurrencyClick: () => void
   onSettingsClick: () => void
+  isSettingsActive?: boolean
 }
 
 interface ActionButtonProps {
@@ -22,9 +23,17 @@ interface ActionButtonProps {
   onClick: () => void
   isCollapsed: boolean
   disabled?: boolean
+  isActive?: boolean
 }
 
-function ActionButton({ icon, label, onClick, isCollapsed, disabled }: ActionButtonProps) {
+function ActionButton({
+  icon,
+  label,
+  onClick,
+  isCollapsed,
+  disabled,
+  isActive,
+}: ActionButtonProps) {
   const button = (
     <button
       onClick={onClick}
@@ -32,8 +41,8 @@ function ActionButton({ icon, label, onClick, isCollapsed, disabled }: ActionBut
       aria-label={label}
       className={`
         flex items-center gap-2.5 w-full rounded-lg
-        text-muted-foreground hover:text-foreground hover:bg-secondary
         transition-colors duration-150 disabled:opacity-50
+        ${isActive ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
         ${isCollapsed ? "justify-center h-9" : "px-3 h-9"}
       `}
     >
@@ -76,6 +85,7 @@ export default function SidebarActions({
   displayCurrency,
   onCurrencyClick,
   onSettingsClick,
+  isSettingsActive,
 }: SidebarActionsProps) {
   const { t } = useTranslation("common")
 
@@ -123,6 +133,7 @@ export default function SidebarActions({
           label={t("settings")}
           onClick={onSettingsClick}
           isCollapsed={isCollapsed}
+          isActive={isSettingsActive}
         />
 
         <div className="border-t border-border my-1" />
