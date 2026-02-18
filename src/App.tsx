@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react"
+import { useEffect, useState, useCallback, useMemo, useRef } from "react"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { useTranslation } from "react-i18next"
 import DashboardView from "@/components/DashboardView"
@@ -61,6 +61,15 @@ export default function App() {
     refreshCooldown,
   } = appData
 
+  const handleLock = useCallback(async () => {
+    try {
+      await api.settings.lockApp()
+    } catch {
+      // Lock frontend even if backend call fails
+    }
+    setIsLocked(true)
+  }, [])
+
   // Apply init metadata once available
   useEffect(() => {
     if (!initMetadata) return
@@ -72,16 +81,7 @@ export default function App() {
     if (initMetadata.showOnboarding) {
       setShowOnboarding(true)
     }
-  }, [initMetadata])
-
-  const handleLock = async () => {
-    try {
-      await api.settings.lockApp()
-    } catch {
-      // Lock frontend even if backend call fails
-    }
-    setIsLocked(true)
-  }
+  }, [initMetadata, handleLock])
 
   const handleUnlock = async () => {
     setIsLocked(false)
@@ -124,7 +124,7 @@ export default function App() {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isPinEnabled, isLocked])
+  }, [isPinEnabled, isLocked, handleLock])
 
   const netWorthUsd =
     assets.reduce((sum, asset) => sum + getAssetValueInUsd(asset, prices, exchangeRates), 0) +
@@ -263,15 +263,17 @@ export default function App() {
 
   const vaultBadgeTotal = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
 
+  const recordSnapshotNowRef = useRef(recordSnapshotNow)
+  recordSnapshotNowRef.current = recordSnapshotNow
+
   useEffect(() => {
     if (!loading && (assets.length > 0 || accounts.length > 0)) {
-      recordSnapshotNow()
+      recordSnapshotNowRef.current()
       api.snapshots.prune().catch(() => {
         // Pruning is best-effort; failures do not affect user experience
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading])
+  }, [loading, assets.length, accounts.length])
 
   // When entity is deleted and was the selected one, return to dashboard
   useEffect(() => {
@@ -350,6 +352,11 @@ export default function App() {
               />
             ) : (
               <EntityView
+                entityName={entities.find((e) => e.id === entityCrud.selectedEntityId)?.name ?? ""}
+                entityType={
+                  entities.find((e) => e.id === entityCrud.selectedEntityId)?.type ?? "individual"
+                }
+                entityTotal={entityTotals[entityCrud.selectedEntityId] ?? 0}
                 assets={filteredAssets}
                 accounts={filteredAccounts}
                 cashFlows={cashFlows}

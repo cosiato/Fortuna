@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
 import { motion } from "framer-motion"
-import type { Asset, Account, CashFlow } from "@/types/database"
+import type { Asset, Account, CashFlow, EntityType } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
+import SlotMachineNumber from "@/components/SlotMachineNumber"
 import CountryFlag from "@/components/CountryFlag"
 import VaultFlowDiagram from "@/components/VaultFlowDiagram"
 import VaultProjectionChart from "@/components/VaultProjectionChart"
@@ -21,6 +22,9 @@ import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProje
 import { toDisplayCurrency } from "@/lib/currencyConversion"
 
 interface EntityViewProps {
+  entityName: string
+  entityType: EntityType
+  entityTotal: number
   assets: Asset[]
   accounts: Account[]
   cashFlows: CashFlow[]
@@ -49,6 +53,9 @@ const ASSET_CATEGORIES = [
 ] as const
 
 export default function EntityView({
+  entityName,
+  entityType,
+  entityTotal,
   assets,
   accounts,
   cashFlows,
@@ -68,7 +75,9 @@ export default function EntityView({
   onToggleCashFlow,
   onAddFlow,
 }: EntityViewProps) {
-  const { t } = useTranslation(["common", "assets", "vaults"])
+  const { t } = useTranslation(["common", "assets", "vaults", "entities"])
+
+  const displayName = entityType === "individual" ? t("entities:personal") : entityName
 
   const categories = ASSET_CATEGORIES.map((cat) => ({
     ...cat,
@@ -97,6 +106,15 @@ export default function EntityView({
 
   return (
     <div className="space-y-6 mb-8">
+      <div className="mb-2">
+        <h1 className="text-xl font-semibold text-white mb-1">{displayName}</h1>
+        <SlotMachineNumber
+          value={formatCurrency(entityTotal, displayCurrency)}
+          className="text-3xl font-bold text-accent font-serif"
+          duration={700}
+        />
+      </div>
+
       <div className="rounded-xl bg-background border border-border p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t("assets:title")}</h2>
