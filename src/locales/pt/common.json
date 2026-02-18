@@ -86,5 +86,23 @@
   "liquidity": "Liquidez",
   "liquid": "Liquido",
   "illiquid": "Iliquido",
-  "thirtyDayChange": "30d"
+  "thirtyDayChange": "30d",
+  "empty": {
+    "entities": {
+      "title": "Sem entidades",
+      "subtitle": "Adicione uma entidade para acompanhar seus ativos"
+    },
+    "topAssets": {
+      "title": "Sem ativos ainda",
+      "subtitle": "Adicione ativos para ver suas principais posicoes"
+    },
+    "diversity": {
+      "title": "Sem dados de diversidade",
+      "subtitle": "Adicione ativos para visualizar a composicao da sua carteira"
+    },
+    "liquidity": {
+      "title": "Sem dados de liquidez",
+      "subtitle": "Adicione ativos ou cofres para ver sua distribuicao de liquidez"
+    }
+  }
 }

@@ -86,5 +86,23 @@
   "liquidity": "Liquidite",
   "liquid": "Liquide",
   "illiquid": "Illiquide",
-  "thirtyDayChange": "30j"
+  "thirtyDayChange": "30j",
+  "empty": {
+    "entities": {
+      "title": "Aucune entite",
+      "subtitle": "Ajoutez une entite pour suivre vos avoirs"
+    },
+    "topAssets": {
+      "title": "Aucun actif",
+      "subtitle": "Ajoutez des actifs pour voir vos principaux avoirs"
+    },
+    "diversity": {
+      "title": "Aucune donnee de diversite",
+      "subtitle": "Ajoutez des actifs pour visualiser la repartition de votre portefeuille"
+    },
+    "liquidity": {
+      "title": "Aucune donnee de liquidite",
+      "subtitle": "Ajoutez des actifs ou des coffres pour voir votre repartition de liquidite"
+    }
+  }
 }

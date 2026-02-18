@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
 import type { Account, Asset, Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
+import EmptyStateCard from "@/components/EmptyStateCard"
 
 const CATEGORY_CONFIG: Record<string, { bg: string; text: string; icon: string }> = {
   stock: { bg: "bg-amber-500/15", text: "text-amber-400", icon: "solar:chart-linear" },
@@ -72,7 +73,7 @@ export default function EntitySummaryGrid({
   getAssetValue,
   getAccountValue,
 }: EntitySummaryGridProps) {
-  const { t } = useTranslation(["entities"])
+  const { t } = useTranslation(["entities", "common"])
 
   const entityCategories = useMemo(
     () =>
@@ -83,7 +84,14 @@ export default function EntitySummaryGrid({
     [entities, assets, accounts, getAssetValue, getAccountValue],
   )
 
-  if (entities.length === 0) return null
+  if (entities.length === 0)
+    return (
+      <EmptyStateCard
+        icon="solar:users-group-rounded-linear"
+        title={t("common:empty.entities.title")}
+        subtitle={t("common:empty.entities.subtitle")}
+      />
+    )
 
   return (
     <div className="rounded-xl bg-background border border-border p-5">

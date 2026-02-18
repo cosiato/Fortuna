@@ -86,5 +86,23 @@
   "liquidity": "Liquidity",
   "liquid": "Liquid",
   "illiquid": "Illiquid",
-  "thirtyDayChange": "30d"
+  "thirtyDayChange": "30d",
+  "empty": {
+    "entities": {
+      "title": "No Entities",
+      "subtitle": "Add an entity to track your holdings"
+    },
+    "topAssets": {
+      "title": "No Assets Yet",
+      "subtitle": "Add assets to see your top holdings"
+    },
+    "diversity": {
+      "title": "No Diversity Data",
+      "subtitle": "Add assets to visualize your portfolio mix"
+    },
+    "liquidity": {
+      "title": "No Liquidity Data",
+      "subtitle": "Add assets or vaults to see your liquidity split"
+    }
+  }
 }

@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react"
 import { CATEGORY_BADGE_CONFIG, formatCompactValue } from "@/lib/dashboardUtils"
 import type { Asset } from "@/types/database"
 import { SupportedCurrency } from "@/lib/currency"
+import EmptyStateCard from "@/components/EmptyStateCard"
 
 interface TopAssetsCardProps {
   assets: Asset[]
@@ -27,7 +28,14 @@ export default function TopAssetsCard({
     return ranked.slice(0, 5)
   }, [assets, getAssetValue])
 
-  if (topAssets.length < 1) return null
+  if (topAssets.length < 1)
+    return (
+      <EmptyStateCard
+        icon="solar:crown-linear"
+        title={t("empty.topAssets.title")}
+        subtitle={t("empty.topAssets.subtitle")}
+      />
+    )
 
   return (
     <div className="rounded-xl bg-background border border-border p-5">

@@ -86,5 +86,23 @@
   "liquidity": "Liquidez",
   "liquid": "Liquido",
   "illiquid": "Iliquido",
-  "thirtyDayChange": "30d"
+  "thirtyDayChange": "30d",
+  "empty": {
+    "entities": {
+      "title": "Sin entidades",
+      "subtitle": "Agrega una entidad para rastrear tus activos"
+    },
+    "topAssets": {
+      "title": "Sin activos aun",
+      "subtitle": "Agrega activos para ver tus principales posiciones"
+    },
+    "diversity": {
+      "title": "Sin datos de diversidad",
+      "subtitle": "Agrega activos para visualizar la composicion de tu portafolio"
+    },
+    "liquidity": {
+      "title": "Sin datos de liquidez",
+      "subtitle": "Agrega activos o bovedas para ver tu distribucion de liquidez"
+    }
+  }
 }

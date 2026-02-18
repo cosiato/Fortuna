@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import { SupportedCurrency } from "@/lib/currency"
 import { formatCompactValue } from "@/lib/dashboardUtils"
+import EmptyStateCard from "@/components/EmptyStateCard"
 
 interface CategoryBadge {
   key: string
@@ -99,7 +100,14 @@ export default function AssetDiversityChart({
 
   const grandTotal = useMemo(() => slices.reduce((sum, s) => sum + s.value, 0), [slices])
 
-  if (slices.length === 0 || grandTotal <= 0) return null
+  if (slices.length === 0 || grandTotal <= 0)
+    return (
+      <EmptyStateCard
+        icon="solar:pie-chart-2-linear"
+        title={t("common:empty.diversity.title")}
+        subtitle={t("common:empty.diversity.subtitle")}
+      />
+    )
 
   return (
     <div className="rounded-xl bg-background border border-border p-5">

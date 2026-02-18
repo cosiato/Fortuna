@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { SupportedCurrency } from "@/lib/currency"
 import { formatCompactValue } from "@/lib/dashboardUtils"
+import EmptyStateCard from "@/components/EmptyStateCard"
 
 interface LiquidityCardProps {
   liquidTotal: number
@@ -16,7 +17,14 @@ export default function LiquidityCard({
   const { t } = useTranslation("common")
 
   const total = liquidTotal + illiquidTotal
-  if (total <= 0) return null
+  if (total <= 0)
+    return (
+      <EmptyStateCard
+        icon="solar:water-linear"
+        title={t("empty.liquidity.title")}
+        subtitle={t("empty.liquidity.subtitle")}
+      />
+    )
 
   const liquidPct = (liquidTotal / total) * 100
   const illiquidPct = (illiquidTotal / total) * 100
