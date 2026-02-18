@@ -328,9 +328,9 @@ describe("currency", () => {
   })
 
   describe("SUPPORTED_CURRENCIES", () => {
-    it("should contain exactly 50 currencies", async () => {
+    it("should contain exactly 51 currencies", async () => {
       const { SUPPORTED_CURRENCIES } = await import("./currency")
-      expect(SUPPORTED_CURRENCIES).toHaveLength(50)
+      expect(SUPPORTED_CURRENCIES).toHaveLength(51)
     })
 
     it("should include key currencies from each continent", async () => {
