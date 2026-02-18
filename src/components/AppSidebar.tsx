@@ -61,7 +61,7 @@ function AddCompanyButton({
                 aria-label={t("addCompany")}
                 className="flex items-center justify-center w-full h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors duration-150"
               >
-                <Icon icon="solar:add-circle-linear" width={16} height={16} />
+                <span className="text-base font-light leading-none">+</span>
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -79,7 +79,7 @@ function AddCompanyButton({
         onClick={onAddCompany}
         className="flex items-center gap-2.5 w-full h-9 px-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors duration-150"
       >
-        <Icon icon="solar:add-circle-linear" width={16} height={16} className="flex-shrink-0" />
+        <span className="text-base font-light leading-none flex-shrink-0">+</span>
         <AnimatePresence>
           <motion.span
             initial={{ opacity: 0, width: 0 }}

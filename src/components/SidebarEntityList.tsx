@@ -79,7 +79,7 @@ export default function SidebarEntityList({
             `}
           >
             <Icon icon="solar:home-linear" width={16} height={16} className="flex-shrink-0" />
-            <span className="font-medium text-sm">{t("common:dashboard")}</span>
+            <span className="font-medium text-sm mt-1">{t("common:dashboard")}</span>
           </button>
         )}
 
@@ -146,7 +146,7 @@ export default function SidebarEntityList({
                 <span className="relative">
                   <EntityIcon type={entity.type} />
                 </span>
-                <span className="relative font-medium text-sm truncate">{label}</span>
+                <span className="relative font-medium text-sm truncate mt-0.5">{label}</span>
                 <SlotMachineNumber
                   value={formatCurrency(total, displayCurrency)}
                   className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
