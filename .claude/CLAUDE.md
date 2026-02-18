@@ -118,6 +118,7 @@ src/
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- EmptyStateCard.tsx        # Reusable empty-state placeholder (icon + title + subtitle)
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
+|   |-- RestoreBackupDialog.tsx  # Type-to-confirm dialog for restoring from backup
 |   |-- settings/                 # Dedicated settings page
 |       |-- SettingsView.tsx      # Root settings container with section routing
 |       |-- SettingsSidebar.tsx   # Non-collapsible category navigation sidebar
