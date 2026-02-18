@@ -1,19 +1,19 @@
 {
   "welcomeAriaLabel": "Bienvenue sur Fortuna",
-  "beginJourney": "Commencez votre aventure",
+  "beginJourney": "Commencer",
   "step1": {
     "title": "Constituez votre inventaire",
     "subtitle": "Toute fortune commence par ce que vous possedez.",
-    "description": "Suivez vos actions, cryptos, biens immobiliers et plus encore. Fortuna recupere les prix en temps reel automatiquement -- votre puissance reste a jour sans lever le petit doigt."
+    "description": "Suivez vos actions, cryptos, biens immobiliers et plus encore. Fortuna recupere les prix en temps reel automatiquement pour que votre patrimoine soit toujours a jour."
   },
   "step2": {
-    "title": "Securisez vos coffres",
-    "subtitle": "L'or n'est en securite que dans un bon coffre.",
-    "description": "Ajoutez vos comptes bancaires, puis configurez vos entrees et sorties recurrentes. Fortuna projette votre solde pour que vous sachiez toujours ce qui vous attend."
+    "title": "Gerez vos comptes",
+    "subtitle": "Sachez exactement ou se trouve votre argent.",
+    "description": "Ajoutez vos comptes bancaires, puis configurez vos entrees et sorties recurrentes. Fortuna projette votre solde pour que vous puissiez planifier en toute confiance."
   },
   "step3": {
-    "title": "Choisissez votre voie",
-    "subtitle": "Un heros. Plusieurs allegeances.",
-    "description": "Organisez votre patrimoine sous des entites Personnelles ou Entreprises. Basculez entre les royaumes instantanement et visualisez la puissance de chacun en un coup d'oeil."
+    "title": "Organisez par entite",
+    "subtitle": "Une seule app. Toutes vos finances.",
+    "description": "Regroupez votre patrimoine sous des entites Personnelles ou Entreprises. Basculez entre elles instantanement et visualisez la valeur totale de chacune en un coup d'oeil."
   }
 }
