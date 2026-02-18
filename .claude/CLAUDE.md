@@ -114,7 +114,6 @@ src/
 |   |-- TopAssetsCard.tsx         # Ranked list of top 5 assets by value
 |   |-- CurrencyCombobox.tsx      # Searchable currency combobox (Popover+Command, grouped by continent)
 |   |-- CurrencyPickerOverlay.tsx  # Fullscreen currency picker grouped by continent
-|   |-- CurrencySelector.tsx      # Currency picker button (opens overlay)
 |   |-- DeleteAccountDialog.tsx   # Confirmation dialog for vault deletion
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
@@ -152,6 +151,7 @@ src/
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
+|   |-- dashboardUtils.ts         # Shared dashboard config (category badges, compact formatting)
 |   |-- cashFlowCategories.ts     # Cash flow category definitions and helpers
 |   |-- cashFlowProjection.ts     # Balance projection logic for cash flows
 |   |-- countries.ts              # Country data and utilities
