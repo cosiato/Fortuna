@@ -5,7 +5,6 @@ import { motion } from "framer-motion"
 import type { Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import SlotMachineNumber from "@/components/SlotMachineNumber"
-import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
@@ -13,12 +12,13 @@ interface SidebarEntityListProps {
   entities: Entity[]
   selectedEntityId: number
   onSelect: (entityId: number) => void
-  onAddCompany: () => void
   onEditEntity?: (entity: Entity) => void
   onDeleteEntity?: (entity: Entity) => void
   entityTotals: Record<number, number>
   displayCurrency: SupportedCurrency
   isCollapsed: boolean
+  isDashboardActive: boolean
+  onDashboard: () => void
 }
 
 function EntityIcon({ type }: { type: string }) {
@@ -36,12 +36,13 @@ export default function SidebarEntityList({
   entities,
   selectedEntityId,
   onSelect,
-  onAddCompany,
   onEditEntity,
   onDeleteEntity,
   entityTotals,
   displayCurrency,
   isCollapsed,
+  isDashboardActive,
+  onDashboard,
 }: SidebarEntityListProps) {
   const [openPopoverId, setOpenPopoverId] = useState<number | null>(null)
   const { t } = useTranslation(["entities", "common"])
@@ -49,8 +50,43 @@ export default function SidebarEntityList({
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex flex-col gap-1 px-2">
+        {isCollapsed ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onDashboard}
+                aria-label={t("common:dashboard")}
+                className={`
+                  flex items-center justify-center w-full h-9 rounded-lg
+                  transition-colors duration-150
+                  ${isDashboardActive ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
+                `}
+              >
+                <Icon icon="solar:home-linear" width={16} height={16} className="flex-shrink-0" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p className="font-medium">{t("common:dashboard")}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <button
+            onClick={onDashboard}
+            className={`
+              flex items-center gap-2 w-full py-2 px-3 rounded-lg text-left
+              transition-colors duration-150
+              ${isDashboardActive ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
+            `}
+          >
+            <Icon icon="solar:home-linear" width={16} height={16} className="flex-shrink-0" />
+            <span className="font-medium text-sm">{t("common:dashboard")}</span>
+          </button>
+        )}
+
+        <div className="border-t border-border my-1" />
+
         {entities.map((entity) => {
-          const isSelected = entity.id === selectedEntityId
+          const isSelected = entity.id === selectedEntityId && !isDashboardActive
           const total = entityTotals[entity.id] ?? 0
           const isCompany = entity.type === "company"
           const label = entity.type === "individual" ? t("entities:personal") : entity.name
@@ -95,7 +131,7 @@ export default function SidebarEntityList({
               <button
                 onClick={() => onSelect(entity.id)}
                 className={`
-                  relative flex flex-col gap-0.5 w-full py-2 px-3 rounded-lg text-left
+                  relative flex items-center gap-2 w-full py-2 px-3 rounded-lg text-left
                   transition-colors duration-150
                   ${isSelected ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
                 `}
@@ -107,13 +143,13 @@ export default function SidebarEntityList({
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <div className="relative flex items-center gap-2">
+                <span className="relative">
                   <EntityIcon type={entity.type} />
-                  <span className="font-medium text-sm truncate">{label}</span>
-                </div>
+                </span>
+                <span className="relative font-medium text-sm truncate">{label}</span>
                 <SlotMachineNumber
                   value={formatCurrency(total, displayCurrency)}
-                  className={`relative text-xs ml-6 ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                  className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
                   duration={500}
                   staggerMs={20}
                 />
@@ -131,10 +167,10 @@ export default function SidebarEntityList({
                         setOpenPopoverId(openPopoverId === entity.id ? null : entity.id)
                       }}
                       className={`
-                        absolute right-1 top-1 p-1 rounded-md
+                        absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md
                         text-muted-foreground hover:text-foreground hover:bg-slate-700/50
                         transition-all duration-200
-                        ${openPopoverId === entity.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                        ${openPopoverId === entity.id ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"}
                       `}
                       aria-label={t("entities:entityOptions")}
                     >
@@ -174,33 +210,6 @@ export default function SidebarEntityList({
             </div>
           )
         })}
-
-        {isCollapsed ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onAddCompany}
-                aria-label={t("entities:addCompany")}
-                className="flex items-center justify-center w-full h-9 rounded-lg text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors"
-              >
-                <Icon icon="solar:add-circle-linear" width={16} height={16} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>{t("entities:addCompany")}</p>
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start h-9 px-3 text-muted-foreground hover:text-accent hover:bg-accent/10"
-            onClick={onAddCompany}
-          >
-            <Icon icon="solar:add-circle-linear" width={16} height={16} className="mr-2" />
-            <span className="text-xs">{t("entities:addCompany")}</span>
-          </Button>
-        )}
       </div>
     </TooltipProvider>
   )

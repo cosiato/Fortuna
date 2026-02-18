@@ -1,22 +1,16 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import { useTranslation } from "react-i18next"
-import { Icon } from "@iconify/react"
-import NetWorthChart from "@/components/NetWorthChart"
+import DashboardView from "@/components/DashboardView"
+import EntityView from "@/components/EntityView"
 import AssetForm from "@/components/AssetForm"
 import AccountForm from "@/components/AccountForm"
-import VaultFlowDiagram from "@/components/VaultFlowDiagram"
-import VaultProjectionChart from "@/components/VaultProjectionChart"
 import CashFlowForm from "@/components/CashFlowForm"
 import CurrencyPickerOverlay from "@/components/CurrencyPickerOverlay"
 import type { Asset, Account } from "@/types/database"
 import { api } from "@/lib/api"
-import { SupportedCurrency, formatCurrency, getIntlLocale } from "@/lib/currency"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
+import { SupportedCurrency } from "@/lib/currency"
 import AppSidebar from "@/components/AppSidebar"
-import SlotMachineNumber from "@/components/SlotMachineNumber"
 import EntityForm from "@/components/EntityForm"
 import DeleteEntityDialog from "@/components/DeleteEntityDialog"
 import DeleteAccountDialog from "@/components/DeleteAccountDialog"
@@ -25,19 +19,10 @@ import LockScreen from "@/components/LockScreen"
 import OnboardingOverlay from "@/components/onboarding/OnboardingOverlay"
 import UpdateNotification from "@/components/UpdateNotification"
 import SettingsDialog from "@/components/SettingsDialog"
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion"
-import CountryFlag from "@/components/CountryFlag"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { motion } from "framer-motion"
 import { showErrorToast } from "@/lib/errorHandling"
-import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
 import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 import { getAssetValueInUsd, toUsd, fromUsd, toDisplayCurrency } from "@/lib/currencyConversion"
+import { calculateMonthlyTotals } from "@/lib/cashFlowProjection"
 import { useAppData } from "@/hooks/useAppData"
 import { useAssetCrud } from "@/hooks/useAssetCrud"
 import { useVaultCrud } from "@/hooks/useVaultCrud"
@@ -45,50 +30,11 @@ import { useEntityCrud } from "@/hooks/useEntityCrud"
 import { useUpdater } from "@/hooks/useUpdater"
 import { useSidebar } from "@/hooks/useSidebar"
 
-const CATEGORY_BADGE_CONFIG: Record<
-  string,
-  { bg: string; text: string; border: string; icon: string }
-> = {
-  stock: {
-    bg: "bg-amber-500/15",
-    text: "text-amber-400",
-    border: "border-amber-500/25",
-    icon: "solar:chart-linear",
-  },
-  crypto: {
-    bg: "bg-purple-500/15",
-    text: "text-purple-400",
-    border: "border-purple-500/25",
-    icon: "solar:money-bag-linear",
-  },
-  real_estate: {
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-400",
-    border: "border-emerald-500/25",
-    icon: "solar:home-linear",
-  },
-  other: {
-    bg: "bg-slate-400/15",
-    text: "text-slate-400",
-    border: "border-slate-400/25",
-    icon: "solar:box-linear",
-  },
-}
-
-function formatCompactValue(value: number, currency: SupportedCurrency): string {
-  if (currency === "BTC") {
-    return value >= 1 ? `${value.toFixed(2)} BTC` : `${value.toFixed(4)} BTC`
-  }
-  return new Intl.NumberFormat(getIntlLocale(), {
-    style: "currency",
-    currency,
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value)
-}
+type CurrentView = "dashboard" | "entity"
 
 export default function App() {
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
+  const [currentView, setCurrentView] = useState<CurrentView>("dashboard")
   const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -156,6 +102,7 @@ export default function App() {
       appActions.setPrices({})
       setIsPinEnabled(false)
       setIsLocked(false)
+      setCurrentView("dashboard")
       entityCrud.setSelectedEntityId(0)
       setResetDialogOpen(false)
       setSettingsOpen(false)
@@ -199,6 +146,19 @@ export default function App() {
     requestSnapshot,
   })
 
+  const handleNavigateDashboard = useCallback(() => {
+    setCurrentView("dashboard")
+    entityCrud.setSelectedEntityId(0)
+  }, [entityCrud.setSelectedEntityId])
+
+  const handleSelectEntity = useCallback(
+    (entityId: number) => {
+      entityCrud.setSelectedEntityId(entityId)
+      setCurrentView("entity")
+    },
+    [entityCrud.setSelectedEntityId],
+  )
+
   const assetCrud = useAssetCrud({
     selectedEntityId: entityCrud.selectedEntityId,
     fetchDataOnly: appActions.fetchDataOnly,
@@ -215,57 +175,22 @@ export default function App() {
     requestSnapshot,
   })
 
-  const ASSET_CATEGORIES = [
-    {
-      key: "stock",
-      label: t("assets:type.stock"),
-      icon: <Icon icon="solar:chart-linear" width={12} height={12} />,
-    },
-    {
-      key: "crypto",
-      label: t("assets:type.crypto"),
-      icon: <Icon icon="solar:money-bag-linear" width={12} height={12} />,
-    },
-    {
-      key: "real_estate",
-      label: t("assets:type.real_estate"),
-      icon: <Icon icon="solar:home-linear" width={12} height={12} />,
-    },
-    {
-      key: "other",
-      label: t("assets:type.other"),
-      icon: <Icon icon="solar:box-linear" width={12} height={12} />,
-    },
-  ]
-
   const filteredAssets = assets.filter((asset) => asset.entityId === entityCrud.selectedEntityId)
   const filteredAccounts = accounts.filter(
     (account) => account.entityId === entityCrud.selectedEntityId,
   )
 
-  const assetsByType = ASSET_CATEGORIES.reduce<Record<string, Asset[]>>((acc, category) => {
-    acc[category.key] = filteredAssets.filter((asset) => asset.type === category.key)
-    return acc
-  }, {})
-
-  const nonEmptyCategories = ASSET_CATEGORIES.filter(
-    (category) => assetsByType[category.key].length > 0,
+  const getAssetValue = useCallback(
+    (asset: Asset): number =>
+      fromUsd(getAssetValueInUsd(asset, prices, exchangeRates), displayCurrency, exchangeRates),
+    [prices, exchangeRates, displayCurrency],
   )
 
-  const defaultAssetTab = nonEmptyCategories[0]?.key || "stock"
-  const [activeTab, setActiveTab] = useState(defaultAssetTab)
-
-  useEffect(() => {
-    if (nonEmptyCategories.length > 0 && !nonEmptyCategories.some((c) => c.key === activeTab)) {
-      setActiveTab(nonEmptyCategories[0].key)
-    }
-  }, [nonEmptyCategories, activeTab])
-
-  const getAssetValue = (asset: Asset): number =>
-    fromUsd(getAssetValueInUsd(asset, prices, exchangeRates), displayCurrency, exchangeRates)
-
-  const getAccountValue = (account: Account): number =>
-    toDisplayCurrency(account.balance, account.currency, displayCurrency, exchangeRates)
+  const getAccountValue = useCallback(
+    (account: Account): number =>
+      toDisplayCurrency(account.balance, account.currency, displayCurrency, exchangeRates),
+    [displayCurrency, exchangeRates],
+  )
 
   const entityTotals = entities.reduce<Record<number, number>>((acc, entity) => {
     const entityAssets = assets.filter((a) => a.entityId === entity.id)
@@ -277,6 +202,58 @@ export default function App() {
     acc[entity.id] = assetsTotal + accountsTotal
     return acc
   }, {})
+
+  // Compute global monthly cash flow totals across all accounts
+  const globalMonthlyTotals = useMemo(() => {
+    let totalInflow = 0
+    let totalOutflow = 0
+
+    for (const account of accounts) {
+      const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
+      const totals = calculateMonthlyTotals(accountFlows)
+      totalInflow += toDisplayCurrency(
+        totals.totalInflow,
+        account.currency,
+        displayCurrency,
+        exchangeRates,
+      )
+      totalOutflow += toDisplayCurrency(
+        totals.totalOutflow,
+        account.currency,
+        displayCurrency,
+        exchangeRates,
+      )
+    }
+
+    return { totalInflow, totalOutflow, net: totalInflow - totalOutflow }
+  }, [accounts, cashFlows, displayCurrency, exchangeRates])
+
+  // Compute liquid vs illiquid totals
+  const liquidityTotals = useMemo(() => {
+    const liquidAssetTypes = new Set(["stock", "crypto", "cash"])
+    const illiquidAssetTypes = new Set(["real_estate", "other"])
+
+    let liquid = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
+    let illiquid = 0
+
+    for (const asset of assets) {
+      const value = getAssetValue(asset)
+      if (liquidAssetTypes.has(asset.type)) {
+        liquid += value
+      } else if (illiquidAssetTypes.has(asset.type)) {
+        illiquid += value
+      }
+    }
+
+    return { liquid, illiquid }
+  }, [assets, accounts, getAssetValue, getAccountValue])
+
+  const ASSET_CATEGORIES = [
+    { key: "stock", label: t("assets:type.stock") },
+    { key: "crypto", label: t("assets:type.crypto") },
+    { key: "real_estate", label: t("assets:type.real_estate") },
+    { key: "other", label: t("assets:type.other") },
+  ]
 
   const categoryBadgeData = ASSET_CATEGORIES.map((cat) => {
     const catAssets = assets.filter((a) => a.type === cat.key)
@@ -296,6 +273,13 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading])
 
+  // When entity is deleted and was the selected one, return to dashboard
+  useEffect(() => {
+    if (currentView === "entity" && !entities.some((e) => e.id === entityCrud.selectedEntityId)) {
+      setCurrentView("dashboard")
+    }
+  }, [entities, entityCrud.selectedEntityId, currentView])
+
   if (loading) {
     return (
       <div className="h-screen bg-background flex items-center justify-center">
@@ -307,12 +291,25 @@ export default function App() {
   return (
     <div className="h-screen flex flex-row bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-vignette pointer-events-none" />
+      <div
+        className="absolute top-0 left-0 right-0 h-9 z-30 cursor-grab active:cursor-grabbing"
+        onMouseDown={() => getCurrentWindow().startDragging()}
+        onDoubleClick={async () => {
+          const win = getCurrentWindow()
+          const maximized = await win.isMaximized()
+          if (maximized) {
+            await win.unmaximize()
+          } else {
+            await win.maximize()
+          }
+        }}
+      />
       <AppSidebar
         isCollapsed={sidebar.isCollapsed}
         onToggle={sidebar.toggle}
         entities={entities}
         selectedEntityId={entityCrud.selectedEntityId}
-        onSelectEntity={entityCrud.setSelectedEntityId}
+        onSelectEntity={handleSelectEntity}
         onAddCompany={() => entityCrud.setEntityFormOpen(true)}
         onEditEntity={entityCrud.handleEditEntity}
         onDeleteEntity={entityCrud.handleDeleteEntityRequest}
@@ -323,349 +320,56 @@ export default function App() {
         refreshCooldown={refreshCooldown}
         onCurrencyClick={() => setCurrencyPickerOpen(true)}
         onSettingsClick={() => setSettingsOpen(true)}
+        currentView={currentView}
+        onNavigateDashboard={handleNavigateDashboard}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="h-7 shrink-0" data-tauri-drag-region />
+      <main className="flex-1 flex flex-col overflow-hidden pt-9">
         <div className="flex-1 overflow-y-auto overscroll-none custom-scrollbar relative">
           <div className="max-w-7xl mx-auto px-6 py-6">
-            <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
-              <CardContent className="relative z-10 px-6 pt-6 pb-3">
-                <SlotMachineNumber
-                  value={formatCurrency(netWorth, displayCurrency)}
-                  className="text-4xl font-bold text-accent font-serif"
-                  duration={700}
-                />
-                <div className="flex flex-wrap items-center gap-2 mt-3 mb-8">
-                  {categoryBadgeData.map((cat) => {
-                    const colors = CATEGORY_BADGE_CONFIG[cat.key]
-                    return (
-                      <div
-                        key={cat.key}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md ${colors.bg} border ${colors.border}`}
-                      >
-                        <Icon icon={colors.icon} className={colors.text} width={14} height={14} />
-                        <span className={`text-xs font-medium ${colors.text}`}>{cat.label}</span>
-                        <span className="text-xs text-muted-foreground/60">|</span>
-                        <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatCompactValue(cat.total, displayCurrency)}
-                        </span>
-                      </div>
-                    )
-                  })}
-                  {accounts.length > 0 && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/15 border border-sky-500/25">
-                      <Icon
-                        icon="solar:safe-2-linear"
-                        className="text-sky-400"
-                        width={14}
-                        height={14}
-                      />
-                      <span className="text-xs font-medium text-sky-400">{t("vaults:title")}</span>
-                      <span className="text-xs text-muted-foreground/60">|</span>
-                      <span className="text-xs font-bold text-sky-400">{accounts.length}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatCompactValue(vaultBadgeTotal, displayCurrency)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="h-36 -mx-2">
-                  <NetWorthChart
-                    snapshots={snapshots}
-                    displayCurrency={displayCurrency}
-                    exchangeRates={exchangeRates}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="space-y-6 mb-8">
-              <div className="rounded-xl bg-background border border-border p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">{t("assets:title")}</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                    onClick={() => assetCrud.setAssetFormOpen(true)}
-                  >
-                    <span
-                      className={`text-xl leading-none ${filteredAssets.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
-                    >
-                      +
-                    </span>
-                  </Button>
-                </div>
-                {filteredAssets.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <p className="text-muted-foreground">{t("assets:noAssets")}</p>
-                  </div>
-                ) : (
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="h-auto bg-transparent p-0 flex justify-start gap-1 mb-4">
-                      {ASSET_CATEGORIES.map((category) => {
-                        const categoryAssets = assetsByType[category.key]
-                        const hasAssets = categoryAssets.length > 0
-
-                        return (
-                          <TabsTrigger
-                            key={category.key}
-                            value={category.key}
-                            disabled={!hasAssets}
-                            className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                          >
-                            <span className="text-current">{category.icon}</span>
-                            <span>{category.label}</span>
-                            {hasAssets && (
-                              <span className="text-muted-foreground">{categoryAssets.length}</span>
-                            )}
-                          </TabsTrigger>
-                        )
-                      })}
-                    </TabsList>
-
-                    {ASSET_CATEGORIES.map((category) => {
-                      const categoryAssets = assetsByType[category.key]
-
-                      return (
-                        <TabsContent key={category.key} value={category.key} className="mt-0">
-                          <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                          >
-                            {categoryAssets.length === 0 ? (
-                              <div className="text-center py-12 text-muted-foreground">
-                                {t("assets:noAssetsInCategory", {
-                                  category: category.label.toLowerCase(),
-                                })}
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                                {categoryAssets.map((asset) => (
-                                  <AssetTile
-                                    key={asset.id}
-                                    asset={asset}
-                                    displayValue={getAssetValue(asset)}
-                                    displayCurrency={displayCurrency}
-                                    categoryStyle={CATEGORY_STYLES[category.key]}
-                                    onEdit={assetCrud.handleEditAsset}
-                                    onDelete={assetCrud.handleDeleteAsset}
-                                    onQuantityChange={assetCrud.handleQuantityChange}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </motion.div>
-                        </TabsContent>
-                      )
-                    })}
-                  </Tabs>
-                )}
-              </div>
-
-              <div className="rounded-xl bg-background border border-border p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">{t("vaults:title")}</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-accent hover:text-accent/80 hover:bg-accent/10"
-                    onClick={() => vaultCrud.setAccountFormOpen(true)}
-                  >
-                    <span
-                      className={`text-xl leading-none ${filteredAccounts.length === 0 ? "animate-gentle-bounce-lg" : ""}`}
-                    >
-                      +
-                    </span>
-                  </Button>
-                </div>
-                {filteredAccounts.length === 0 ? (
-                  <div className="p-4">
-                    <p className="text-muted-foreground text-center py-4">{t("vaults:noVaults")}</p>
-                  </div>
-                ) : (
-                  <Accordion type="multiple" className="space-y-3">
-                    {filteredAccounts.map((account) => {
-                      const accountFlows = cashFlows.filter((f) => f.accountId === account.id)
-                      const flowKey = accountFlows
-                        .map(
-                          (f) => `${f.id}:${f.amount}:${f.frequency}:${f.isActive}:${f.flowType}`,
-                        )
-                        .join(",")
-                      const hasActiveFlows = accountFlows.some((f) => f.isActive)
-
-                      const monthlyTotals = calculateMonthlyTotals(accountFlows)
-                      const monthlyNetDisplay = toDisplayCurrency(
-                        monthlyTotals.net,
-                        account.currency,
-                        displayCurrency,
-                        exchangeRates,
-                      )
-
-                      const currentBalanceDisplay = getAccountValue(account)
-                      const projection1M = calculateProjection(account.balance, accountFlows, 1)
-                      const projectedBalance =
-                        projection1M.length > 0
-                          ? projection1M[projection1M.length - 1].balance
-                          : account.balance
-                      const projectedBalanceDisplay = toDisplayCurrency(
-                        projectedBalance,
-                        account.currency,
-                        displayCurrency,
-                        exchangeRates,
-                      )
-                      const projectedChange = projectedBalanceDisplay - currentBalanceDisplay
-                      const projectedChangePct =
-                        currentBalanceDisplay !== 0
-                          ? (projectedChange / Math.abs(currentBalanceDisplay)) * 100
-                          : 0
-
-                      const netColorClass =
-                        monthlyTotals.net > 0
-                          ? "text-emerald-400"
-                          : monthlyTotals.net < 0
-                            ? "text-red-400"
-                            : "text-muted-foreground"
-
-                      return (
-                        <AccordionItem
-                          key={account.id}
-                          value={account.id}
-                          className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
-                        >
-                          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
-                            <div className="flex flex-1 items-center justify-between mr-2">
-                              <div className="flex items-center gap-2">
-                                <CountryFlag code={account.countryCode} />
-                                <span className="text-sm font-semibold text-foreground">
-                                  {account.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {account.currency}
-                                </span>
-                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      vaultCrud.handleEditAccount(account)
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" || e.key === " ") {
-                                        e.stopPropagation()
-                                        vaultCrud.handleEditAccount(account)
-                                      }
-                                    }}
-                                    className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-accent hover:bg-accent/10 cursor-pointer"
-                                  >
-                                    <Icon icon="solar:pen-linear" width={12} height={12} />
-                                  </div>
-                                  <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      vaultCrud.handleDeleteAccountRequest(account)
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter" || e.key === " ") {
-                                        e.stopPropagation()
-                                        vaultCrud.handleDeleteAccountRequest(account)
-                                      }
-                                    }}
-                                    className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-500/10 cursor-pointer"
-                                  >
-                                    <Icon
-                                      icon="solar:trash-bin-trash-linear"
-                                      width={12}
-                                      height={12}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              <TooltipProvider delayDuration={300}>
-                                <div className="flex items-center gap-3">
-                                  {hasActiveFlows && (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span className="flex items-center gap-1.5 cursor-default">
-                                          <span className={`text-xs font-medium ${netColorClass}`}>
-                                            {monthlyTotals.net >= 0 ? "+" : ""}
-                                            {formatCurrency(monthlyNetDisplay, displayCurrency)}
-                                            <span className="text-muted-foreground">
-                                              {t("common:perMonth")}
-                                            </span>
-                                          </span>
-                                          <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
-                                            <Icon
-                                              icon={
-                                                projectedChange >= 0
-                                                  ? "solar:arrow-up-linear"
-                                                  : "solar:arrow-down-linear"
-                                              }
-                                              width={10}
-                                              height={10}
-                                            />
-                                            {projectedChange >= 0 ? "+" : ""}
-                                            {projectedChangePct.toFixed(1)}%
-                                          </span>
-                                        </span>
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top">
-                                        <p>{t("common:projectedMonthlyGain")}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span className="text-sm font-bold text-accent cursor-default">
-                                        {formatCurrency(currentBalanceDisplay, displayCurrency)}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top">
-                                      <p>{t("common:currentBalance")}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </div>
-                              </TooltipProvider>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="px-4 pb-4">
-                            <div className="space-y-4">
-                              <VaultFlowDiagram
-                                key={`${account.id}-${flowKey}`}
-                                account={account}
-                                cashFlows={accountFlows}
-                                displayCurrency={displayCurrency}
-                                displayBalance={getAccountValue(account)}
-                                exchangeRates={exchangeRates}
-                                onEdit={vaultCrud.handleEditCashFlow}
-                                onDelete={vaultCrud.handleDeleteCashFlow}
-                                onToggle={vaultCrud.handleToggleCashFlow}
-                                onAddFlow={(flowType) =>
-                                  vaultCrud.openAddFlow(account.id, flowType ?? "inflow")
-                                }
-                              />
-                              <VaultProjectionChart
-                                currentBalance={getAccountValue(account)}
-                                cashFlows={accountFlows}
-                                displayCurrency={displayCurrency}
-                                accountCurrency={account.currency}
-                                exchangeRates={exchangeRates}
-                              />
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )
-                    })}
-                  </Accordion>
-                )}
-              </div>
-            </div>
+            {currentView === "dashboard" ? (
+              <DashboardView
+                netWorth={netWorth}
+                netWorthUsd={netWorthUsd}
+                displayCurrency={displayCurrency}
+                categoryBadgeData={categoryBadgeData}
+                vaultBadgeTotal={vaultBadgeTotal}
+                accountCount={accounts.length}
+                snapshots={snapshots}
+                exchangeRates={exchangeRates}
+                entities={entities}
+                entityTotals={entityTotals}
+                onSelectEntity={handleSelectEntity}
+                monthlyTotals={globalMonthlyTotals}
+                assets={assets}
+                accounts={accounts}
+                getAssetValue={getAssetValue}
+                getAccountValue={getAccountValue}
+                liquidTotal={liquidityTotals.liquid}
+                illiquidTotal={liquidityTotals.illiquid}
+              />
+            ) : (
+              <EntityView
+                assets={filteredAssets}
+                accounts={filteredAccounts}
+                cashFlows={cashFlows}
+                displayCurrency={displayCurrency}
+                exchangeRates={exchangeRates}
+                getAssetValue={getAssetValue}
+                getAccountValue={getAccountValue}
+                onAddAsset={() => assetCrud.setAssetFormOpen(true)}
+                onEditAsset={assetCrud.handleEditAsset}
+                onDeleteAsset={assetCrud.handleDeleteAsset}
+                onQuantityChange={assetCrud.handleQuantityChange}
+                onAddAccount={() => vaultCrud.setAccountFormOpen(true)}
+                onEditAccount={vaultCrud.handleEditAccount}
+                onDeleteAccountRequest={vaultCrud.handleDeleteAccountRequest}
+                onEditCashFlow={vaultCrud.handleEditCashFlow}
+                onDeleteCashFlow={vaultCrud.handleDeleteCashFlow}
+                onToggleCashFlow={vaultCrud.handleToggleCashFlow}
+                onAddFlow={vaultCrud.openAddFlow}
+              />
+            )}
 
             <AssetForm
               asset={assetCrud.editingAsset}
