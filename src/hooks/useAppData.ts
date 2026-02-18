@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next"
 import i18n from "@/lib/i18n"
 import type { Asset, Snapshot, Account, Entity, CashFlow } from "@/types/database"
 import { api } from "@/lib/api"
-import { PriceResult, getMultiplePrices, forceRefreshPrices } from "@/lib/prices"
+import type { PriceResult } from "@/lib/prices"
+import { getMultiplePrices, forceRefreshPrices } from "@/lib/prices"
 import {
   SUPPORTED_CURRENCIES,
   SupportedCurrency,
@@ -14,6 +15,19 @@ import {
 import { showErrorToast } from "@/lib/errorHandling"
 
 const REFRESH_COOLDOWN = 2 * 60 * 1000 // 2 minutes
+
+function getTradeableAssets(assets: readonly Asset[]): Asset[] {
+  return assets.filter((a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol)
+}
+
+function buildPriceMap(pricesArray: readonly PriceResult[]): Record<string, PriceResult> {
+  return Object.fromEntries(
+    pricesArray.flatMap((p) => [
+      [p.symbol.toLowerCase(), p],
+      [p.symbol.toUpperCase(), p],
+    ]),
+  )
+}
 
 export interface AppDataState {
   assets: Asset[]
@@ -99,9 +113,7 @@ export function useAppData(): {
       const ratesData = await getExchangeRates()
       setExchangeRates(ratesData.rates || FALLBACK_RATES)
 
-      const tradeableAssets = assetsData.filter(
-        (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
-      )
+      const tradeableAssets = getTradeableAssets(assetsData)
 
       if (tradeableAssets.length > 0) {
         const symbolsWithTypes = tradeableAssets.map((a: Asset) => ({
@@ -110,15 +122,7 @@ export function useAppData(): {
         }))
 
         const pricesArray = await getMultiplePrices(symbolsWithTypes)
-
-        const pricesMap: Record<string, PriceResult> = {}
-
-        for (const p of pricesArray) {
-          pricesMap[p.symbol.toLowerCase()] = p
-          pricesMap[p.symbol.toUpperCase()] = p
-        }
-
-        setPrices((prev) => ({ ...prev, ...pricesMap }))
+        setPrices((prev) => ({ ...prev, ...buildPriceMap(pricesArray) }))
       }
     } catch (error) {
       showErrorToast(error, tRef.current("errors:failedToRefreshPrices"))
@@ -138,9 +142,7 @@ export function useAppData(): {
     }, REFRESH_COOLDOWN)
 
     try {
-      const tradeableAssets = assets.filter(
-        (a: Asset) => (a.type === "stock" || a.type === "crypto") && a.symbol,
-      )
+      const tradeableAssets = getTradeableAssets(assets)
 
       const [ratesData] = await Promise.all([
         forceRefreshExchangeRates(),
@@ -151,12 +153,7 @@ export function useAppData(): {
                 type: a.type as "stock" | "crypto",
               })),
             ).then((pricesArray) => {
-              const pricesMap: Record<string, PriceResult> = {}
-              for (const p of pricesArray) {
-                pricesMap[p.symbol.toLowerCase()] = p
-                pricesMap[p.symbol.toUpperCase()] = p
-              }
-              setPrices((prev) => ({ ...prev, ...pricesMap }))
+              setPrices((prev) => ({ ...prev, ...buildPriceMap(pricesArray) }))
             })
           : Promise.resolve(),
       ])
@@ -167,7 +164,6 @@ export function useAppData(): {
     } finally {
       setIsRefreshing(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assets, refreshCooldown])
 
   const refreshSnapshots = useCallback(async () => {
