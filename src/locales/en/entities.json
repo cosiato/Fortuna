@@ -4,5 +4,6 @@
   "editEntity": "Edit Entity",
   "namePlaceholder": "e.g., Acme Corp, My LLC",
   "addBtn": "Add New",
-  "entityOptions": "Entity options"
+  "entityOptions": "Entity options",
+  "summaryTitle": "Your Entities"
 }

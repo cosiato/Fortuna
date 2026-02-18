@@ -4,5 +4,6 @@
   "editEntity": "Editar Entidad",
   "namePlaceholder": "p. ej., Acme Corp, Mi LLC",
   "addBtn": "Agregar Nueva",
-  "entityOptions": "Opciones de entidad"
+  "entityOptions": "Opciones de entidad",
+  "summaryTitle": "Sus entidades"
 }

@@ -72,6 +72,19 @@
   "updateNow": "Update now",
   "later": "Later",
   "downloadingUpdate": "Downloading update...",
+  "dashboard": "Dashboard",
   "collapseSidebar": "Collapse sidebar",
-  "expandSidebar": "Expand sidebar"
+  "expandSidebar": "Expand sidebar",
+  "assetDiversity": "Asset Diversity",
+  "ofPortfolio": "of portfolio",
+  "monthlyOverview": "Monthly Overview",
+  "inflow": "Inflow",
+  "outflow": "Outflow",
+  "net": "Net",
+  "savingsRate": "Savings rate",
+  "topAssets": "Top Assets",
+  "liquidity": "Liquidity",
+  "liquid": "Liquid",
+  "illiquid": "Illiquid",
+  "thirtyDayChange": "30d"
 }

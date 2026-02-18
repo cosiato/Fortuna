@@ -72,6 +72,19 @@
   "updateNow": "Actualizar ahora",
   "later": "Mas tarde",
   "downloadingUpdate": "Descargando actualizacion...",
+  "dashboard": "Panel",
   "collapseSidebar": "Contraer barra lateral",
-  "expandSidebar": "Expandir barra lateral"
+  "expandSidebar": "Expandir barra lateral",
+  "assetDiversity": "Diversidad de activos",
+  "ofPortfolio": "del portafolio",
+  "monthlyOverview": "Resumen mensual",
+  "inflow": "Ingresos",
+  "outflow": "Egresos",
+  "net": "Neto",
+  "savingsRate": "Tasa de ahorro",
+  "topAssets": "Top activos",
+  "liquidity": "Liquidez",
+  "liquid": "Liquido",
+  "illiquid": "Iliquido",
+  "thirtyDayChange": "30d"
 }

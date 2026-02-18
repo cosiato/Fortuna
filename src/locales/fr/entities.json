@@ -4,5 +4,6 @@
   "editEntity": "Modifier l'entreprise",
   "namePlaceholder": "ex. Acme Corp, Ma SARL",
   "addBtn": "Ajouter",
-  "entityOptions": "Options de l'entreprise"
+  "entityOptions": "Options de l'entreprise",
+  "summaryTitle": "Vos entites"
 }

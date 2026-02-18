@@ -72,6 +72,19 @@
   "updateNow": "Mettre a jour",
   "later": "Plus tard",
   "downloadingUpdate": "Telechargement de la mise a jour...",
+  "dashboard": "Tableau de bord",
   "collapseSidebar": "Replier la barre laterale",
-  "expandSidebar": "Deployer la barre laterale"
+  "expandSidebar": "Deployer la barre laterale",
+  "assetDiversity": "Diversite des actifs",
+  "ofPortfolio": "du portefeuille",
+  "monthlyOverview": "Apercu mensuel",
+  "inflow": "Entrees",
+  "outflow": "Sorties",
+  "net": "Net",
+  "savingsRate": "Taux d'epargne",
+  "topAssets": "Top actifs",
+  "liquidity": "Liquidite",
+  "liquid": "Liquide",
+  "illiquid": "Illiquide",
+  "thirtyDayChange": "30j"
 }
