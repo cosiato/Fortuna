@@ -6,7 +6,6 @@ import type {
   Asset,
   Account,
   Snapshot,
-  ActivityLogEntry,
   CreateEntityInput,
   UpdateEntityInput,
   CreateAssetInput,
@@ -42,24 +41,6 @@ describe("api", () => {
       expect(result).toEqual(entities)
     })
 
-    it("getById should invoke get_entity_by_id with correct params", async () => {
-      mockInvoke.mockResolvedValueOnce(mockEntity)
-
-      const result = await api.entities.getById(1)
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_entity_by_id", { id: 1 })
-      expect(result).toEqual(mockEntity)
-    })
-
-    it("getById should return null for non-existent entity", async () => {
-      mockInvoke.mockResolvedValueOnce(null)
-
-      const result = await api.entities.getById(999)
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_entity_by_id", { id: 999 })
-      expect(result).toBeNull()
-    })
-
     it("create should invoke create_entity with input", async () => {
       const input: CreateEntityInput = { name: "New Entity", type: "company" }
       mockInvoke.mockResolvedValueOnce({ ...mockEntity, ...input, id: 2 })
@@ -78,14 +59,6 @@ describe("api", () => {
 
       expect(mockInvoke).toHaveBeenCalledWith("update_entity", { id: 1, input })
       expect(result.name).toBe("Updated Entity")
-    })
-
-    it("delete should invoke delete_entity with id", async () => {
-      mockInvoke.mockResolvedValueOnce(undefined)
-
-      await api.entities.delete(1)
-
-      expect(mockInvoke).toHaveBeenCalledWith("delete_entity", { id: 1 })
     })
 
     it("ensureIndividual should invoke ensure_individual_entity", async () => {
@@ -120,25 +93,6 @@ describe("api", () => {
 
       expect(mockInvoke).toHaveBeenCalledWith("get_all_assets")
       expect(result).toEqual(assets)
-    })
-
-    it("getByEntity should invoke get_assets_by_entity with entityId", async () => {
-      const assets = [mockAsset]
-      mockInvoke.mockResolvedValueOnce(assets)
-
-      const result = await api.assets.getByEntity(0)
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_assets_by_entity", { entityId: 0 })
-      expect(result).toEqual(assets)
-    })
-
-    it("getById should invoke get_asset_by_id with id", async () => {
-      mockInvoke.mockResolvedValueOnce(mockAsset)
-
-      const result = await api.assets.getById("asset-uuid-1")
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_asset_by_id", { id: "asset-uuid-1" })
-      expect(result).toEqual(mockAsset)
     })
 
     it("create should invoke create_asset with input", async () => {
@@ -197,25 +151,6 @@ describe("api", () => {
       expect(result).toEqual(accounts)
     })
 
-    it("getByEntity should invoke get_accounts_by_entity with entityId", async () => {
-      const accounts = [mockAccount]
-      mockInvoke.mockResolvedValueOnce(accounts)
-
-      const result = await api.accounts.getByEntity(0)
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_accounts_by_entity", { entityId: 0 })
-      expect(result).toEqual(accounts)
-    })
-
-    it("getById should invoke get_account_by_id with id", async () => {
-      mockInvoke.mockResolvedValueOnce(mockAccount)
-
-      const result = await api.accounts.getById("account-uuid-1")
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_account_by_id", { id: "account-uuid-1" })
-      expect(result).toEqual(mockAccount)
-    })
-
     it("create should invoke create_account with input", async () => {
       const input: CreateAccountInput = {
         name: "Checking Account",
@@ -265,33 +200,6 @@ describe("api", () => {
 
       expect(mockInvoke).toHaveBeenCalledWith("get_all_snapshots")
       expect(result).toEqual(snapshots)
-    })
-
-    it("getToday should invoke get_today_snapshot", async () => {
-      mockInvoke.mockResolvedValueOnce(mockSnapshot)
-
-      const result = await api.snapshots.getToday()
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_today_snapshot")
-      expect(result).toEqual(mockSnapshot)
-    })
-
-    it("getToday should return null when no snapshot exists", async () => {
-      mockInvoke.mockResolvedValueOnce(null)
-
-      const result = await api.snapshots.getToday()
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_today_snapshot")
-      expect(result).toBeNull()
-    })
-
-    it("getLatest should invoke get_latest_snapshot", async () => {
-      mockInvoke.mockResolvedValueOnce(mockSnapshot)
-
-      const result = await api.snapshots.getLatest()
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_latest_snapshot")
-      expect(result).toEqual(mockSnapshot)
     })
 
     it("create should invoke create_snapshot with input", async () => {
@@ -350,55 +258,6 @@ describe("api", () => {
     })
   })
 
-  describe("activityLog", () => {
-    const mockEntry: ActivityLogEntry = {
-      id: "log-uuid-1",
-      action: "asset_created",
-      assetId: "asset-uuid-1",
-      assetName: "Bitcoin",
-      assetType: "crypto",
-      entityId: 0,
-      quantityBefore: null,
-      quantityAfter: 1.5,
-      currency: "USD",
-      createdAt: "2024-01-01T00:00:00Z",
-    }
-
-    it("getAll should invoke get_activity_log", async () => {
-      const entries = [mockEntry]
-      mockInvoke.mockResolvedValueOnce(entries)
-
-      const result = await api.activityLog.getAll()
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_activity_log")
-      expect(result).toEqual(entries)
-    })
-
-    it("getByAsset should invoke get_activity_log_by_asset with assetId", async () => {
-      const entries = [mockEntry]
-      mockInvoke.mockResolvedValueOnce(entries)
-
-      const result = await api.activityLog.getByAsset("asset-uuid-1")
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_activity_log_by_asset", {
-        assetId: "asset-uuid-1",
-      })
-      expect(result).toEqual(entries)
-    })
-
-    it("getByEntity should invoke get_activity_log_by_entity with entityId", async () => {
-      const entries = [mockEntry]
-      mockInvoke.mockResolvedValueOnce(entries)
-
-      const result = await api.activityLog.getByEntity(0)
-
-      expect(mockInvoke).toHaveBeenCalledWith("get_activity_log_by_entity", {
-        entityId: 0,
-      })
-      expect(result).toEqual(entries)
-    })
-  })
-
   describe("error handling", () => {
     it("should propagate errors from invoke", async () => {
       const error = new Error("Database connection failed")
@@ -410,7 +269,7 @@ describe("api", () => {
     it("should propagate Tauri error strings", async () => {
       mockInvoke.mockRejectedValueOnce("Entity not found")
 
-      await expect(api.entities.getById(999)).rejects.toBe("Entity not found")
+      await expect(api.entities.getAll()).rejects.toBe("Entity not found")
     })
   })
 })
