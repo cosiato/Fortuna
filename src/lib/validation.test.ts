@@ -118,6 +118,110 @@ describe("validation", () => {
       })
       expect(result.success).toBe(false)
     })
+
+    it("should accept stakedQuantity <= quantity for crypto", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 2,
+        currency: "USD",
+        stakedQuantity: 1.5,
+        withdrawalCooldownDays: 28,
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it("should accept stakedQuantity equal to quantity for crypto", () => {
+      const result = schema.safeParse({
+        name: "Ethereum",
+        type: "crypto",
+        quantity: 10,
+        currency: "USD",
+        stakedQuantity: 10,
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it("should reject stakedQuantity > quantity for crypto", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 1,
+        currency: "USD",
+        stakedQuantity: 2,
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it("should accept stakedQuantity for non-crypto types (ignored)", () => {
+      const result = schema.safeParse({
+        name: "Apple",
+        type: "stock",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: 10,
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it("should reject negative stakedQuantity", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: -1,
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it("should reject non-integer withdrawalCooldownDays", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: 2,
+        withdrawalCooldownDays: 7.5,
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it("should reject negative withdrawalCooldownDays", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: 2,
+        withdrawalCooldownDays: -1,
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it("should accept null staking fields", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: null,
+        withdrawalCooldownDays: null,
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it("should accept zero withdrawalCooldownDays", () => {
+      const result = schema.safeParse({
+        name: "Bitcoin",
+        type: "crypto",
+        quantity: 5,
+        currency: "USD",
+        stakedQuantity: 2,
+        withdrawalCooldownDays: 0,
+      })
+      expect(result.success).toBe(true)
+    })
   })
 
   describe("createAccountSchema", () => {

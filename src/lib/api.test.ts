@@ -81,6 +81,8 @@ describe("api", () => {
       manualPrice: null,
       currency: "USD",
       entityId: 0,
+      stakedQuantity: null,
+      withdrawalCooldownDays: null,
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-01T00:00:00Z",
     }

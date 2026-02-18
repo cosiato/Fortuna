@@ -11,5 +11,6 @@
   "categoryRequired": "Category is required",
   "startDateRequired": "Start date is required",
   "endDateAfterStart": "End date must be after start date",
-  "validationFailed": "Validation failed"
+  "validationFailed": "Validation failed",
+  "stakedQuantityMax": "Staked quantity cannot exceed total quantity"
 }

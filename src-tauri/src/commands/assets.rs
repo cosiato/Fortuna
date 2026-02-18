@@ -19,6 +19,8 @@ pub struct Asset {
     pub manual_price: Option<f64>,
     pub currency: String,
     pub entity_id: i64,
+    pub staked_quantity: Option<f64>,
+    pub withdrawal_cooldown_days: Option<i64>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -34,6 +36,8 @@ pub struct CreateAssetInput {
     pub manual_price: Option<f64>,
     pub currency: Option<String>,
     pub entity_id: Option<i64>,
+    pub staked_quantity: Option<f64>,
+    pub withdrawal_cooldown_days: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -47,6 +51,36 @@ pub struct UpdateAssetInput {
     pub manual_price: Option<f64>,
     pub currency: Option<String>,
     pub entity_id: Option<i64>,
+    pub staked_quantity: Option<f64>,
+    pub withdrawal_cooldown_days: Option<i64>,
+}
+
+fn validate_staking_fields(
+    staked_quantity: Option<f64>,
+    withdrawal_cooldown_days: Option<i64>,
+    quantity: f64,
+    asset_type: &str,
+) -> Result<(Option<f64>, Option<i64>), String> {
+    if asset_type != "crypto" {
+        return Ok((None, None));
+    }
+
+    if let Some(sq) = staked_quantity {
+        if sq < 0.0 {
+            return Err("Staked quantity must be >= 0".to_string());
+        }
+        if sq > quantity {
+            return Err("Staked quantity cannot exceed total quantity".to_string());
+        }
+    }
+
+    if let Some(cd) = withdrawal_cooldown_days {
+        if cd < 0 {
+            return Err("Withdrawal cooldown days must be >= 0".to_string());
+        }
+    }
+
+    Ok((staked_quantity, withdrawal_cooldown_days))
 }
 
 fn validate_name(name: &str) -> Result<(), String> {
@@ -61,6 +95,26 @@ fn validate_name(name: &str) -> Result<(), String> {
 }
 
 const VALID_ASSET_TYPES: [&str; 5] = ["stock", "crypto", "real_estate", "cash", "other"];
+
+const ASSET_SELECT_COLUMNS: &str =
+    "id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at, staked_quantity, withdrawal_cooldown_days";
+
+fn asset_from_row(row: &rusqlite::Row) -> rusqlite::Result<Asset> {
+    Ok(Asset {
+        id: row.get(0)?,
+        name: row.get(1)?,
+        asset_type: row.get(2)?,
+        symbol: row.get(3)?,
+        quantity: row.get(4)?,
+        manual_price: row.get(5)?,
+        currency: row.get(6)?,
+        entity_id: row.get(7)?,
+        created_at: row.get(8)?,
+        updated_at: row.get(9)?,
+        staked_quantity: row.get(10)?,
+        withdrawal_cooldown_days: row.get(11)?,
+    })
+}
 
 fn validate_asset_type(asset_type: &str) -> Result<(), String> {
     if !VALID_ASSET_TYPES.contains(&asset_type) {
@@ -77,28 +131,14 @@ pub fn get_all_assets(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Ass
     let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-             FROM assets ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
+    let sql = format!(
+        "SELECT {} FROM assets ORDER BY created_at DESC",
+        ASSET_SELECT_COLUMNS
+    );
+    let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
 
     let assets = stmt
-        .query_map([], |row| {
-            Ok(Asset {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                asset_type: row.get(2)?,
-                symbol: row.get(3)?,
-                quantity: row.get(4)?,
-                manual_price: row.get(5)?,
-                currency: row.get(6)?,
-                entity_id: row.get(7)?,
-                created_at: row.get(8)?,
-                updated_at: row.get(9)?,
-            })
-        })
+        .query_map([], asset_from_row)
         .map_err(|e| e.to_string())?
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| e.to_string())?;
@@ -115,28 +155,14 @@ pub fn get_assets_by_entity(
     let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-             FROM assets WHERE entity_id = ? ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
+    let sql = format!(
+        "SELECT {} FROM assets WHERE entity_id = ? ORDER BY created_at DESC",
+        ASSET_SELECT_COLUMNS
+    );
+    let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
 
     let assets = stmt
-        .query_map([entity_id], |row| {
-            Ok(Asset {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                asset_type: row.get(2)?,
-                symbol: row.get(3)?,
-                quantity: row.get(4)?,
-                manual_price: row.get(5)?,
-                currency: row.get(6)?,
-                entity_id: row.get(7)?,
-                created_at: row.get(8)?,
-                updated_at: row.get(9)?,
-            })
-        })
+        .query_map([entity_id], asset_from_row)
         .map_err(|e| e.to_string())?
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| e.to_string())?;
@@ -153,25 +179,8 @@ pub fn get_asset_by_id(
     let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
-    let result = conn.query_row(
-        "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-         FROM assets WHERE id = ?",
-        [&id],
-        |row| {
-            Ok(Asset {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                asset_type: row.get(2)?,
-                symbol: row.get(3)?,
-                quantity: row.get(4)?,
-                manual_price: row.get(5)?,
-                currency: row.get(6)?,
-                entity_id: row.get(7)?,
-                created_at: row.get(8)?,
-                updated_at: row.get(9)?,
-            })
-        },
-    );
+    let sql = format!("SELECT {} FROM assets WHERE id = ?", ASSET_SELECT_COLUMNS);
+    let result = conn.query_row(&sql, [&id], asset_from_row);
 
     match result {
         Ok(asset) => Ok(Some(asset)),
@@ -221,9 +230,16 @@ pub fn create_asset(
     let currency = input.currency.unwrap_or_else(|| "USD".to_string());
     let entity_id = input.entity_id.unwrap_or(0);
 
+    let (staked_qty, cooldown) = validate_staking_fields(
+        input.staked_quantity,
+        input.withdrawal_cooldown_days,
+        quantity,
+        &input.asset_type,
+    )?;
+
     conn.execute(
-        "INSERT INTO assets (id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
+        "INSERT INTO assets (id, name, type, symbol, quantity, manual_price, currency, entity_id, staked_quantity, withdrawal_cooldown_days, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
         params![
             id,
             input.name,
@@ -232,31 +248,16 @@ pub fn create_asset(
             quantity,
             input.manual_price,
             currency,
-            entity_id
+            entity_id,
+            staked_qty,
+            cooldown
         ],
     )
     .map_err(|e| e.to_string())?;
 
+    let select_sql = format!("SELECT {} FROM assets WHERE id = ?", ASSET_SELECT_COLUMNS);
     let asset = conn
-        .query_row(
-            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-             FROM assets WHERE id = ?",
-            [&id],
-            |row| {
-                Ok(Asset {
-                    id: row.get(0)?,
-                    name: row.get(1)?,
-                    asset_type: row.get(2)?,
-                    symbol: row.get(3)?,
-                    quantity: row.get(4)?,
-                    manual_price: row.get(5)?,
-                    currency: row.get(6)?,
-                    entity_id: row.get(7)?,
-                    created_at: row.get(8)?,
-                    updated_at: row.get(9)?,
-                })
-            },
-        )
+        .query_row(&select_sql, [&id], asset_from_row)
         .map_err(|e| e.to_string())?;
 
     let _ = log_activity(
@@ -345,6 +346,40 @@ pub fn update_asset(
         params.push(Box::new(entity_id));
     }
 
+    // Clear staking fields when type changes away from crypto
+    let changing_away_from_crypto = matches!(input.asset_type.as_deref(), Some(t) if t != "crypto");
+    let needs_staking = input.staked_quantity.is_some() || input.withdrawal_cooldown_days.is_some();
+
+    if changing_away_from_crypto {
+        updates.push("staked_quantity = ?");
+        params.push(Box::new(None::<f64>));
+        updates.push("withdrawal_cooldown_days = ?");
+        params.push(Box::new(None::<i64>));
+    } else if needs_staking {
+        let (current_type, current_qty): (String, f64) = conn
+            .query_row(
+                "SELECT type, quantity FROM assets WHERE id = ?",
+                [&id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .map_err(|e| e.to_string())?;
+
+        let asset_type = input.asset_type.as_deref().unwrap_or(&current_type);
+        let qty = input.quantity.unwrap_or(current_qty);
+
+        let (staked_qty, cooldown) = validate_staking_fields(
+            input.staked_quantity,
+            input.withdrawal_cooldown_days,
+            qty,
+            asset_type,
+        )?;
+
+        updates.push("staked_quantity = ?");
+        params.push(Box::new(staked_qty));
+        updates.push("withdrawal_cooldown_days = ?");
+        params.push(Box::new(cooldown));
+    }
+
     if updates.is_empty() {
         return Err("No fields to update".to_string());
     }
@@ -365,26 +400,9 @@ pub fn update_asset(
         return Err("Asset not found".to_string());
     }
 
+    let select_sql = format!("SELECT {} FROM assets WHERE id = ?", ASSET_SELECT_COLUMNS);
     let asset = conn
-        .query_row(
-            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-             FROM assets WHERE id = ?",
-            [&id],
-            |row| {
-                Ok(Asset {
-                    id: row.get(0)?,
-                    name: row.get(1)?,
-                    asset_type: row.get(2)?,
-                    symbol: row.get(3)?,
-                    quantity: row.get(4)?,
-                    manual_price: row.get(5)?,
-                    currency: row.get(6)?,
-                    entity_id: row.get(7)?,
-                    created_at: row.get(8)?,
-                    updated_at: row.get(9)?,
-                })
-            },
-        )
+        .query_row(&select_sql, [&id], asset_from_row)
         .map_err(|e| e.to_string())?;
 
     if let Some(old_qty) = old_quantity {
@@ -418,26 +436,9 @@ pub fn delete_asset(app: AppHandle, db: State<DbConnection>, lock: State<LockSta
     check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
+    let select_sql = format!("SELECT {} FROM assets WHERE id = ?", ASSET_SELECT_COLUMNS);
     let asset = conn
-        .query_row(
-            "SELECT id, name, type, symbol, quantity, manual_price, currency, entity_id, created_at, updated_at
-             FROM assets WHERE id = ?",
-            [&id],
-            |row| {
-                Ok(Asset {
-                    id: row.get(0)?,
-                    name: row.get(1)?,
-                    asset_type: row.get(2)?,
-                    symbol: row.get(3)?,
-                    quantity: row.get(4)?,
-                    manual_price: row.get(5)?,
-                    currency: row.get(6)?,
-                    entity_id: row.get(7)?,
-                    created_at: row.get(8)?,
-                    updated_at: row.get(9)?,
-                })
-            },
-        )
+        .query_row(&select_sql, [&id], asset_from_row)
         .map_err(|e| e.to_string())?;
 
     let affected = conn

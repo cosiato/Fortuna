@@ -31,5 +31,10 @@
   "currency": "Currency",
   "namePlaceholder": "e.g., House, Car",
   "loadingBtn": "Loading...",
-  "addBtn": "Add Asset"
+  "addBtn": "Add Asset",
+  "markAsStaked": "Mark as staked",
+  "stakedQuantity": "Staked quantity",
+  "withdrawalCooldown": "Withdrawal cooldown (days)",
+  "staked": "Staked",
+  "stakedOf": "{{staked}} staked"
 }

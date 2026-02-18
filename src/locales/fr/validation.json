@@ -11,5 +11,6 @@
   "categoryRequired": "La categorie est requise",
   "startDateRequired": "La date de debut est requise",
   "endDateAfterStart": "La date de fin doit etre posterieure a la date de debut",
-  "validationFailed": "La validation a echoue"
+  "validationFailed": "La validation a echoue",
+  "stakedQuantityMax": "La quantite stakee ne peut pas depasser la quantite totale"
 }

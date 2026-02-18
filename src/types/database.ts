@@ -17,6 +17,8 @@ export interface Asset {
   manualPrice: number | null
   currency: string
   entityId: number
+  stakedQuantity: number | null
+  withdrawalCooldownDays: number | null
   createdAt: string
   updatedAt: string
 }
@@ -49,6 +51,8 @@ export interface CreateAssetInput {
   manualPrice?: number | null
   currency?: string
   entityId?: number
+  stakedQuantity?: number | null
+  withdrawalCooldownDays?: number | null
 }
 
 export interface UpdateAssetInput {
@@ -59,6 +63,8 @@ export interface UpdateAssetInput {
   manualPrice?: number | null
   currency?: string
   entityId?: number
+  stakedQuantity?: number | null
+  withdrawalCooldownDays?: number | null
 }
 
 export interface CreateAccountInput {

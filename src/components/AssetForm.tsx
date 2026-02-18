@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import CurrencyCombobox from "@/components/CurrencyCombobox"
 import CryptoSelector from "@/components/CryptoSelector"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
@@ -34,6 +35,9 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
   const [quantity, setQuantity] = useState(asset?.quantity?.toString() || "1")
   const [manualPrice, setManualPrice] = useState(asset?.manualPrice?.toString() || "")
   const [currency, setCurrency] = useState(asset?.currency || "USD")
+  const [isStaked, setIsStaked] = useState(false)
+  const [stakedQuantity, setStakedQuantity] = useState("")
+  const [cooldownDays, setCooldownDays] = useState("")
   const [resolvedName, setResolvedName] = useState("")
   const [isLoadingName, setIsLoadingName] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
@@ -64,6 +68,12 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setResolvedName(asset.name || "")
       setNameError(null)
       setIsLoadingName(false)
+      const hasStaking = asset.stakedQuantity != null && asset.stakedQuantity > 0
+      setIsStaked(hasStaking)
+      setStakedQuantity(hasStaking ? asset.stakedQuantity!.toString() : "")
+      setCooldownDays(
+        asset.withdrawalCooldownDays != null ? asset.withdrawalCooldownDays.toString() : "",
+      )
     } else {
       setName("")
       setType("stock")
@@ -74,6 +84,9 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       setResolvedName("")
       setNameError(null)
       setIsLoadingName(false)
+      setIsStaked(false)
+      setStakedQuantity("")
+      setCooldownDays("")
     }
   }, [asset, open])
 
@@ -162,6 +175,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const isCryptoStaked = type === "crypto" && isStaked
     const data = {
       name: getEffectiveName(),
       type,
@@ -169,6 +183,8 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
       quantity: parseFloat(quantity) || 0,
       manualPrice: requiresManualPrice ? parseFloat(manualPrice) || null : null,
       currency,
+      stakedQuantity: isCryptoStaked && stakedQuantity !== "" ? parseFloat(stakedQuantity) : null,
+      withdrawalCooldownDays: isCryptoStaked && cooldownDays !== "" ? parseInt(cooldownDays) : null,
     }
     const result = validateSchema(createAssetSchema(), data)
     if (!result.success) {
@@ -200,6 +216,11 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
                 if (val === "crypto" || val === "stock") {
                   setCurrency("USD")
                 }
+                if (val !== "crypto") {
+                  setIsStaked(false)
+                  setStakedQuantity("")
+                  setCooldownDays("")
+                }
               }}
             >
               <SelectTrigger>
@@ -220,6 +241,43 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
               <Label>{t("cryptocurrency")}</Label>
               <CryptoSelector value={symbol} onChange={handleCryptoChange} />
               {nameError && <p className="text-sm text-destructive">{nameError}</p>}
+            </div>
+          )}
+
+          {type === "crypto" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="staking-toggle">{t("markAsStaked")}</Label>
+                <Switch id="staking-toggle" checked={isStaked} onCheckedChange={setIsStaked} />
+              </div>
+              {isStaked && (
+                <div className="space-y-3 pl-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="stakedQuantity">{t("stakedQuantity")}</Label>
+                    <Input
+                      id="stakedQuantity"
+                      type="number"
+                      value={stakedQuantity}
+                      onChange={(e) => setStakedQuantity(e.target.value)}
+                      step="any"
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cooldownDays">{t("withdrawalCooldown")}</Label>
+                    <Input
+                      id="cooldownDays"
+                      type="number"
+                      value={cooldownDays}
+                      onChange={(e) => setCooldownDays(e.target.value)}
+                      step="1"
+                      min="0"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

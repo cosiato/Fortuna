@@ -6,14 +6,27 @@ const t = (key: string) => i18n.t(key as any, { ns: "validation" })
 const nameField = () => z.string().min(1, t("nameRequired")).max(255, t("nameTooLong"))
 
 export const createAssetSchema = () =>
-  z.object({
-    name: nameField(),
-    type: z.enum(["stock", "crypto", "real_estate", "cash", "other"]),
-    symbol: z.string().max(20).nullable().optional(),
-    quantity: z.number().min(0, t("quantityMin")),
-    manualPrice: z.number().min(0, t("priceMin")).nullable().optional(),
-    currency: z.string().length(3, t("currencyCode")),
-  })
+  z
+    .object({
+      name: nameField(),
+      type: z.enum(["stock", "crypto", "real_estate", "cash", "other"]),
+      symbol: z.string().max(20).nullable().optional(),
+      quantity: z.number().min(0, t("quantityMin")),
+      manualPrice: z.number().min(0, t("priceMin")).nullable().optional(),
+      currency: z.string().length(3, t("currencyCode")),
+      stakedQuantity: z.number().min(0, t("quantityMin")).nullable().optional(),
+      withdrawalCooldownDays: z.number().int().min(0).nullable().optional(),
+    })
+    .refine(
+      (data) => {
+        if (data.type !== "crypto" || data.stakedQuantity == null) return true
+        return data.stakedQuantity <= data.quantity
+      },
+      {
+        message: t("stakedQuantityMax"),
+        path: ["stakedQuantity"],
+      },
+    )
 
 export const createAccountSchema = () =>
   z.object({

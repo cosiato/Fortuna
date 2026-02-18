@@ -213,6 +213,25 @@ export default function AssetTile({
                     </div>
                   )}
                 </div>
+                {asset.type === "crypto" &&
+                  asset.stakedQuantity != null &&
+                  asset.stakedQuantity > 0 && (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Icon
+                        icon="solar:lock-linear"
+                        width={10}
+                        height={10}
+                        className="text-muted-foreground"
+                      />
+                      <span className="text-[9px] text-muted-foreground">
+                        {t("assets:stakedOf", {
+                          staked: asset.stakedQuantity.toLocaleString(undefined, {
+                            maximumFractionDigits: 4,
+                          }),
+                        })}
+                      </span>
+                    </div>
+                  )}
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-[9px] text-muted-foreground uppercase tracking-wide">

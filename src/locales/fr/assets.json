@@ -31,5 +31,10 @@
   "currency": "Devise",
   "namePlaceholder": "ex. Maison, Voiture",
   "loadingBtn": "Chargement...",
-  "addBtn": "Ajouter l'actif"
+  "addBtn": "Ajouter l'actif",
+  "markAsStaked": "Marquer comme stake",
+  "stakedQuantity": "Quantite stakee",
+  "withdrawalCooldown": "Delai de retrait (jours)",
+  "staked": "Stake",
+  "stakedOf": "{{staked}} stake(s)"
 }

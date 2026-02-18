@@ -57,18 +57,15 @@ export function useAssetCrud({
         manualPrice: data.manualPrice,
         currency: data.currency,
         entityId: selectedEntityId,
+        stakedQuantity: data.stakedQuantity ?? null,
+        withdrawalCooldownDays: data.withdrawalCooldownDays ?? null,
       })
       setAssetFormOpen(false)
       await fetchDataOnly()
       requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        await fetchPriceAndSyncCurrency(
-          created.id,
-          data.symbol,
-          data.type,
-          data.currency,
-        )
+        await fetchPriceAndSyncCurrency(created.id, data.symbol, data.type, data.currency)
       }
     } catch (error) {
       showErrorToast(error, t("errors:failedToCreateAsset"))
@@ -90,6 +87,8 @@ export function useAssetCrud({
         quantity: data.quantity,
         manualPrice: data.manualPrice,
         currency: data.currency,
+        stakedQuantity: data.stakedQuantity ?? null,
+        withdrawalCooldownDays: data.withdrawalCooldownDays ?? null,
       })
       setAssetFormOpen(false)
       setEditingAsset(null)
@@ -97,12 +96,7 @@ export function useAssetCrud({
       requestSnapshot()
 
       if (data.symbol && (data.type === "stock" || data.type === "crypto")) {
-        await fetchPriceAndSyncCurrency(
-          editingAsset.id,
-          data.symbol,
-          data.type,
-          data.currency,
-        )
+        await fetchPriceAndSyncCurrency(editingAsset.id, data.symbol, data.type, data.currency)
       }
     } catch (error) {
       showErrorToast(error, t("errors:failedToUpdateAsset"))

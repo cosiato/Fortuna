@@ -31,5 +31,10 @@
   "currency": "Moeda",
   "namePlaceholder": "ex., Casa, Carro",
   "loadingBtn": "Carregando...",
-  "addBtn": "Adicionar Ativo"
+  "addBtn": "Adicionar Ativo",
+  "markAsStaked": "Marcar como staked",
+  "stakedQuantity": "Quantidade em staking",
+  "withdrawalCooldown": "Periodo de retirada (dias)",
+  "staked": "Staked",
+  "stakedOf": "{{staked}} em staking"
 }
