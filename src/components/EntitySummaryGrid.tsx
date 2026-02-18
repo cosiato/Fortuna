@@ -132,7 +132,7 @@ export default function EntitySummaryGrid({
                   )
                 })}
               </div>
-              <span className="text-sm font-semibold text-muted-foreground shrink-0">
+              <span className="text-sm text-muted-foreground shrink-0 mt-1">
                 {formatCurrency(total, displayCurrency)}
               </span>
             </button>

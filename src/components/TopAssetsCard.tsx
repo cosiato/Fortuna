@@ -54,7 +54,7 @@ export default function TopAssetsCard({
               <span className="text-sm font-medium text-foreground flex-1 truncate">
                 {asset.name}
               </span>
-              <span className="text-sm font-semibold text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {formatCompactValue(value, displayCurrency)}
               </span>
             </div>
