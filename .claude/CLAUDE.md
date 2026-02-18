@@ -79,7 +79,7 @@ src-tauri/                        # Tauri backend (Rust)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
 |-- main.tsx                      # React entry point
-|-- App.tsx                       # Main dashboard component
+|-- App.tsx                       # Root component with view routing (dashboard/entity)
 |-- globals.css                   # Global styles
 |-- components/                   # Reusable UI components
 |   |-- ui/                       # Shadcn UI primitives
@@ -100,12 +100,18 @@ src/
 |   |-- AnimatedFlowEdge.tsx      # Animated edge for React Flow diagram
 |   |-- AppSidebar.tsx            # Collapsible sidebar (entities, actions, update notification)
 |   |-- AssetForm.tsx             # Form for adding/editing assets
+|   |-- AssetDiversityChart.tsx    # Donut chart showing asset distribution by type
 |   |-- AssetTile.tsx             # Tile for displaying assets
 |   |-- CashFlowForm.tsx          # Form for adding/editing cash flows
 |   |-- CashFlowNode.tsx          # React Flow node for cash flow entries
 |   |-- CountryFlag.tsx            # SVG flag icon via circle-flags (cross-platform)
 |   |-- CountrySelector.tsx       # Country picker with flags
 |   |-- CryptoSelector.tsx        # Cryptocurrency picker with search
+|   |-- DashboardView.tsx         # Dashboard page: net worth card, category badges, chart, indicators
+|   |-- LiquidityCard.tsx         # Horizontal bar showing liquid vs illiquid portfolio split
+|   |-- MonthlyCashFlowCard.tsx   # Monthly inflow/outflow/net summary with savings rate badge
+|   |-- NetWorthTrendBadge.tsx    # 30-day % change badge next to net worth number
+|   |-- TopAssetsCard.tsx         # Ranked list of top 5 assets by value
 |   |-- CurrencyCombobox.tsx      # Searchable currency combobox (Popover+Command, grouped by continent)
 |   |-- CurrencyPickerOverlay.tsx  # Fullscreen currency picker grouped by continent
 |   |-- CurrencySelector.tsx      # Currency picker button (opens overlay)
@@ -113,6 +119,8 @@ src/
 |   |-- DeleteEntityDialog.tsx    # Confirmation dialog for entity deletion
 |   |-- ResetAccountDialog.tsx    # Type-to-confirm dialog for wiping all data
 |   |-- SettingsDialog.tsx        # Settings dialog with PIN management
+|   |-- EntitySummaryGrid.tsx      # Responsive grid of entity cards for dashboard
+|   |-- EntityView.tsx            # Entity page: assets tabs, vaults accordion with flows
 |   |-- EntityForm.tsx            # Form for adding/editing entities
 |   |-- LockScreen.tsx            # Full-screen PIN lock overlay
 |   |-- SlotMachineNumber.tsx     # Animated digit roller for currency values
