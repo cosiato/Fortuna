@@ -26,7 +26,7 @@ function toDateKey(date: Date): string {
 }
 
 function toLabel(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "2-digit" })
 }
 
 function addDays(date: Date, days: number): Date {
