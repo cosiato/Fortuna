@@ -12,6 +12,8 @@
     "opener:default",
     "updater:default",
     "process:allow-restart",
+    "dialog:allow-save",
+    "dialog:allow-open",
     {
       "identifier": "http:default",
       "allow": [

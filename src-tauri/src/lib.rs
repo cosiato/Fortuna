@@ -14,6 +14,7 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
 
             let db_path = database::get_db_path(&app.handle());
@@ -70,6 +71,8 @@ pub fn run() {
             commands::set_currency_preference,
             commands::get_locale_preference,
             commands::set_locale_preference,
+            commands::export_database,
+            commands::import_database,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
