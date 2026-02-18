@@ -31,5 +31,18 @@
     "typeToConfirm": "Type <bold>{{word}}</bold> to confirm",
     "resetting": "Resetting...",
     "resetBtn": "Reset All Data"
+  },
+  "restoreBackup": {
+    "title": "Restore from Backup",
+    "cannotBeUndone": "This action cannot be undone.",
+    "warningTitle": "Warning: All current data will be replaced",
+    "warningReplace": "All existing data will be overwritten with the backup contents.",
+    "warningRestart": "The app will restart after restoring.",
+    "selectedFile": "Selected file",
+    "typeToConfirm": "Type <bold>{{word}}</bold> to confirm",
+    "enterPinToAuthorize": "Enter your PIN to authorize this action",
+    "enterPin": "Enter 4-digit PIN",
+    "restoring": "Restoring...",
+    "restoreBtn": "Restore Data"
   }
 }

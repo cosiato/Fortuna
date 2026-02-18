@@ -38,7 +38,11 @@
     "resetDescription": "Eliminar permanentemente todos tus datos. Esta accion no se puede deshacer.",
     "exportData": "Exportar datos",
     "exportDescription": "Descargar una copia de todos tus datos",
-    "comingSoon": "Proximamente"
+    "exportButton": "Exportar",
+    "exportSuccess": "Datos exportados con exito",
+    "importData": "Restaurar desde respaldo",
+    "importDescription": "Reemplazar todos los datos desde un archivo de respaldo",
+    "importButton": "Restaurar"
   },
   "about": {
     "version": "Version",

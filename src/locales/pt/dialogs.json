@@ -31,5 +31,18 @@
     "typeToConfirm": "Digite <bold>{{word}}</bold> para confirmar",
     "resetting": "Redefinindo...",
     "resetBtn": "Redefinir Todos os Dados"
+  },
+  "restoreBackup": {
+    "title": "Restaurar do backup",
+    "cannotBeUndone": "Esta acao nao pode ser desfeita.",
+    "warningTitle": "Atencao: todos os dados atuais serao substituidos",
+    "warningReplace": "Todos os dados existentes serao substituidos pelo conteudo do backup.",
+    "warningRestart": "O aplicativo sera reiniciado apos a restauracao.",
+    "selectedFile": "Arquivo selecionado",
+    "typeToConfirm": "Digite <bold>{{word}}</bold> para confirmar",
+    "enterPinToAuthorize": "Digite seu PIN para autorizar esta acao",
+    "enterPin": "Digite o PIN de 4 digitos",
+    "restoring": "Restaurando...",
+    "restoreBtn": "Restaurar dados"
   }
 }

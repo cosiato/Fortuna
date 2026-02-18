@@ -16,5 +16,7 @@
   "failedToRefreshPrices": "Falha ao atualizar preços",
   "failedToLoadData": "Falha ao carregar dados",
   "failedToResetData": "Falha ao redefinir dados",
+  "failedToExportData": "Falha ao exportar dados",
+  "failedToImportData": "Falha ao restaurar dados",
   "genericError": "Ocorreu um erro"
 }

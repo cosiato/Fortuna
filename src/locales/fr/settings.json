@@ -38,7 +38,11 @@
     "resetDescription": "Supprimer definitivement toutes vos donnees. Cette action est irreversible.",
     "exportData": "Exporter les donnees",
     "exportDescription": "Telecharger une copie de toutes vos donnees",
-    "comingSoon": "Bientot disponible"
+    "exportButton": "Exporter",
+    "exportSuccess": "Donnees exportees avec succes",
+    "importData": "Restaurer depuis une sauvegarde",
+    "importDescription": "Remplacer toutes les donnees a partir d'un fichier de sauvegarde",
+    "importButton": "Restaurer"
   },
   "about": {
     "version": "Version",

@@ -38,7 +38,11 @@
     "resetDescription": "Permanently delete all your data. This action cannot be undone.",
     "exportData": "Export Data",
     "exportDescription": "Download a copy of all your data",
-    "comingSoon": "Coming Soon"
+    "exportButton": "Export",
+    "exportSuccess": "Data exported successfully",
+    "importData": "Restore from Backup",
+    "importDescription": "Replace all data from a backup file",
+    "importButton": "Restore"
   },
   "about": {
     "version": "Version",

@@ -38,7 +38,11 @@
     "resetDescription": "Excluir permanentemente todos os seus dados. Esta acao nao pode ser desfeita.",
     "exportData": "Exportar dados",
     "exportDescription": "Baixar uma copia de todos os seus dados",
-    "comingSoon": "Em breve"
+    "exportButton": "Exportar",
+    "exportSuccess": "Dados exportados com sucesso",
+    "importData": "Restaurar do backup",
+    "importDescription": "Substituir todos os dados a partir de um arquivo de backup",
+    "importButton": "Restaurar"
   },
   "about": {
     "version": "Versao",

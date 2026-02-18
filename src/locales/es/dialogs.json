@@ -31,5 +31,18 @@
     "typeToConfirm": "Escribe <bold>{{word}}</bold> para confirmar",
     "resetting": "Restableciendo...",
     "resetBtn": "Restablecer Todos los Datos"
+  },
+  "restoreBackup": {
+    "title": "Restaurar desde respaldo",
+    "cannotBeUndone": "Esta accion no se puede deshacer.",
+    "warningTitle": "Advertencia: todos los datos actuales seran reemplazados",
+    "warningReplace": "Todos los datos existentes seran sobrescritos con el contenido del respaldo.",
+    "warningRestart": "La aplicacion se reiniciara despues de restaurar.",
+    "selectedFile": "Archivo seleccionado",
+    "typeToConfirm": "Escribe <bold>{{word}}</bold> para confirmar",
+    "enterPinToAuthorize": "Ingresa tu PIN para autorizar esta accion",
+    "enterPin": "Ingresa el PIN de 4 digitos",
+    "restoring": "Restaurando...",
+    "restoreBtn": "Restaurar datos"
   }
 }

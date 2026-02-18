@@ -31,5 +31,18 @@
     "typeToConfirm": "Tapez <bold>{{word}}</bold> pour confirmer",
     "resetting": "Reinitialisation...",
     "resetBtn": "Reinitialiser toutes les donnees"
+  },
+  "restoreBackup": {
+    "title": "Restaurer depuis une sauvegarde",
+    "cannotBeUndone": "Cette action est irreversible.",
+    "warningTitle": "Attention : toutes les donnees actuelles seront remplacees",
+    "warningReplace": "Toutes les donnees existantes seront ecrasees par le contenu de la sauvegarde.",
+    "warningRestart": "L'application redemarrera apres la restauration.",
+    "selectedFile": "Fichier selectionne",
+    "typeToConfirm": "Tapez <bold>{{word}}</bold> pour confirmer",
+    "enterPinToAuthorize": "Entrez votre PIN pour autoriser cette action",
+    "enterPin": "Entrez le code PIN a 4 chiffres",
+    "restoring": "Restauration...",
+    "restoreBtn": "Restaurer les donnees"
   }
 }
