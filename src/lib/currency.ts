@@ -55,6 +55,7 @@ class RatesCacheManager {
 
 const ratesCache = new RatesCacheManager()
 
+// Keep in sync with ALLOWED_CURRENCIES in src-tauri/src/commands/settings.rs
 export const SUPPORTED_CURRENCIES = [
   // North America
   "USD",

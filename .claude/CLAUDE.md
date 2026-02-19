@@ -70,12 +70,13 @@ src-tauri/                        # Tauri backend (Rust)
 |   |-- database.rs               # SQLite initialization
 |   |-- commands/                 # Tauri IPC commands
 |       |-- mod.rs                # Command exports
+|       |-- validation.rs         # Shared input validation (validate_name)
 |       |-- accounts.rs           # Account CRUD
-|       |-- activity_log.rs       # Activity log helper + query commands
+|       |-- activity_log.rs       # Activity log helper (internal, no commands)
 |       |-- assets.rs             # Asset CRUD (logs mutations to activity_log)
 |       |-- cash_flows.rs         # Cash flow CRUD (recurring income/expenses)
 |       |-- entities.rs           # Entity CRUD (includes transactional cascade delete)
-|       |-- settings.rs           # Settings (currency/locale preferences, PIN)
+|       |-- settings.rs           # Settings (currency/locale preferences, PIN, import/export)
 |       |-- snapshots.rs          # Snapshot CRUD
 src/
 |-- main.tsx                      # React entry point
@@ -159,7 +160,7 @@ src/
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
 |   |-- api.ts                    # Tauri IPC wrapper functions
-|   |-- dashboardUtils.ts         # Shared dashboard config (category badges, compact formatting)
+|   |-- dashboardUtils.ts         # Shared dashboard config (ASSET_CATEGORY_KEYS, category badges, compact formatting)
 |   |-- cashFlowCategories.ts     # Cash flow category definitions and helpers
 |   |-- cashFlowProjection.ts     # Balance projection logic for cash flows
 |   |-- countries.ts              # Country data and utilities
