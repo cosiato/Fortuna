@@ -30,17 +30,13 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' https://assets.coingecko.com data:; connect-src 'self' https://api.coingecko.com https://query1.finance.yahoo.com https://api.exchangerate-api.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com"
+      "csp": "default-src 'self'; img-src 'self' https://coin-images.coingecko.com data:; connect-src 'self' https://api.coingecko.com https://query1.finance.yahoo.com https://api.exchangerate-api.com https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com"
     }
   },
   "bundle": {
     "createUpdaterArtifacts": true,
     "active": true,
-    "targets": [
-      "app",
-      "dmg",
-      "nsis"
-    ],
+    "targets": ["app", "dmg", "nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -73,15 +69,13 @@
         "type": "downloadBootstrapper"
       },
       "nsis": {
-        "installMode": "currentUser"
+        "installMode": "both"
       }
     }
   },
   "plugins": {
     "updater": {
-      "endpoints": [
-        "https://github.com/cosiato/Fortuna/releases/latest/download/latest.json"
-      ],
+      "endpoints": ["https://github.com/cosiato/Fortuna/releases/latest/download/latest.json"],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEzOEY5Qzc4RDhFQUMzMTcKUldRWHcrclllSnlQRS9UTnJxc0hINEQvVExib3RZL2FKSmxmMmcvbGJqSXN6Q0xsTUJ0OWJMNGMK"
     }
   }
