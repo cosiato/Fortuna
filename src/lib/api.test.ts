@@ -6,6 +6,7 @@ import type {
   Asset,
   Account,
   Snapshot,
+  CashFlow,
   CreateEntityInput,
   UpdateEntityInput,
   CreateAssetInput,
@@ -13,6 +14,8 @@ import type {
   CreateAccountInput,
   UpdateAccountInput,
   CreateSnapshotInput,
+  CreateCashFlowInput,
+  UpdateCashFlowInput,
 } from "@/types/database"
 
 const mockInvoke = vi.mocked(invoke)
@@ -68,6 +71,14 @@ describe("api", () => {
 
       expect(mockInvoke).toHaveBeenCalledWith("ensure_individual_entity")
       expect(result).toEqual(mockEntity)
+    })
+
+    it("deleteCascade should invoke delete_entity_cascade with id", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.entities.deleteCascade(1)
+
+      expect(mockInvoke).toHaveBeenCalledWith("delete_entity_cascade", { id: 1 })
     })
   })
 
@@ -213,6 +224,79 @@ describe("api", () => {
       expect(mockInvoke).toHaveBeenCalledWith("create_snapshot", { input })
       expect(result.totalValue).toBe(60000)
     })
+
+    it("prune should invoke prune_old_snapshots and return count", async () => {
+      mockInvoke.mockResolvedValueOnce(5)
+
+      const result = await api.snapshots.prune()
+
+      expect(mockInvoke).toHaveBeenCalledWith("prune_old_snapshots")
+      expect(result).toBe(5)
+    })
+  })
+
+  describe("cashFlows", () => {
+    const mockCashFlow: CashFlow = {
+      id: "cf-uuid-1",
+      accountId: "account-uuid-1",
+      name: "Monthly Salary",
+      amount: 5000,
+      flowType: "inflow",
+      frequency: "monthly",
+      category: "salary",
+      startDate: "2024-01-01",
+      endDate: null,
+      isActive: true,
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z",
+    }
+
+    it("getAll should invoke get_all_cash_flows", async () => {
+      const cashFlows = [mockCashFlow]
+      mockInvoke.mockResolvedValueOnce(cashFlows)
+
+      const result = await api.cashFlows.getAll()
+
+      expect(mockInvoke).toHaveBeenCalledWith("get_all_cash_flows")
+      expect(result).toEqual(cashFlows)
+    })
+
+    it("create should invoke create_cash_flow with input", async () => {
+      const input: CreateCashFlowInput = {
+        accountId: "account-uuid-1",
+        name: "Rent Payment",
+        amount: 1200,
+        flowType: "outflow",
+        frequency: "monthly",
+        category: "rent",
+        startDate: "2024-02-01",
+      }
+      mockInvoke.mockResolvedValueOnce({ ...mockCashFlow, ...input, id: "cf-uuid-2" })
+
+      const result = await api.cashFlows.create(input)
+
+      expect(mockInvoke).toHaveBeenCalledWith("create_cash_flow", { input })
+      expect(result.name).toBe("Rent Payment")
+    })
+
+    it("update should invoke update_cash_flow with id and input", async () => {
+      const input: UpdateCashFlowInput = { amount: 5500, name: "Updated Salary" }
+      mockInvoke.mockResolvedValueOnce({ ...mockCashFlow, ...input })
+
+      const result = await api.cashFlows.update("cf-uuid-1", input)
+
+      expect(mockInvoke).toHaveBeenCalledWith("update_cash_flow", { id: "cf-uuid-1", input })
+      expect(result.amount).toBe(5500)
+      expect(result.name).toBe("Updated Salary")
+    })
+
+    it("delete should invoke delete_cash_flow with id", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.cashFlows.delete("cf-uuid-1")
+
+      expect(mockInvoke).toHaveBeenCalledWith("delete_cash_flow", { id: "cf-uuid-1" })
+    })
   })
 
   describe("settings", () => {
@@ -257,6 +341,103 @@ describe("api", () => {
 
       expect(mockInvoke).toHaveBeenCalledWith("is_pin_enabled")
       expect(result).toBe(true)
+    })
+
+    it("resetAllData should invoke reset_all_data with pin", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.resetAllData("1234")
+
+      expect(mockInvoke).toHaveBeenCalledWith("reset_all_data", { pin: "1234" })
+    })
+
+    it("resetAllData should invoke reset_all_data with null when no pin", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.resetAllData()
+
+      expect(mockInvoke).toHaveBeenCalledWith("reset_all_data", { pin: null })
+    })
+
+    it("lockApp should invoke lock_app", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.lockApp()
+
+      expect(mockInvoke).toHaveBeenCalledWith("lock_app")
+    })
+
+    it("unlockApp should invoke unlock_app with pin and return boolean", async () => {
+      mockInvoke.mockResolvedValueOnce(true)
+
+      const result = await api.settings.unlockApp("1234")
+
+      expect(mockInvoke).toHaveBeenCalledWith("unlock_app", { pin: "1234" })
+      expect(result).toBe(true)
+    })
+
+    it("getCurrencyPreference should invoke get_currency_preference", async () => {
+      mockInvoke.mockResolvedValueOnce("EUR")
+
+      const result = await api.settings.getCurrencyPreference()
+
+      expect(mockInvoke).toHaveBeenCalledWith("get_currency_preference")
+      expect(result).toBe("EUR")
+    })
+
+    it("setCurrencyPreference should invoke set_currency_preference with currency", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.setCurrencyPreference("EUR")
+
+      expect(mockInvoke).toHaveBeenCalledWith("set_currency_preference", { currency: "EUR" })
+    })
+
+    it("getLocalePreference should invoke get_locale_preference", async () => {
+      mockInvoke.mockResolvedValueOnce("fr")
+
+      const result = await api.settings.getLocalePreference()
+
+      expect(mockInvoke).toHaveBeenCalledWith("get_locale_preference")
+      expect(result).toBe("fr")
+    })
+
+    it("setLocalePreference should invoke set_locale_preference with locale", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.setLocalePreference("fr")
+
+      expect(mockInvoke).toHaveBeenCalledWith("set_locale_preference", { locale: "fr" })
+    })
+
+    it("exportDatabase should invoke export_database with destination", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.exportDatabase("/tmp/backup.db")
+
+      expect(mockInvoke).toHaveBeenCalledWith("export_database", { destination: "/tmp/backup.db" })
+    })
+
+    it("importDatabase should invoke import_database with source and pin", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.importDatabase("/tmp/backup.db", "1234")
+
+      expect(mockInvoke).toHaveBeenCalledWith("import_database", {
+        source: "/tmp/backup.db",
+        pin: "1234",
+      })
+    })
+
+    it("importDatabase should invoke import_database with null pin when no pin", async () => {
+      mockInvoke.mockResolvedValueOnce(undefined)
+
+      await api.settings.importDatabase("/tmp/backup.db")
+
+      expect(mockInvoke).toHaveBeenCalledWith("import_database", {
+        source: "/tmp/backup.db",
+        pin: null,
+      })
     })
   })
 
