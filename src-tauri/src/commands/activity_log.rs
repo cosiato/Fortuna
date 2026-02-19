@@ -1,21 +1,5 @@
 use rusqlite::{params, Connection};
-use serde::Serialize;
 use uuid::Uuid;
-
-#[derive(Debug, Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct ActivityLogEntry {
-    pub id: String,
-    pub action: String,
-    pub asset_id: String,
-    pub asset_name: String,
-    pub asset_type: String,
-    pub entity_id: i64,
-    pub quantity_before: Option<f64>,
-    pub quantity_after: Option<f64>,
-    pub currency: Option<String>,
-    pub created_at: String,
-}
 
 pub fn log_activity(
     conn: &Connection,
