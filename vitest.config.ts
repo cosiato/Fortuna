@@ -23,6 +23,8 @@ export default defineConfig({
         "src/main.tsx",
         "src/App.tsx",
         "src/components/",
+        "src/lib/icons.ts",
+        "src/types/",
       ],
     },
   },
