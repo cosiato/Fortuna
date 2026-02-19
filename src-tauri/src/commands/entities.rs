@@ -1,10 +1,11 @@
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
-use tauri::{AppHandle, State};
+use tauri::State;
 
 use super::activity_log::log_activity;
 use super::settings::{check_not_locked, LockState};
+use super::validation::validate_name;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -47,20 +48,8 @@ fn validate_entity_type(entity_type: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_name(name: &str) -> Result<(), String> {
-    let trimmed = name.trim();
-    if trimmed.is_empty() {
-        return Err("Name cannot be empty".to_string());
-    }
-    if trimmed.len() > 255 {
-        return Err("Name is too long (max 255 characters)".to_string());
-    }
-    Ok(())
-}
-
 #[tauri::command]
-pub fn get_all_entities(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Entity>, String> {
-    let _ = app;
+pub fn get_all_entities(db: State<DbConnection>) -> Result<Vec<Entity>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -85,43 +74,11 @@ pub fn get_all_entities(app: AppHandle, db: State<DbConnection>) -> Result<Vec<E
 }
 
 #[tauri::command]
-pub fn get_entity_by_id(
-    app: AppHandle,
-    db: State<DbConnection>,
-    id: i64,
-) -> Result<Option<Entity>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let result = conn.query_row(
-        "SELECT id, name, type, created_at, updated_at FROM entities WHERE id = ?",
-        [id],
-        |row| {
-            Ok(Entity {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                entity_type: row.get(2)?,
-                created_at: row.get(3)?,
-                updated_at: row.get(4)?,
-            })
-        },
-    );
-
-    match result {
-        Ok(entity) => Ok(Some(entity)),
-        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
 pub fn create_entity(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     input: CreateEntityInput,
 ) -> Result<Entity, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     validate_name(&input.name)?;
 
@@ -156,13 +113,11 @@ pub fn create_entity(
 
 #[tauri::command]
 pub fn update_entity(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     id: i64,
     input: UpdateEntityInput,
 ) -> Result<Entity, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     if id == 0 {
         return Err("Cannot modify the Individual entity".to_string());
@@ -225,34 +180,11 @@ pub fn update_entity(
 }
 
 #[tauri::command]
-pub fn delete_entity(app: AppHandle, db: State<DbConnection>, lock: State<LockState>, id: i64) -> Result<(), String> {
-    let _ = app;
-    check_not_locked(&lock)?;
-    if id == 0 {
-        return Err("Cannot delete the Individual entity".to_string());
-    }
-
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let affected = conn
-        .execute("DELETE FROM entities WHERE id = ?", [id])
-        .map_err(|e| e.to_string())?;
-
-    if affected == 0 {
-        return Err("Entity not found".to_string());
-    }
-
-    Ok(())
-}
-
-#[tauri::command]
 pub fn delete_entity_cascade(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     id: i64,
 ) -> Result<(), String> {
-    let _ = app;
     check_not_locked(&lock)?;
     if id == 0 {
         return Err("Cannot delete the Individual entity".to_string());
@@ -319,8 +251,7 @@ pub fn delete_entity_cascade(
 }
 
 #[tauri::command]
-pub fn ensure_individual_entity(app: AppHandle, db: State<DbConnection>) -> Result<Entity, String> {
-    let _ = app;
+pub fn ensure_individual_entity(db: State<DbConnection>) -> Result<Entity, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let exists: bool = conn

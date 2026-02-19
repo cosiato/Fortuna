@@ -5,9 +5,9 @@ pub mod cash_flows;
 pub mod entities;
 pub mod settings;
 pub mod snapshots;
+pub mod validation;
 
 pub use accounts::*;
-pub use activity_log::*;
 pub use assets::*;
 pub use cash_flows::*;
 pub use entities::*;

@@ -1,10 +1,11 @@
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, State};
+use tauri::State;
 use uuid::Uuid;
 
 use super::entities::DbConnection;
 use super::settings::{check_not_locked, validate_currency, LockState};
+use super::validation::validate_name;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -39,17 +40,6 @@ pub struct UpdateAccountInput {
     pub entity_id: Option<i64>,
 }
 
-fn validate_name(name: &str) -> Result<(), String> {
-    let trimmed = name.trim();
-    if trimmed.is_empty() {
-        return Err("Name cannot be empty".to_string());
-    }
-    if trimmed.len() > 255 {
-        return Err("Name is too long (max 255 characters)".to_string());
-    }
-    Ok(())
-}
-
 fn validate_country_code(code: &str) -> Result<(), String> {
     if code.len() != 2 || !code.chars().all(|c| c.is_ascii_uppercase()) {
         return Err(format!(
@@ -61,8 +51,7 @@ fn validate_country_code(code: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn get_all_accounts(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Account>, String> {
-    let _ = app;
+pub fn get_all_accounts(db: State<DbConnection>) -> Result<Vec<Account>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -93,83 +82,11 @@ pub fn get_all_accounts(app: AppHandle, db: State<DbConnection>) -> Result<Vec<A
 }
 
 #[tauri::command]
-pub fn get_accounts_by_entity(
-    app: AppHandle,
-    db: State<DbConnection>,
-    entity_id: i64,
-) -> Result<Vec<Account>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, name, balance, currency, country_code, entity_id, created_at, updated_at
-             FROM accounts WHERE entity_id = ? ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
-
-    let accounts = stmt
-        .query_map([entity_id], |row| {
-            Ok(Account {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                balance: row.get(2)?,
-                currency: row.get(3)?,
-                country_code: row.get(4)?,
-                entity_id: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
-            })
-        })
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(accounts)
-}
-
-#[tauri::command]
-pub fn get_account_by_id(
-    app: AppHandle,
-    db: State<DbConnection>,
-    id: String,
-) -> Result<Option<Account>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let result = conn.query_row(
-        "SELECT id, name, balance, currency, country_code, entity_id, created_at, updated_at
-         FROM accounts WHERE id = ?",
-        [&id],
-        |row| {
-            Ok(Account {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                balance: row.get(2)?,
-                currency: row.get(3)?,
-                country_code: row.get(4)?,
-                entity_id: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
-            })
-        },
-    );
-
-    match result {
-        Ok(account) => Ok(Some(account)),
-        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
 pub fn create_account(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     input: CreateAccountInput,
 ) -> Result<Account, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     validate_name(&input.name)?;
     validate_country_code(&input.country_code)?;
@@ -213,13 +130,11 @@ pub fn create_account(
 
 #[tauri::command]
 pub fn update_account(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     id: String,
     input: UpdateAccountInput,
 ) -> Result<Account, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     if let Some(ref name) = input.name {
         validate_name(name)?;
@@ -302,8 +217,7 @@ pub fn update_account(
 }
 
 #[tauri::command]
-pub fn delete_account(app: AppHandle, db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
-    let _ = app;
+pub fn delete_account(db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
     check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 

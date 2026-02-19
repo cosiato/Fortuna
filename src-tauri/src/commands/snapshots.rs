@@ -1,6 +1,6 @@
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, State};
+use tauri::State;
 use uuid::Uuid;
 
 use super::entities::DbConnection;
@@ -22,8 +22,7 @@ pub struct CreateSnapshotInput {
 }
 
 #[tauri::command]
-pub fn get_all_snapshots(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Snapshot>, String> {
-    let _ = app;
+pub fn get_all_snapshots(db: State<DbConnection>) -> Result<Vec<Snapshot>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -50,75 +49,10 @@ pub fn get_all_snapshots(app: AppHandle, db: State<DbConnection>) -> Result<Vec<
 }
 
 #[tauri::command]
-pub fn get_today_snapshot(
-    app: AppHandle,
-    db: State<DbConnection>,
-) -> Result<Option<Snapshot>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let result = conn.query_row(
-        "SELECT id, total_value, currency, recorded_at
-         FROM snapshots
-         WHERE date(recorded_at) = date('now')
-         ORDER BY recorded_at DESC
-         LIMIT 1",
-        [],
-        |row| {
-            Ok(Snapshot {
-                id: row.get(0)?,
-                total_value: row.get(1)?,
-                currency: row.get(2)?,
-                recorded_at: row.get(3)?,
-            })
-        },
-    );
-
-    match result {
-        Ok(snapshot) => Ok(Some(snapshot)),
-        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
-pub fn get_latest_snapshot(
-    app: AppHandle,
-    db: State<DbConnection>,
-) -> Result<Option<Snapshot>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let result = conn.query_row(
-        "SELECT id, total_value, currency, recorded_at
-         FROM snapshots
-         ORDER BY recorded_at DESC
-         LIMIT 1",
-        [],
-        |row| {
-            Ok(Snapshot {
-                id: row.get(0)?,
-                total_value: row.get(1)?,
-                currency: row.get(2)?,
-                recorded_at: row.get(3)?,
-            })
-        },
-    );
-
-    match result {
-        Ok(snapshot) => Ok(Some(snapshot)),
-        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
 pub fn create_snapshot(
-    app: AppHandle,
     db: State<DbConnection>,
     input: CreateSnapshotInput,
 ) -> Result<Snapshot, String> {
-    let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let currency = input.currency.unwrap_or_else(|| "USD".to_string());
 
@@ -179,10 +113,8 @@ pub fn create_snapshot(
 
 #[tauri::command]
 pub fn prune_old_snapshots(
-    app: AppHandle,
     db: State<DbConnection>,
 ) -> Result<u64, String> {
-    let _ = app;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let deleted = conn

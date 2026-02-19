@@ -1,11 +1,12 @@
 use rusqlite::params;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, State};
+use tauri::State;
 use uuid::Uuid;
 
 use super::activity_log::log_activity;
 use super::entities::DbConnection;
 use super::settings::{check_not_locked, validate_currency, LockState};
+use super::validation::validate_name;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -83,17 +84,6 @@ fn validate_staking_fields(
     Ok((staked_quantity, withdrawal_cooldown_days))
 }
 
-fn validate_name(name: &str) -> Result<(), String> {
-    let trimmed = name.trim();
-    if trimmed.is_empty() {
-        return Err("Name cannot be empty".to_string());
-    }
-    if trimmed.len() > 255 {
-        return Err("Name is too long (max 255 characters)".to_string());
-    }
-    Ok(())
-}
-
 const VALID_ASSET_TYPES: [&str; 5] = ["stock", "crypto", "real_estate", "cash", "other"];
 
 const ASSET_SELECT_COLUMNS: &str =
@@ -127,8 +117,7 @@ fn validate_asset_type(asset_type: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn get_all_assets(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Asset>, String> {
-    let _ = app;
+pub fn get_all_assets(db: State<DbConnection>) -> Result<Vec<Asset>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
     let sql = format!(
@@ -147,56 +136,11 @@ pub fn get_all_assets(app: AppHandle, db: State<DbConnection>) -> Result<Vec<Ass
 }
 
 #[tauri::command]
-pub fn get_assets_by_entity(
-    app: AppHandle,
-    db: State<DbConnection>,
-    entity_id: i64,
-) -> Result<Vec<Asset>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let sql = format!(
-        "SELECT {} FROM assets WHERE entity_id = ? ORDER BY created_at DESC",
-        ASSET_SELECT_COLUMNS
-    );
-    let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
-
-    let assets = stmt
-        .query_map([entity_id], asset_from_row)
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(assets)
-}
-
-#[tauri::command]
-pub fn get_asset_by_id(
-    app: AppHandle,
-    db: State<DbConnection>,
-    id: String,
-) -> Result<Option<Asset>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let sql = format!("SELECT {} FROM assets WHERE id = ?", ASSET_SELECT_COLUMNS);
-    let result = conn.query_row(&sql, [&id], asset_from_row);
-
-    match result {
-        Ok(asset) => Ok(Some(asset)),
-        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-        Err(e) => Err(e.to_string()),
-    }
-}
-
-#[tauri::command]
 pub fn create_asset(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     input: CreateAssetInput,
 ) -> Result<Asset, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     validate_name(&input.name)?;
     validate_asset_type(&input.asset_type)?;
@@ -277,13 +221,11 @@ pub fn create_asset(
 
 #[tauri::command]
 pub fn update_asset(
-    app: AppHandle,
     db: State<DbConnection>,
     lock: State<LockState>,
     id: String,
     input: UpdateAssetInput,
 ) -> Result<Asset, String> {
-    let _ = app;
     check_not_locked(&lock)?;
     if let Some(ref name) = input.name {
         validate_name(name)?;
@@ -431,8 +373,7 @@ pub fn update_asset(
 }
 
 #[tauri::command]
-pub fn delete_asset(app: AppHandle, db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
-    let _ = app;
+pub fn delete_asset(db: State<DbConnection>, lock: State<LockState>, id: String) -> Result<(), String> {
     check_not_locked(&lock)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 

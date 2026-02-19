@@ -1,9 +1,6 @@
 use rusqlite::{params, Connection};
 use serde::Serialize;
-use tauri::{AppHandle, State};
 use uuid::Uuid;
-
-use super::entities::DbConnection;
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -49,93 +46,4 @@ pub fn log_activity(
     )
     .map_err(|e| e.to_string())?;
     Ok(())
-}
-
-fn row_to_entry(row: &rusqlite::Row) -> rusqlite::Result<ActivityLogEntry> {
-    Ok(ActivityLogEntry {
-        id: row.get(0)?,
-        action: row.get(1)?,
-        asset_id: row.get(2)?,
-        asset_name: row.get(3)?,
-        asset_type: row.get(4)?,
-        entity_id: row.get(5)?,
-        quantity_before: row.get(6)?,
-        quantity_after: row.get(7)?,
-        currency: row.get(8)?,
-        created_at: row.get(9)?,
-    })
-}
-
-#[tauri::command]
-pub fn get_activity_log(
-    app: AppHandle,
-    db: State<DbConnection>,
-) -> Result<Vec<ActivityLogEntry>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, action, asset_id, asset_name, asset_type, entity_id, quantity_before, quantity_after, currency, created_at
-             FROM activity_log ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
-
-    let entries = stmt
-        .query_map([], |row| row_to_entry(row))
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(entries)
-}
-
-#[tauri::command]
-pub fn get_activity_log_by_asset(
-    app: AppHandle,
-    db: State<DbConnection>,
-    asset_id: String,
-) -> Result<Vec<ActivityLogEntry>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, action, asset_id, asset_name, asset_type, entity_id, quantity_before, quantity_after, currency, created_at
-             FROM activity_log WHERE asset_id = ? ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
-
-    let entries = stmt
-        .query_map([&asset_id], |row| row_to_entry(row))
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(entries)
-}
-
-#[tauri::command]
-pub fn get_activity_log_by_entity(
-    app: AppHandle,
-    db: State<DbConnection>,
-    entity_id: i64,
-) -> Result<Vec<ActivityLogEntry>, String> {
-    let _ = app;
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-    let mut stmt = conn
-        .prepare(
-            "SELECT id, action, asset_id, asset_name, asset_type, entity_id, quantity_before, quantity_after, currency, created_at
-             FROM activity_log WHERE entity_id = ? ORDER BY created_at DESC",
-        )
-        .map_err(|e| e.to_string())?;
-
-    let entries = stmt
-        .query_map([entity_id], |row| row_to_entry(row))
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(entries)
 }
