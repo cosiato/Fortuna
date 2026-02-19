@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/accordion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import AssetTile, { CATEGORY_STYLES } from "@/components/AssetTile"
+import { ASSET_CATEGORY_KEYS, CATEGORY_BADGE_CONFIG } from "@/lib/dashboardUtils"
 import SlotMachineNumber from "@/components/SlotMachineNumber"
 import CountryFlag from "@/components/CountryFlag"
 import VaultFlowDiagram from "@/components/VaultFlowDiagram"
@@ -45,12 +46,10 @@ interface EntityViewProps {
   onAddFlow: (accountId: string, flowType: "inflow" | "outflow") => void
 }
 
-const ASSET_CATEGORIES = [
-  { key: "stock", icon: "solar:chart-linear" },
-  { key: "crypto", icon: "solar:money-bag-linear" },
-  { key: "real_estate", icon: "solar:home-linear" },
-  { key: "other", icon: "solar:box-linear" },
-] as const
+const ASSET_CATEGORIES = ASSET_CATEGORY_KEYS.map((key) => ({
+  key,
+  icon: CATEGORY_BADGE_CONFIG[key].icon,
+}))
 
 export default function EntityView({
   entityName,

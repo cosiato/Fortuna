@@ -1,5 +1,8 @@
 import { SupportedCurrency, getIntlLocale } from "@/lib/currency"
 
+export const ASSET_CATEGORY_KEYS = ["stock", "crypto", "real_estate", "other"] as const
+export type AssetCategoryKey = (typeof ASSET_CATEGORY_KEYS)[number]
+
 export const CATEGORY_BADGE_CONFIG: Record<
   string,
   { bg: string; text: string; border: string; icon: string }

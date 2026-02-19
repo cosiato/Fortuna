@@ -26,6 +26,7 @@ import { showErrorToast } from "@/lib/errorHandling"
 import { useSnapshotRecorder } from "@/hooks/useSnapshotRecorder"
 import { getAssetValueInUsd, toUsd, fromUsd, toDisplayCurrency } from "@/lib/currencyConversion"
 import { calculateMonthlyTotals } from "@/lib/cashFlowProjection"
+import { ASSET_CATEGORY_KEYS } from "@/lib/dashboardUtils"
 import { useAppData } from "@/hooks/useAppData"
 import { useAssetCrud } from "@/hooks/useAssetCrud"
 import { useVaultCrud } from "@/hooks/useVaultCrud"
@@ -226,16 +227,22 @@ export default function App() {
     [displayCurrency, exchangeRates],
   )
 
-  const entityTotals = entities.reduce<Record<number, number>>((acc, entity) => {
-    const entityAssets = assets.filter((a) => a.entityId === entity.id)
-    const entityAccounts = accounts.filter((a) => a.entityId === entity.id)
+  const entityTotals = useMemo(
+    () =>
+      entities.reduce<Record<number, number>>((acc, entity) => {
+        const entityAssets = assets.filter((a) => a.entityId === entity.id)
+        const entityAccounts = accounts.filter((a) => a.entityId === entity.id)
 
-    const assetsTotal = entityAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
-    const accountsTotal = entityAccounts.reduce((sum, account) => sum + getAccountValue(account), 0)
+        const assetsTotal = entityAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
+        const accountsTotal = entityAccounts.reduce(
+          (sum, account) => sum + getAccountValue(account),
+          0,
+        )
 
-    acc[entity.id] = assetsTotal + accountsTotal
-    return acc
-  }, {})
+        return { ...acc, [entity.id]: assetsTotal + accountsTotal }
+      }, {}),
+    [entities, assets, accounts, getAssetValue, getAccountValue],
+  )
 
   // Compute global monthly cash flow totals across all accounts
   const globalMonthlyTotals = useMemo(() => {
@@ -288,20 +295,20 @@ export default function App() {
     return { liquid, illiquid }
   }, [assets, accounts, getAssetValue, getAccountValue])
 
-  const ASSET_CATEGORIES = [
-    { key: "stock", label: t("assets:type.stock") },
-    { key: "crypto", label: t("assets:type.crypto") },
-    { key: "real_estate", label: t("assets:type.real_estate") },
-    { key: "other", label: t("assets:type.other") },
-  ]
+  const categoryBadgeData = useMemo(
+    () =>
+      ASSET_CATEGORY_KEYS.map((key) => {
+        const catAssets = assets.filter((a) => a.type === key)
+        const total = catAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
+        return { key, label: t(`assets:type.${key}`), count: catAssets.length, total }
+      }).filter((c) => c.count > 0),
+    [assets, getAssetValue, t],
+  )
 
-  const categoryBadgeData = ASSET_CATEGORIES.map((cat) => {
-    const catAssets = assets.filter((a) => a.type === cat.key)
-    const total = catAssets.reduce((sum, asset) => sum + getAssetValue(asset), 0)
-    return { key: cat.key, label: cat.label, count: catAssets.length, total }
-  }).filter((c) => c.count > 0)
-
-  const vaultBadgeTotal = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
+  const vaultBadgeTotal = useMemo(
+    () => accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0),
+    [accounts, getAccountValue],
+  )
 
   const recordSnapshotNowRef = useRef(recordSnapshotNow)
   recordSnapshotNowRef.current = recordSnapshotNow
