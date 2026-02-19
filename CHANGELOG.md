@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.3.1] - 2026-02-19
+
+### Fixed
+
+- **ui**: restrict drag region to main content area
+- **tauri**: update coingecko CSP domain and NSIS install mode
+
+### Changed
+
+- **rust**: remove unused ActivityLogEntry struct
+
 ## [0.3.0] - 2026-02-18
 
 ### Added
