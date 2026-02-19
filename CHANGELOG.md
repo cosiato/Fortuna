@@ -10,6 +10,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.3.0] - 2026-02-18
+
+### Added
+
+- add cash flow frequency options (none, quarterly, trimester, semester)
+- **ui**: add collapsible sidebar components and hook
+- **i18n**: add dashboard and indicator translation keys
+- **ui**: add dashboard indicator components
+- **ui**: add entity header with slot machine total value
+- **assets**: add crypto staking support
+- **ui**: add EmptyStateCard and dashboard empty states
+- **settings**: add database export and import commands
+- **settings**: add restore from backup UI
+- **i18n**: add restore backup translations
+- **dashboard**: add pagination to entities and top assets cards
+- **release**: add Azure credentials to release workflow and create relic configuration
+
+### Fixed
+
+- **tauri**: adjust traffic lights and enable window dragging
+- **ui**: add isolate to accordion and year to projection labels
+- locale-aware projection labels and update currency test count
+- **rust**: harden import/export with integrity and size checks
+- **security**: tighten CSP by removing wildcard coingecko subdomain
+- **test**: add missing afterEach import in useSnapshotRecorder test
+
+### Changed
+
+- **ui**: replace emoji flags with SVG CountryFlag component
+- **ui**: extract CurrencyCombobox from inline Select pickers
+- **tauri**: use overlay title bar with macOS traffic light positioning
+- **ui**: replace header layout with sidebar navigation
+- **ui**: split App into dashboard and entity views with sidebar nav
+- **ui**: extract dashboard utils and simplify chart layout
+- remove unused API methods, components, and icons
+- extract helpers in useAppData
+- **tauri**: use transaction API for entity cascade delete
+- **ui**: reduce collapsed sidebar width
+- **settings**: replace dialog with dedicated settings page
+- **assets**: improve staking form UX and rename cooldown label
+- **settings**: extract shared PIN verification with rate limiting
+- **sidebar**: replace add-company icon with text and adjust label alignment
+- **settings**: simplify about and data section layouts
+- **dashboard**: reduce font weight on currency values
+- **onboarding**: expand layout and increase spacing
+- **i18n**: replace fantasy wording with clear onboarding copy
+- **rust**: extract validate_name and remove unused commands
+- **dashboard**: extract ASSET_CATEGORY_KEYS and memoize computations
+- **sidebar**: change dashboard icon to eye and clean imports
+
 ## [0.2.0] - 2026-02-17
 
 ### Fixed
