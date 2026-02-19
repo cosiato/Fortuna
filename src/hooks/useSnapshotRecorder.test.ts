@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { renderHook, act } from "@testing-library/react"
 import { invoke } from "@tauri-apps/api/core"
 import { useSnapshotRecorder } from "./useSnapshotRecorder"
@@ -23,7 +23,12 @@ describe("useSnapshotRecorder", () => {
   }
 
   it("requestSnapshot should debounce and record after delay", async () => {
-    mockInvoke.mockResolvedValueOnce({ id: "1", totalValue: 50000, currency: "USD", recordedAt: "" })
+    mockInvoke.mockResolvedValueOnce({
+      id: "1",
+      totalValue: 50000,
+      currency: "USD",
+      recordedAt: "",
+    })
 
     const { result } = renderHook(() => useSnapshotRecorder(defaultOptions))
 
@@ -45,7 +50,12 @@ describe("useSnapshotRecorder", () => {
   })
 
   it("recordSnapshotNow should bypass debounce", async () => {
-    mockInvoke.mockResolvedValueOnce({ id: "1", totalValue: 50000, currency: "USD", recordedAt: "" })
+    mockInvoke.mockResolvedValueOnce({
+      id: "1",
+      totalValue: 50000,
+      currency: "USD",
+      recordedAt: "",
+    })
 
     const { result } = renderHook(() => useSnapshotRecorder(defaultOptions))
 
@@ -60,9 +70,7 @@ describe("useSnapshotRecorder", () => {
   })
 
   it("should not record when disabled", async () => {
-    const { result } = renderHook(() =>
-      useSnapshotRecorder({ ...defaultOptions, enabled: false }),
-    )
+    const { result } = renderHook(() => useSnapshotRecorder({ ...defaultOptions, enabled: false }))
 
     await act(async () => {
       result.current.recordSnapshotNow()
@@ -72,9 +80,7 @@ describe("useSnapshotRecorder", () => {
   })
 
   it("should not record when disabled via requestSnapshot", () => {
-    const { result } = renderHook(() =>
-      useSnapshotRecorder({ ...defaultOptions, enabled: false }),
-    )
+    const { result } = renderHook(() => useSnapshotRecorder({ ...defaultOptions, enabled: false }))
 
     act(() => {
       result.current.requestSnapshot()
