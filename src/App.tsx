@@ -340,19 +340,6 @@ export default function App() {
   return (
     <div className="h-screen flex flex-row bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-vignette pointer-events-none" />
-      <div
-        className="absolute top-0 left-0 right-0 h-9 z-30 cursor-grab active:cursor-grabbing"
-        onMouseDown={() => getCurrentWindow().startDragging()}
-        onDoubleClick={async () => {
-          const win = getCurrentWindow()
-          const maximized = await win.isMaximized()
-          if (maximized) {
-            await win.unmaximize()
-          } else {
-            await win.maximize()
-          }
-        }}
-      />
       <AppSidebar
         isCollapsed={sidebar.isCollapsed}
         onToggle={sidebar.toggle}
@@ -373,7 +360,20 @@ export default function App() {
         onNavigateDashboard={handleNavigateDashboard}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden pt-9">
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div
+          className="shrink-0 h-9 cursor-grab active:cursor-grabbing"
+          onMouseDown={() => getCurrentWindow().startDragging()}
+          onDoubleClick={async () => {
+            const win = getCurrentWindow()
+            const maximized = await win.isMaximized()
+            if (maximized) {
+              await win.unmaximize()
+            } else {
+              await win.maximize()
+            }
+          }}
+        />
         <div className="flex-1 overflow-y-auto overscroll-none custom-scrollbar relative">
           <div className="max-w-7xl mx-auto px-6 py-6">
             {currentView === "settings" ? (

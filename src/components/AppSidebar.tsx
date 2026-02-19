@@ -120,11 +120,7 @@ export default function AppSidebar({
       className="h-full flex flex-col border-r border-border bg-background relative z-20 overflow-hidden shrink-0"
     >
       {/* Traffic-light safe zone */}
-      <div
-        className="shrink-0 h-11 cursor-grab active:cursor-grabbing"
-        onMouseDown={() => getCurrentWindow().startDragging()}
-        onDoubleClick={toggleMaximize}
-      />
+      <div className="shrink-0 h-11" />
 
       {/* Logo */}
       <div
