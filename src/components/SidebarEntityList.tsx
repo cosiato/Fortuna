@@ -62,7 +62,7 @@ export default function SidebarEntityList({
                   ${isDashboardActive ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
                 `}
               >
-                <Icon icon="solar:home-linear" width={16} height={16} className="flex-shrink-0" />
+                <Icon icon="solar:eye-linear" width={16} height={16} className="flex-shrink-0" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">
@@ -78,7 +78,7 @@ export default function SidebarEntityList({
               ${isDashboardActive ? "text-accent bg-accent/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary"}
             `}
           >
-            <Icon icon="solar:home-linear" width={16} height={16} className="flex-shrink-0" />
+            <Icon icon="solar:eye-linear" width={16} height={16} className="flex-shrink-0" />
             <span className="font-medium text-sm mt-1">{t("common:dashboard")}</span>
           </button>
         )}

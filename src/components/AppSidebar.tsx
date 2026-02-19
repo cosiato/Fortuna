@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next"
 import { getCurrentWindow } from "@tauri-apps/api/window"
-import { Icon } from "@iconify/react"
 import { AnimatePresence, motion } from "framer-motion"
 import type { Entity } from "@/types/database"
 import type { SupportedCurrency } from "@/lib/currency"
