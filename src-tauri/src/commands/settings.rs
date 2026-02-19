@@ -211,33 +211,29 @@ pub fn verify_pin(db: State<DbConnection>, pin: String) -> Result<bool, String> 
 
 #[tauri::command]
 pub fn remove_pin(db: State<DbConnection>, current_pin: String) -> Result<(), String> {
-    {
-        let conn = db.0.lock().map_err(|e| e.to_string())?;
-
-        let result = conn.query_row(
-            "SELECT value FROM settings WHERE key = 'pin_hash'",
-            [],
-            |row| row.get::<_, String>(0),
-        );
-
-        match result {
-            Ok(stored_data) => {
-                let (salt, stored_hash) = decode_pin_data(&stored_data)
-                    .ok_or_else(|| "Invalid stored PIN data".to_string())?;
-
-                let input_hash = hash_pin_with_salt(&current_pin, &salt);
-                if stored_hash != input_hash {
-                    return Err("Invalid current PIN".to_string());
-                }
-            }
-            Err(rusqlite::Error::QueryReturnedNoRows) => {
-                return Ok(());
-            }
-            Err(e) => return Err(e.to_string()),
-        }
-    }
-
     let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT value FROM settings WHERE key = 'pin_hash'",
+        [],
+        |row| row.get::<_, String>(0),
+    );
+
+    match result {
+        Ok(stored_data) => {
+            let (salt, stored_hash) = decode_pin_data(&stored_data)
+                .ok_or_else(|| "Invalid stored PIN data".to_string())?;
+
+            let input_hash = hash_pin_with_salt(&current_pin, &salt);
+            if stored_hash != input_hash {
+                return Err("Invalid current PIN".to_string());
+            }
+        }
+        Err(rusqlite::Error::QueryReturnedNoRows) => {
+            return Ok(());
+        }
+        Err(e) => return Err(e.to_string()),
+    }
 
     conn.execute("DELETE FROM settings WHERE key = 'pin_hash'", [])
         .map_err(|e| e.to_string())?;
@@ -385,6 +381,7 @@ pub fn set_locale_preference(db: State<DbConnection>, locale: String) -> Result<
     Ok(())
 }
 
+// Keep in sync with SUPPORTED_CURRENCIES in src/lib/currency.ts
 pub const ALLOWED_CURRENCIES: &[&str] = &[
     // North America
     "USD", "CAD", "MXN",
@@ -462,11 +459,21 @@ pub fn export_database(
         _ => return Err("Export path must have a .db extension".to_string()),
     }
 
-    if let Some(parent) = dest_path.parent() {
-        if !parent.exists() {
-            return Err("Destination directory does not exist".to_string());
-        }
-    }
+    let parent = dest_path
+        .parent()
+        .ok_or("Invalid destination path")?;
+    let canonical_parent = parent
+        .canonicalize()
+        .map_err(|e| format!("Invalid destination directory: {}", e))?;
+    let dest_path = canonical_parent.join(
+        dest_path
+            .file_name()
+            .ok_or("Invalid destination file name")?,
+    );
+    let destination = dest_path
+        .to_str()
+        .ok_or("Destination path contains invalid characters")?
+        .to_string();
 
     let conn = db.0.lock().map_err(|e| e.to_string())?;
 
@@ -524,11 +531,27 @@ pub fn import_database(
         _ => return Err("Backup file must have a .db extension".to_string()),
     }
 
+    // Reject excessively large files (> 500 MB)
+    let file_size = std::fs::metadata(&source_path)
+        .map_err(|e| format!("Failed to read backup file metadata: {}", e))?
+        .len();
+    if file_size > 500 * 1024 * 1024 {
+        return Err("Backup file is too large (max 500 MB)".to_string());
+    }
+
     let source_conn = rusqlite::Connection::open_with_flags(
         &source_path,
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )
     .map_err(|e| format!("Failed to open backup file: {}", e))?;
+
+    // Verify database integrity before restoring
+    let integrity: String = source_conn
+        .query_row("PRAGMA integrity_check", [], |row| row.get(0))
+        .map_err(|e| format!("Integrity check failed: {}", e))?;
+    if integrity != "ok" {
+        return Err(format!("Backup file is corrupt: {}", integrity));
+    }
 
     let missing_tables: Vec<&str> = REQUIRED_TABLES
         .iter()
@@ -558,6 +581,24 @@ pub fn import_database(
     backup
         .run_to_completion(5, Duration::from_millis(250), None)
         .map_err(|e| format!("Failed to restore database: {}", e))?;
+
+    // Drop backup to release the mutable borrow on conn
+    drop(backup);
+
+    // Verify foreign key integrity after restore
+    let fk_count: i32 = conn
+        .query_row(
+            "SELECT COUNT(*) FROM pragma_foreign_key_check",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(|e| format!("Foreign key check failed: {}", e))?;
+    if fk_count > 0 {
+        return Err(format!(
+            "Restored database has {} foreign key violation(s)",
+            fk_count
+        ));
+    }
 
     Ok(())
 }
