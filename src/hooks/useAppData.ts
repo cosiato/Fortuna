@@ -29,6 +29,11 @@ function buildPriceMap(pricesArray: readonly PriceResult[]): Record<string, Pric
   )
 }
 
+export interface PreCheckResult {
+  isPinEnabled: boolean
+  displayCurrency: SupportedCurrency
+}
+
 export interface AppDataState {
   assets: Asset[]
   accounts: Account[]
@@ -42,13 +47,6 @@ export interface AppDataState {
   refreshCooldown: boolean
 }
 
-export interface AppInitMetadata {
-  displayCurrency: SupportedCurrency
-  isPinEnabled: boolean
-  shouldLock: boolean
-  showOnboarding: boolean
-}
-
 export interface AppDataActions {
   setAssets: React.Dispatch<React.SetStateAction<Asset[]>>
   setAccounts: React.Dispatch<React.SetStateAction<Account[]>>
@@ -59,12 +57,18 @@ export interface AppDataActions {
   fetchDataOnly: () => Promise<{ assetsData: Asset[]; accountsData: Account[] }>
   handleManualRefresh: () => Promise<void>
   refreshSnapshots: () => Promise<void>
+  startLoading: () => void
+}
+
+export interface ShowOnboardingResult {
+  showOnboarding: boolean
 }
 
 export function useAppData(): {
   state: AppDataState
   actions: AppDataActions
-  initMetadata: AppInitMetadata | null
+  preCheck: PreCheckResult | null
+  onboardingResult: ShowOnboardingResult | null
 } {
   const [assets, setAssets] = useState<Asset[]>([])
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -76,7 +80,9 @@ export function useAppData(): {
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [refreshCooldown, setRefreshCooldown] = useState(false)
-  const [initMetadata, setInitMetadata] = useState<AppInitMetadata | null>(null)
+  const [preCheck, setPreCheck] = useState<PreCheckResult | null>(null)
+  const [onboardingResult, setOnboardingResult] = useState<ShowOnboardingResult | null>(null)
+  const [loadingTriggered, setLoadingTriggered] = useState(false)
 
   const { t } = useTranslation(["errors"])
   const tRef = useRef(t)
@@ -175,10 +181,21 @@ export function useAppData(): {
     }
   }, [])
 
+  const startLoading = useCallback(() => {
+    setLoadingTriggered(true)
+  }, [])
+
+  // Phase 1: Fast pre-check (PIN status + locale + currency preference)
   useEffect(() => {
-    const initializeApp = async () => {
-      const { assetsData, accountsData } = await fetchDataOnly()
-      await refreshPrices(assetsData)
+    const runPreCheck = async () => {
+      try {
+        const savedLocale = await api.settings.getLocalePreference()
+        if (savedLocale && savedLocale !== i18n.language) {
+          await i18n.changeLanguage(savedLocale)
+        }
+      } catch {
+        // Locale preference load failed, keep default 'en'
+      }
 
       let displayCurrency: SupportedCurrency = "USD"
       try {
@@ -190,33 +207,35 @@ export function useAppData(): {
         // Currency preference load failed, keep default USD
       }
 
-      try {
-        const savedLocale = await api.settings.getLocalePreference()
-        if (savedLocale && savedLocale !== i18n.language) {
-          await i18n.changeLanguage(savedLocale)
-        }
-      } catch {
-        // Locale preference load failed, keep default 'en'
-      }
-
       let isPinEnabled = false
-      let shouldLock = false
       try {
         isPinEnabled = await api.settings.isPinEnabled()
-        shouldLock = isPinEnabled
       } catch {
         // PIN check failed, continue without lock
       }
+
+      setPreCheck({ isPinEnabled, displayCurrency })
+    }
+    runPreCheck()
+  }, [])
+
+  // Phase 2: Full data loading (only runs after startLoading is called)
+  useEffect(() => {
+    if (!loadingTriggered) return
+
+    const loadData = async () => {
+      const { assetsData, accountsData } = await fetchDataOnly()
+      await refreshPrices(assetsData)
 
       const onboardingCompleted = localStorage.getItem("fortuna_onboarding_completed")
       const showOnboarding =
         !onboardingCompleted && assetsData.length === 0 && accountsData.length === 0
 
-      setInitMetadata({ displayCurrency, isPinEnabled, shouldLock, showOnboarding })
+      setOnboardingResult({ showOnboarding })
       setLoading(false)
     }
-    initializeApp()
-  }, [fetchDataOnly, refreshPrices])
+    loadData()
+  }, [loadingTriggered, fetchDataOnly, refreshPrices])
 
   return {
     state: {
@@ -241,7 +260,9 @@ export function useAppData(): {
       fetchDataOnly,
       handleManualRefresh,
       refreshSnapshots,
+      startLoading,
     },
-    initMetadata,
+    preCheck,
+    onboardingResult,
   }
 }

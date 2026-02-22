@@ -34,12 +34,27 @@ import { useEntityCrud } from "@/hooks/useEntityCrud"
 import { useUpdater } from "@/hooks/useUpdater"
 import { useSidebar } from "@/hooks/useSidebar"
 
+// App lifecycle phases:
+// 1. "checking"  - Fast pre-check: PIN status, locale, currency (no data loaded)
+// 2. "locked"    - PIN is enabled: show lock screen, nothing else in DOM
+// 3. "loading"   - After unlock (or no PIN): splash screen while data loads
+// 4. "ready"     - Data loaded: show full app content
+type AppPhase = "checking" | "locked" | "loading" | "ready"
+
 type CurrentView = "dashboard" | "entity" | "settings"
 
+function SplashScreen() {
+  return (
+    <div className="h-screen bg-background flex items-center justify-center">
+      <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce-lg" />
+    </div>
+  )
+}
+
 export default function App() {
+  const [phase, setPhase] = useState<AppPhase>("checking")
   const [displayCurrency, setDisplayCurrency] = useState<SupportedCurrency>("USD")
   const [currentView, setCurrentView] = useState<CurrentView>("dashboard")
-  const [isLocked, setIsLocked] = useState(false)
   const [isPinEnabled, setIsPinEnabled] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
@@ -52,7 +67,7 @@ export default function App() {
   const { t } = useTranslation(["common", "assets", "vaults", "errors"])
   const updater = useUpdater()
   const sidebar = useSidebar()
-  const { state: appData, actions: appActions, initMetadata } = useAppData()
+  const { state: appData, actions: appActions, preCheck, onboardingResult } = useAppData()
   const {
     assets,
     accounts,
@@ -66,31 +81,49 @@ export default function App() {
     refreshCooldown,
   } = appData
 
+  // Phase 1 -> Phase 2 or 3: React to pre-check results
+  useEffect(() => {
+    if (phase !== "checking" || !preCheck) return
+
+    setDisplayCurrency(preCheck.displayCurrency)
+    setIsPinEnabled(preCheck.isPinEnabled)
+
+    if (preCheck.isPinEnabled) {
+      // PIN enabled: go to lock screen, data loading deferred until unlock
+      api.settings.lockApp().catch(() => {})
+      setPhase("locked")
+    } else {
+      // No PIN: skip lock, start loading data immediately
+      appActions.startLoading()
+      setPhase("loading")
+    }
+  }, [phase, preCheck, appActions])
+
+  // Phase 3 -> Phase 4: Data finished loading
+  useEffect(() => {
+    if (phase !== "loading") return
+    if (loading) return
+
+    if (onboardingResult?.showOnboarding) {
+      setShowOnboarding(true)
+    }
+    setPhase("ready")
+  }, [phase, loading, onboardingResult])
+
+  const handleUnlock = useCallback(() => {
+    // After successful PIN entry: transition to loading phase
+    appActions.startLoading()
+    setPhase("loading")
+  }, [appActions])
+
   const handleLock = useCallback(async () => {
     try {
       await api.settings.lockApp()
     } catch {
       // Lock frontend even if backend call fails
     }
-    setIsLocked(true)
+    setPhase("locked")
   }, [])
-
-  // Apply init metadata once available
-  useEffect(() => {
-    if (!initMetadata) return
-    setDisplayCurrency(initMetadata.displayCurrency)
-    setIsPinEnabled(initMetadata.isPinEnabled)
-    if (initMetadata.shouldLock) {
-      handleLock()
-    }
-    if (initMetadata.showOnboarding) {
-      setShowOnboarding(true)
-    }
-  }, [initMetadata, handleLock])
-
-  const handleUnlock = async () => {
-    setIsLocked(false)
-  }
 
   const handleCurrencyChange = async (currency: SupportedCurrency) => {
     setDisplayCurrency(currency)
@@ -106,7 +139,6 @@ export default function App() {
       await api.settings.resetAllData(pin)
       appActions.setPrices({})
       setIsPinEnabled(false)
-      setIsLocked(false)
       setCurrentView("dashboard")
       entityCrud.setSelectedEntityId(0)
       setResetDialogOpen(false)
@@ -146,7 +178,7 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "l" && isPinEnabled && !isLocked) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "l" && isPinEnabled && phase === "ready") {
         e.preventDefault()
         handleLock()
       }
@@ -154,7 +186,7 @@ export default function App() {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isPinEnabled, isLocked, handleLock])
+  }, [isPinEnabled, phase, handleLock])
 
   const netWorthUsd =
     assets.reduce((sum, asset) => sum + getAssetValueInUsd(asset, prices, exchangeRates), 0) +
@@ -167,7 +199,7 @@ export default function App() {
   const { requestSnapshot, recordSnapshotNow } = useSnapshotRecorder({
     netWorth: netWorthUsd,
     currency: "USD",
-    enabled: !loading,
+    enabled: phase === "ready",
     onSnapshotsUpdated: appActions.refreshSnapshots,
   })
 
@@ -314,13 +346,13 @@ export default function App() {
   recordSnapshotNowRef.current = recordSnapshotNow
 
   useEffect(() => {
-    if (!loading && (assets.length > 0 || accounts.length > 0)) {
+    if (phase === "ready" && (assets.length > 0 || accounts.length > 0)) {
       recordSnapshotNowRef.current()
       api.snapshots.prune().catch(() => {
         // Pruning is best-effort; failures do not affect user experience
       })
     }
-  }, [loading, assets.length, accounts.length])
+  }, [phase, assets.length, accounts.length])
 
   // When entity is deleted and was the selected one, return to dashboard
   useEffect(() => {
@@ -329,14 +361,24 @@ export default function App() {
     }
   }, [entities, entityCrud.selectedEntityId, currentView])
 
-  if (loading) {
-    return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <img src="/logo.png" alt="Fortuna" className="w-24 h-24 animate-gentle-bounce-lg" />
-      </div>
-    )
+  // --- Rendering decision ---
+
+  // Phase 1: Pre-check in progress, show splash
+  if (phase === "checking") {
+    return <SplashScreen />
   }
 
+  // Phase 2: Lock screen - only this, no app content in DOM
+  if (phase === "locked") {
+    return <LockScreen onUnlock={handleUnlock} />
+  }
+
+  // Phase 3: Data loading after unlock, show splash
+  if (phase === "loading") {
+    return <SplashScreen />
+  }
+
+  // Phase 4: Ready - render full app
   return (
     <div className="h-screen flex flex-row bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-vignette pointer-events-none" />
@@ -539,16 +581,13 @@ export default function App() {
         onSelect={handleCurrencyChange}
         onClose={handleCloseCurrencyPicker}
       />
-      <LockScreen isLocked={isLocked} onUnlock={handleUnlock} />
-      {!isLocked && (
-        <OnboardingOverlay
-          show={showOnboarding}
-          onComplete={() => {
-            localStorage.setItem("fortuna_onboarding_completed", "true")
-            setShowOnboarding(false)
-          }}
-        />
-      )}
+      <OnboardingOverlay
+        show={showOnboarding}
+        onComplete={() => {
+          localStorage.setItem("fortuna_onboarding_completed", "true")
+          setShowOnboarding(false)
+        }}
+      />
     </div>
   )
 }

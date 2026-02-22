@@ -101,7 +101,30 @@ describe("useAppData", () => {
     expect(result.current.state.cashFlows).toEqual([])
   })
 
-  it("should load data on initialization and set loading false", async () => {
+  it("should set preCheck after fast pre-check completes", async () => {
+    const { result } = renderHook(() => useAppData())
+
+    await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    expect(result.current.preCheck?.displayCurrency).toBe("USD")
+    expect(result.current.preCheck?.isPinEnabled).toBe(false)
+  })
+
+  it("should detect PIN enabled in preCheck", async () => {
+    mockApi.settings.isPinEnabled.mockResolvedValue(true)
+
+    const { result } = renderHook(() => useAppData())
+
+    await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    expect(result.current.preCheck?.isPinEnabled).toBe(true)
+  })
+
+  it("should load data only after startLoading is called", async () => {
     const mockAssets = [
       {
         id: "a1",
@@ -139,6 +162,18 @@ describe("useAppData", () => {
 
     const { result } = renderHook(() => useAppData())
 
+    // Pre-check completes but data not loaded yet
+    await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+    expect(result.current.state.loading).toBe(true)
+    expect(result.current.state.assets).toEqual([])
+
+    // Trigger data loading
+    act(() => {
+      result.current.actions.startLoading()
+    })
+
     await waitFor(() => {
       expect(result.current.state.loading).toBe(false)
     })
@@ -149,39 +184,22 @@ describe("useAppData", () => {
     expect(mockGetExchangeRates).toHaveBeenCalled()
   })
 
-  it("should set initMetadata after initialization", async () => {
+  it("should set onboardingResult when no data and not completed", async () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.displayCurrency).toBe("USD")
-    expect(result.current.initMetadata?.isPinEnabled).toBe(false)
-    expect(result.current.initMetadata?.shouldLock).toBe(false)
-  })
-
-  it("should detect PIN enabled and shouldLock", async () => {
-    mockApi.settings.isPinEnabled.mockResolvedValue(true)
-
-    const { result } = renderHook(() => useAppData())
+    act(() => {
+      result.current.actions.startLoading()
+    })
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.onboardingResult).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.isPinEnabled).toBe(true)
-    expect(result.current.initMetadata?.shouldLock).toBe(true)
-  })
-
-  it("should show onboarding when no data and not completed", async () => {
-    const { result } = renderHook(() => useAppData())
-
-    await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
-    })
-
-    expect(result.current.initMetadata?.showOnboarding).toBe(true)
+    expect(result.current.onboardingResult?.showOnboarding).toBe(true)
   })
 
   it("should not show onboarding when onboarding completed in localStorage", async () => {
@@ -190,10 +208,18 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.showOnboarding).toBe(false)
+    act(() => {
+      result.current.actions.startLoading()
+    })
+
+    await waitFor(() => {
+      expect(result.current.onboardingResult).not.toBeNull()
+    })
+
+    expect(result.current.onboardingResult?.showOnboarding).toBe(false)
   })
 
   it("should not show onboarding when data exists", async () => {
@@ -217,14 +243,30 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.showOnboarding).toBe(false)
+    act(() => {
+      result.current.actions.startLoading()
+    })
+
+    await waitFor(() => {
+      expect(result.current.onboardingResult).not.toBeNull()
+    })
+
+    expect(result.current.onboardingResult?.showOnboarding).toBe(false)
   })
 
   it("fetchDataOnly should return assets and accounts data", async () => {
     const { result } = renderHook(() => useAppData())
+
+    await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    act(() => {
+      result.current.actions.startLoading()
+    })
 
     await waitFor(() => {
       expect(result.current.state.loading).toBe(false)
@@ -251,6 +293,14 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    act(() => {
+      result.current.actions.startLoading()
+    })
+
+    await waitFor(() => {
       expect(result.current.state.loading).toBe(false)
     })
 
@@ -268,6 +318,14 @@ describe("useAppData", () => {
 
   it("refreshSnapshots should update snapshots state", async () => {
     const { result } = renderHook(() => useAppData())
+
+    await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    act(() => {
+      result.current.actions.startLoading()
+    })
 
     await waitFor(() => {
       expect(result.current.state.loading).toBe(false)
@@ -289,6 +347,14 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
+      expect(result.current.preCheck).not.toBeNull()
+    })
+
+    act(() => {
+      result.current.actions.startLoading()
+    })
+
+    await waitFor(() => {
       expect(result.current.state.loading).toBe(false)
     })
 
@@ -305,10 +371,10 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.displayCurrency).toBe("USD")
+    expect(result.current.preCheck?.displayCurrency).toBe("USD")
   })
 
   it("should handle locale preference load failure gracefully", async () => {
@@ -317,10 +383,11 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.state.loading).toBe(false)
+    // Pre-check still completes despite locale failure
+    expect(result.current.preCheck).not.toBeNull()
   })
 
   it("should handle PIN check failure gracefully", async () => {
@@ -329,10 +396,9 @@ describe("useAppData", () => {
     const { result } = renderHook(() => useAppData())
 
     await waitFor(() => {
-      expect(result.current.initMetadata).not.toBeNull()
+      expect(result.current.preCheck).not.toBeNull()
     })
 
-    expect(result.current.initMetadata?.isPinEnabled).toBe(false)
-    expect(result.current.initMetadata?.shouldLock).toBe(false)
+    expect(result.current.preCheck?.isPinEnabled).toBe(false)
   })
 })
