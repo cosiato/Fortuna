@@ -30,6 +30,8 @@ export function useUpdater(): UseUpdaterReturn {
   const [progress, setProgress] = useState<UpdateProgress>({ downloaded: 0, total: 0 })
   const updateRef = useRef<Awaited<ReturnType<typeof check>>>(null)
   const { t } = useTranslation("errors")
+  const tRef = useRef(t)
+  tRef.current = t
 
   useEffect(() => {
     let cancelled = false
@@ -53,7 +55,7 @@ export function useUpdater(): UseUpdaterReturn {
         }
       } catch (error) {
         if (!cancelled) {
-          showErrorToast(error, t("failedToUpdate"))
+          showErrorToast(error, tRef.current("failedToUpdate"))
           setStatus("idle")
         }
       }
@@ -92,7 +94,7 @@ export function useUpdater(): UseUpdaterReturn {
         await relaunch()
       }
     } catch (error) {
-      showErrorToast(error, t("failedToUpdate"))
+      showErrorToast(error, tRef.current("failedToUpdate"))
       setStatus("available")
     }
   }, [])
