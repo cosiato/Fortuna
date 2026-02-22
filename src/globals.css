@@ -158,16 +158,6 @@
   }
 }
 
-@keyframes gentle-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-}
-
 @keyframes gentle-pulse-lg {
   0%,
   100% {
@@ -176,10 +166,6 @@
   50% {
     transform: scale(1.25);
   }
-}
-
-.animate-gentle-bounce {
-  animation: gentle-pulse 2s ease-in-out infinite;
 }
 
 .animate-gentle-bounce-lg {
