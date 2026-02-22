@@ -49,15 +49,13 @@ export interface AppDataState {
 
 export interface AppDataActions {
   setAssets: React.Dispatch<React.SetStateAction<Asset[]>>
-  setAccounts: React.Dispatch<React.SetStateAction<Account[]>>
-  setSnapshots: React.Dispatch<React.SetStateAction<Snapshot[]>>
   setCashFlows: React.Dispatch<React.SetStateAction<CashFlow[]>>
   setPrices: React.Dispatch<React.SetStateAction<Record<string, PriceResult>>>
-  setExchangeRates: React.Dispatch<React.SetStateAction<Record<string, number>>>
   fetchDataOnly: () => Promise<{ assetsData: Asset[]; accountsData: Account[] }>
   handleManualRefresh: () => Promise<void>
   refreshSnapshots: () => Promise<void>
   startLoading: () => void
+  resetForLock: () => void
 }
 
 export interface ShowOnboardingResult {
@@ -83,6 +81,8 @@ export function useAppData(): {
   const [preCheck, setPreCheck] = useState<PreCheckResult | null>(null)
   const [onboardingResult, setOnboardingResult] = useState<ShowOnboardingResult | null>(null)
   const [loadingTriggered, setLoadingTriggered] = useState(false)
+  const preCheckStartedRef = useRef(false)
+  const loadingStartedRef = useRef(false)
 
   const { t } = useTranslation(["errors"])
   const tRef = useRef(t)
@@ -185,8 +185,18 @@ export function useAppData(): {
     setLoadingTriggered(true)
   }, [])
 
+  const resetForLock = useCallback(() => {
+    setLoadingTriggered(false)
+    setLoading(true)
+    setOnboardingResult(null)
+    loadingStartedRef.current = false
+  }, [])
+
   // Phase 1: Fast pre-check (PIN status + locale + currency preference)
   useEffect(() => {
+    if (preCheckStartedRef.current) return
+    preCheckStartedRef.current = true
+
     const runPreCheck = async () => {
       try {
         const savedLocale = await api.settings.getLocalePreference()
@@ -222,6 +232,8 @@ export function useAppData(): {
   // Phase 2: Full data loading (only runs after startLoading is called)
   useEffect(() => {
     if (!loadingTriggered) return
+    if (loadingStartedRef.current) return
+    loadingStartedRef.current = true
 
     const loadData = async () => {
       const { assetsData, accountsData } = await fetchDataOnly()
@@ -252,15 +264,13 @@ export function useAppData(): {
     },
     actions: {
       setAssets,
-      setAccounts,
-      setSnapshots,
       setCashFlows,
       setPrices,
-      setExchangeRates,
       fetchDataOnly,
       handleManualRefresh,
       refreshSnapshots,
       startLoading,
+      resetForLock,
     },
     preCheck,
     onboardingResult,

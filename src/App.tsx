@@ -97,7 +97,7 @@ export default function App() {
       appActions.startLoading()
       setPhase("loading")
     }
-  }, [phase, preCheck, appActions])
+  }, [phase, preCheck, appActions.startLoading])
 
   // Phase 3 -> Phase 4: Data finished loading
   useEffect(() => {
@@ -122,8 +122,9 @@ export default function App() {
     } catch {
       // Lock frontend even if backend call fails
     }
+    appActions.resetForLock()
     setPhase("locked")
-  }, [])
+  }, [appActions.resetForLock])
 
   const handleCurrencyChange = async (currency: SupportedCurrency) => {
     setDisplayCurrency(currency)
