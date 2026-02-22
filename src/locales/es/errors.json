@@ -18,5 +18,6 @@
   "failedToResetData": "Error al restablecer los datos",
   "failedToExportData": "Error al exportar los datos",
   "failedToImportData": "Error al restaurar los datos",
+  "failedToUpdate": "Error al actualizar la aplicación",
   "genericError": "Ocurrió un error"
 }

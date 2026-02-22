@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { renderHook, act, waitFor } from "@testing-library/react"
 
-const { mockCheck, mockRelaunch } = vi.hoisted(() => ({
+const { mockCheck, mockRelaunch, mockShowErrorToast } = vi.hoisted(() => ({
   mockCheck: vi.fn(),
   mockRelaunch: vi.fn(),
+  mockShowErrorToast: vi.fn(),
 }))
 
 vi.mock("@tauri-apps/plugin-updater", () => ({
@@ -12,6 +13,14 @@ vi.mock("@tauri-apps/plugin-updater", () => ({
 
 vi.mock("@tauri-apps/plugin-process", () => ({
   relaunch: (...args: unknown[]) => mockRelaunch(...args),
+}))
+
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}))
+
+vi.mock("@/lib/errorHandling", () => ({
+  showErrorToast: (...args: unknown[]) => mockShowErrorToast(...args),
 }))
 
 import { useUpdater } from "./useUpdater"
@@ -60,14 +69,16 @@ describe("useUpdater", () => {
     expect(result.current.updateInfo).toBeNull()
   })
 
-  it("should set status to error when check fails", async () => {
+  it("should show error toast and reset to idle when check fails", async () => {
     mockCheck.mockRejectedValueOnce(new Error("Network error"))
 
     const { result } = renderHook(() => useUpdater())
 
     await waitFor(() => {
-      expect(result.current.status).toBe("error")
+      expect(mockShowErrorToast).toHaveBeenCalledWith(expect.any(Error), "failedToUpdate")
     })
+
+    expect(result.current.status).toBe("idle")
   })
 
   it("should handle update with null body", async () => {
@@ -152,7 +163,7 @@ describe("useUpdater", () => {
     expect(mockRelaunch).toHaveBeenCalled()
   })
 
-  it("downloadAndInstall should set error on failure", async () => {
+  it("downloadAndInstall should show error toast and reset to available on failure", async () => {
     const mockDownloadAndInstall = vi.fn().mockRejectedValue(new Error("Download failed"))
     const mockUpdate = {
       version: "1.2.0",
@@ -171,7 +182,8 @@ describe("useUpdater", () => {
       await result.current.downloadAndInstall()
     })
 
-    expect(result.current.status).toBe("error")
+    expect(result.current.status).toBe("available")
     expect(mockRelaunch).not.toHaveBeenCalled()
+    expect(mockShowErrorToast).toHaveBeenCalledWith(expect.any(Error), "failedToUpdate")
   })
 })

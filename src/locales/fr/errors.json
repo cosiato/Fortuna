@@ -18,5 +18,6 @@
   "failedToResetData": "Echec de la reinitialisation des donnees",
   "failedToExportData": "Echec de l'exportation des donnees",
   "failedToImportData": "Echec de la restauration des donnees",
+  "failedToUpdate": "Echec de la mise a jour de l'application",
   "genericError": "Une erreur est survenue"
 }

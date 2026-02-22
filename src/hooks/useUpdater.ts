@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react"
+import { useTranslation } from "react-i18next"
 import { check } from "@tauri-apps/plugin-updater"
 import { relaunch } from "@tauri-apps/plugin-process"
+import { showErrorToast } from "@/lib/errorHandling"
 
 export type UpdateStatus = "idle" | "checking" | "available" | "downloading" | "error"
 
@@ -27,6 +29,7 @@ export function useUpdater(): UseUpdaterReturn {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
   const [progress, setProgress] = useState<UpdateProgress>({ downloaded: 0, total: 0 })
   const updateRef = useRef<Awaited<ReturnType<typeof check>>>(null)
+  const { t } = useTranslation("errors")
 
   useEffect(() => {
     let cancelled = false
@@ -48,9 +51,10 @@ export function useUpdater(): UseUpdaterReturn {
         } else {
           setStatus("idle")
         }
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          setStatus("error")
+          showErrorToast(error, t("failedToUpdate"))
+          setStatus("idle")
         }
       }
     }
@@ -87,8 +91,9 @@ export function useUpdater(): UseUpdaterReturn {
       if (updateRef.current) {
         await relaunch()
       }
-    } catch {
-      setStatus("error")
+    } catch (error) {
+      showErrorToast(error, t("failedToUpdate"))
+      setStatus("available")
     }
   }, [])
 
