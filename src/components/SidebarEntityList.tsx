@@ -151,14 +151,14 @@ export default function SidebarEntityList({
                 <span className="relative font-medium text-sm truncate mt-0.5">{label}</span>
                 {isPrivate ? (
                   <span
-                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 rounded px-1.5 py-0.5 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80 bg-[hsl(var(--accent-muted))]" : "text-muted-foreground group-hover:bg-secondary"}`}
                   >
                     {HIDDEN_VALUE}
                   </span>
                 ) : (
                   <SlotMachineNumber
                     value={formatCurrency(total, displayCurrency)}
-                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 rounded px-1.5 py-0.5 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80 bg-[hsl(var(--accent-muted))]" : "text-muted-foreground group-hover:bg-secondary"}`}
                     duration={500}
                     staggerMs={20}
                   />
