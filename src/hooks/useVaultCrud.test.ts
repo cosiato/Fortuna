@@ -43,6 +43,7 @@ describe("useVaultCrud", () => {
     currency: "USD",
     countryCode: "US",
     entityId: 0,
+    isLiquid: true,
     createdAt: "2024-01-01",
     updatedAt: "2024-01-01",
   }
