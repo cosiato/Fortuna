@@ -30,6 +30,11 @@
   },
   "general": {
     "languageDescription": "Escolha seu idioma preferido",
+    "theme": "Tema",
+    "themeDescription": "Escolha a aparencia do aplicativo",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "themeSystem": "Sistema",
     "currencyPreference": "Moeda de exibicao",
     "currencyDescription": "Moeda usada para exibir todos os valores",
     "changeCurrency": "Alterar"
