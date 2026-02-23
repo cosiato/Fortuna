@@ -158,6 +158,7 @@ src/
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
 |   |-- useSidebar.ts             # Sidebar collapse state with localStorage persistence + Cmd+B shortcut
 |   |-- usePrivacyMode.ts         # Privacy mode context, state hook, HIDDEN_VALUE constant
+|   |-- useThemeMode.ts           # Theme mode context (light/dark/system), state hook, flash prevention
 |   |-- useUpdater.ts            # Auto-update check, download, install, and relaunch
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
