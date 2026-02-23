@@ -4,6 +4,46 @@
 
 @layer base {
   :root {
+    /* Light palette - warm parchment-inspired */
+    --background: 40 20% 96%;
+    --foreground: 240 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 20% 12%;
+    --primary: 240 20% 12%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 15% 92%;
+    --secondary-foreground: 240 20% 12%;
+    --muted: 220 9% 56%;
+    --muted-foreground: 220 9% 40%;
+    --accent: 46 100% 42%;
+    --accent-foreground: 240 20% 12%;
+    --accent-secondary: 271 81% 50%;
+    --accent-secondary-foreground: 0 0% 100%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 38%;
+    --success-foreground: 0 0% 100%;
+    --border: 40 15% 85%;
+    --input: 40 15% 85%;
+    --ring: 46 100% 42%;
+    --accent-muted: 46 30% 88%;
+    --radius: 0.75rem;
+    /* Chart colors */
+    --chart-1: 46 100% 42%;
+    --chart-2: 271 81% 50%;
+    --chart-3: 142 71% 38%;
+    --chart-4: 0 84% 55%;
+    --chart-5: 220 9% 56%;
+
+    /* Font families - loaded from Google Fonts */
+    --font-sans:
+      "Exo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-serif: "Cinzel", ui-serif, Georgia, serif;
+  }
+
+  .dark {
     /* Gamified dark palette - Hades meets fintech */
     --background: 240 20% 9%;
     --foreground: 245 23% 93%;
@@ -29,18 +69,12 @@
     --input: 240 20% 20%;
     --ring: 51 100% 50%;
     --accent-muted: 46 30% 14%;
-    --radius: 0.75rem;
     /* Chart colors - gamified */
     --chart-1: 51 100% 50%;
     --chart-2: 271 81% 56%;
     --chart-3: 142 71% 45%;
     --chart-4: 0 84% 60%;
     --chart-5: 220 9% 46%;
-
-    /* Font families - loaded from Google Fonts */
-    --font-sans:
-      "Exo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-serif: "Cinzel", ui-serif, Georgia, serif;
   }
 }
 
@@ -83,13 +117,13 @@
   .gradient-border {
     border: 1px solid transparent;
     background:
-      linear-gradient(hsl(240 24% 15%), hsl(240 24% 15%)) padding-box,
+      linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
       linear-gradient(135deg, #ffd700, #a855f7) border-box;
   }
   .gradient-border-treasury {
     border: 1px solid transparent;
     background:
-      linear-gradient(160deg, hsl(240 28% 12%) 0%, hsl(240 33% 7%) 100%) padding-box,
+      linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%) padding-box,
       linear-gradient(135deg, #ffd700, #a855f7) border-box;
     position: relative;
     overflow: hidden;
@@ -119,7 +153,11 @@
     animation: treasury-glow-purple 10s ease-in-out infinite alternate;
   }
   .bg-vignette {
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 15, 26, 0.4) 100%);
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      hsl(var(--background) / 0.4) 100%
+    );
   }
   .font-sans {
     font-family: var(--font-sans);
@@ -136,20 +174,20 @@
   }
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: hsl(260 30% 30%) hsl(240 20% 12%);
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
   }
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: hsl(240 20% 12%);
+    background: hsl(var(--background));
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(260 30% 30%);
+    background: hsl(var(--muted));
     border-radius: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(260 30% 40%);
+    background: hsl(var(--muted-foreground));
   }
   .logo-hover {
     transition: transform 0.4s ease-in-out;

@@ -75,7 +75,7 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 2px 8px rgba(26, 31, 61, 0.08)",
-        card: "0 4px 12px rgba(15, 15, 26, 0.3)",
+        card: "0 4px 12px rgba(0, 0, 0, 0.08)",
         "glow-gold": "0 0 20px rgba(255, 215, 0, 0.3)",
         "glow-purple": "0 0 20px rgba(168, 85, 247, 0.3)",
         "glow-success": "0 0 15px rgba(34, 197, 94, 0.3)",
