@@ -58,6 +58,8 @@ pub fn run() {
             commands::set_currency_preference,
             commands::get_locale_preference,
             commands::set_locale_preference,
+            commands::get_theme_preference,
+            commands::set_theme_preference,
             commands::export_database,
             commands::import_database,
         ])

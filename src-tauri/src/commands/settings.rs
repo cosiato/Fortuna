@@ -345,6 +345,42 @@ pub fn unlock_app(
     }
 }
 
+const ALLOWED_THEMES: &[&str] = &["light", "dark", "system"];
+
+#[tauri::command]
+pub fn get_theme_preference(db: State<DbConnection>) -> Result<String, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    let result = conn.query_row(
+        "SELECT value FROM settings WHERE key = 'display_theme'",
+        [],
+        |row| row.get::<_, String>(0),
+    );
+
+    match result {
+        Ok(theme) => Ok(theme),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok("dark".to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn set_theme_preference(db: State<DbConnection>, theme: String) -> Result<(), String> {
+    if !ALLOWED_THEMES.contains(&theme.as_str()) {
+        return Err(format!("Unsupported theme: {}", theme));
+    }
+
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+
+    conn.execute(
+        "INSERT OR REPLACE INTO settings (key, value) VALUES ('display_theme', ?1)",
+        [&theme],
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 const ALLOWED_LOCALES: &[&str] = &["en", "fr", "es", "pt"];
 
 #[tauri::command]
