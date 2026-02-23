@@ -344,9 +344,21 @@ export default function EntityView({
                               </TooltipContent>
                             </Tooltip>
                           )}
+                          {!account.isLiquid && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="text-muted-foreground cursor-default">
+                                  <Icon icon="solar:lock-linear" width={14} height={14} />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                <p>{t("vaults:illiquidTooltip")}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="text-sm font-bold text-accent cursor-default">
+                              <span className="text-sm font-bold text-accent cursor-default mt-0.5">
                                 {formatCurrency(currentBalanceDisplay, displayCurrency)}
                               </span>
                             </TooltipTrigger>

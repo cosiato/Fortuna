@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import CurrencyCombobox from "@/components/CurrencyCombobox"
 import CountrySelector from "@/components/CountrySelector"
 import { createAccountSchema, validateSchema } from "@/lib/validation"
@@ -23,6 +24,7 @@ export default function AccountForm({ account, open, onOpenChange, onSubmit }: A
   const [balance, setBalance] = useState(account?.balance?.toString() ?? "")
   const [currency, setCurrency] = useState(account?.currency ?? "USD")
   const [countryCode, setCountryCode] = useState(account?.countryCode ?? "")
+  const [isLiquid, setIsLiquid] = useState(account?.isLiquid ?? true)
 
   useEffect(() => {
     if (account) {
@@ -30,11 +32,13 @@ export default function AccountForm({ account, open, onOpenChange, onSubmit }: A
       setBalance(account.balance?.toString() ?? "")
       setCurrency(account.currency ?? "USD")
       setCountryCode(account.countryCode ?? "")
+      setIsLiquid(account.isLiquid ?? true)
     } else {
       setName("")
       setBalance("")
       setCurrency("USD")
       setCountryCode("")
+      setIsLiquid(true)
     }
   }, [account, open])
 
@@ -47,6 +51,7 @@ export default function AccountForm({ account, open, onOpenChange, onSubmit }: A
       balance: parseFloat(balance) || 0,
       currency,
       countryCode,
+      isLiquid,
     }
     const result = validateSchema(createAccountSchema(), data)
     if (!result.success) {
@@ -97,6 +102,14 @@ export default function AccountForm({ account, open, onOpenChange, onSubmit }: A
           <div className="space-y-2">
             <Label htmlFor="country">{t("location")}</Label>
             <CountrySelector value={countryCode} onChange={setCountryCode} />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg bg-white/5 p-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="liquid-toggle">{t("liquidToggle")}</Label>
+              <p className="text-xs text-muted-foreground">{t("liquidDescription")}</p>
+            </div>
+            <Switch id="liquid-toggle" checked={isLiquid} onCheckedChange={setIsLiquid} />
           </div>
 
           <div className="flex gap-3 pt-4">

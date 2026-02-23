@@ -46,6 +46,7 @@ export function useVaultCrud({
         currency: data.currency,
         countryCode: data.countryCode!,
         entityId: selectedEntityId,
+        isLiquid: data.isLiquid,
       })
       setAccountFormOpen(false)
       await fetchDataOnly()
@@ -68,6 +69,7 @@ export function useVaultCrud({
         balance: data.balance,
         currency: data.currency,
         countryCode: data.countryCode,
+        isLiquid: data.isLiquid,
       })
       setAccountFormOpen(false)
       setEditingAccount(null)

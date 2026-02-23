@@ -307,8 +307,17 @@ export default function App() {
     const liquidAssetTypes = new Set(["stock", "cash"])
     const illiquidAssetTypes = new Set(["real_estate", "other"])
 
-    let liquid = accounts.reduce((sum, acc) => sum + getAccountValue(acc), 0)
+    let liquid = 0
     let illiquid = 0
+
+    for (const acc of accounts) {
+      const value = getAccountValue(acc)
+      if (acc.isLiquid) {
+        liquid += value
+      } else {
+        illiquid += value
+      }
+    }
 
     for (const asset of assets) {
       const value = getAssetValue(asset)
