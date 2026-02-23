@@ -9,6 +9,9 @@
   "currency": "Devise",
   "location": "Localisation",
   "addBtn": "Ajouter le coffre",
+  "liquidToggle": "Compte liquide",
+  "liquidDescription": "Les fonds sont disponibles immediatement",
+  "illiquidTooltip": "Illiquide - les fonds ne sont pas disponibles immediatement",
   "cashFlow": {
     "title": "Ajouter un flux",
     "editTitle": "Modifier le flux",

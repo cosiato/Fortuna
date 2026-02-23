@@ -9,6 +9,9 @@
   "currency": "Currency",
   "location": "Location",
   "addBtn": "Add Vault",
+  "liquidToggle": "Liquid Account",
+  "liquidDescription": "Funds can be withdrawn immediately",
+  "illiquidTooltip": "Illiquid - funds are not immediately available",
   "cashFlow": {
     "title": "Add Cash Flow",
     "editTitle": "Edit Cash Flow",

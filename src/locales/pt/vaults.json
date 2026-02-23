@@ -9,6 +9,9 @@
   "currency": "Moeda",
   "location": "Localização",
   "addBtn": "Adicionar Cofre",
+  "liquidToggle": "Conta liquida",
+  "liquidDescription": "Os fundos podem ser retirados imediatamente",
+  "illiquidTooltip": "Iliquida - os fundos nao estao disponiveis imediatamente",
   "cashFlow": {
     "title": "Adicionar Fluxo de Caixa",
     "editTitle": "Editar Fluxo de Caixa",

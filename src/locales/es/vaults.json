@@ -9,6 +9,9 @@
   "currency": "Moneda",
   "location": "Ubicación",
   "addBtn": "Agregar Bóveda",
+  "liquidToggle": "Cuenta liquida",
+  "liquidDescription": "Los fondos se pueden retirar de inmediato",
+  "illiquidTooltip": "Iliquida - los fondos no estan disponibles de inmediato",
   "cashFlow": {
     "title": "Agregar Flujo de Caja",
     "editTitle": "Editar Flujo de Caja",
