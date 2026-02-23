@@ -29,9 +29,12 @@ function buildPriceMap(pricesArray: readonly PriceResult[]): Record<string, Pric
   )
 }
 
+import type { ThemePreference } from "@/hooks/useThemeMode"
+
 export interface PreCheckResult {
   isPinEnabled: boolean
   displayCurrency: SupportedCurrency
+  themePreference: ThemePreference
 }
 
 export interface AppDataState {
@@ -224,7 +227,17 @@ export function useAppData(): {
         // PIN check failed, continue without lock
       }
 
-      setPreCheck({ isPinEnabled, displayCurrency })
+      let themePreference: ThemePreference = "dark"
+      try {
+        const savedTheme = await api.settings.getThemePreference()
+        if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
+          themePreference = savedTheme
+        }
+      } catch {
+        // Theme preference load failed, keep default 'dark'
+      }
+
+      setPreCheck({ isPinEnabled, displayCurrency, themePreference })
     }
     runPreCheck()
   }, [])

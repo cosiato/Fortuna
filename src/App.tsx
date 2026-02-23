@@ -34,6 +34,7 @@ import { useEntityCrud } from "@/hooks/useEntityCrud"
 import { useUpdater } from "@/hooks/useUpdater"
 import { useSidebar } from "@/hooks/useSidebar"
 import { usePrivacyModeState, PrivacyModeContext } from "@/hooks/usePrivacyMode"
+import { useThemeModeState, ThemeModeContext, ThemePreference } from "@/hooks/useThemeMode"
 
 // App lifecycle phases:
 // 1. "checking"  - Fast pre-check: PIN status, locale, currency (no data loaded)
@@ -66,9 +67,11 @@ export default function App() {
   const handleCloseCurrencyPicker = useCallback(() => setCurrencyPickerOpen(false), [])
 
   const { t } = useTranslation(["common", "assets", "vaults", "errors"])
+  const [themeInitial, setThemeInitial] = useState<ThemePreference>("dark")
   const updater = useUpdater()
   const sidebar = useSidebar()
   const privacyMode = usePrivacyModeState()
+  const themeMode = useThemeModeState(themeInitial)
   const { state: appData, actions: appActions, preCheck, onboardingResult } = useAppData()
   const {
     assets,
@@ -89,6 +92,7 @@ export default function App() {
 
     setDisplayCurrency(preCheck.displayCurrency)
     setIsPinEnabled(preCheck.isPinEnabled)
+    setThemeInitial(preCheck.themePreference)
 
     if (preCheck.isPinEnabled) {
       // PIN enabled: go to lock screen, data loading deferred until unlock
@@ -377,235 +381,251 @@ export default function App() {
 
   // Phase 1: Pre-check in progress, show splash
   if (phase === "checking") {
-    return <SplashScreen />
+    return (
+      <ThemeModeContext.Provider value={themeMode}>
+        <SplashScreen />
+      </ThemeModeContext.Provider>
+    )
   }
 
   // Phase 2: Lock screen - only this, no app content in DOM
   if (phase === "locked") {
-    return <LockScreen onUnlock={handleUnlock} />
+    return (
+      <ThemeModeContext.Provider value={themeMode}>
+        <LockScreen onUnlock={handleUnlock} />
+      </ThemeModeContext.Provider>
+    )
   }
 
   // Phase 3: Data loading after unlock, show splash
   if (phase === "loading") {
-    return <SplashScreen />
+    return (
+      <ThemeModeContext.Provider value={themeMode}>
+        <SplashScreen />
+      </ThemeModeContext.Provider>
+    )
   }
 
   // Phase 4: Ready - render full app
   return (
-    <PrivacyModeContext.Provider value={privacyMode}>
-      <div className="h-screen flex flex-row bg-background relative overflow-hidden">
-        <div className="absolute inset-0 bg-vignette pointer-events-none" />
-        <AppSidebar
-          isCollapsed={sidebar.isCollapsed}
-          onToggle={sidebar.toggle}
-          entities={entities}
-          selectedEntityId={entityCrud.selectedEntityId}
-          onSelectEntity={handleSelectEntity}
-          onAddCompany={() => entityCrud.setEntityFormOpen(true)}
-          onEditEntity={entityCrud.handleEditEntity}
-          onDeleteEntity={entityCrud.handleDeleteEntityRequest}
-          entityTotals={entityTotals}
-          displayCurrency={displayCurrency}
-          onRefresh={appActions.handleManualRefresh}
-          isRefreshing={isRefreshing}
-          refreshCooldown={refreshCooldown}
-          onCurrencyClick={() => setCurrencyPickerOpen(true)}
-          onSettingsClick={handleNavigateSettings}
-          currentView={currentView}
-          onNavigateDashboard={handleNavigateDashboard}
-        />
+    <ThemeModeContext.Provider value={themeMode}>
+      <PrivacyModeContext.Provider value={privacyMode}>
+        <div className="h-screen flex flex-row bg-background relative overflow-hidden">
+          <div className="absolute inset-0 bg-vignette pointer-events-none" />
+          <AppSidebar
+            isCollapsed={sidebar.isCollapsed}
+            onToggle={sidebar.toggle}
+            entities={entities}
+            selectedEntityId={entityCrud.selectedEntityId}
+            onSelectEntity={handleSelectEntity}
+            onAddCompany={() => entityCrud.setEntityFormOpen(true)}
+            onEditEntity={entityCrud.handleEditEntity}
+            onDeleteEntity={entityCrud.handleDeleteEntityRequest}
+            entityTotals={entityTotals}
+            displayCurrency={displayCurrency}
+            onRefresh={appActions.handleManualRefresh}
+            isRefreshing={isRefreshing}
+            refreshCooldown={refreshCooldown}
+            onCurrencyClick={() => setCurrencyPickerOpen(true)}
+            onSettingsClick={handleNavigateSettings}
+            currentView={currentView}
+            onNavigateDashboard={handleNavigateDashboard}
+          />
 
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <div
-            className="shrink-0 h-9 cursor-grab active:cursor-grabbing"
-            onMouseDown={() => getCurrentWindow().startDragging()}
-            onDoubleClick={async () => {
-              const win = getCurrentWindow()
-              const maximized = await win.isMaximized()
-              if (maximized) {
-                await win.unmaximize()
-              } else {
-                await win.maximize()
-              }
+          <main className="flex-1 flex flex-col overflow-hidden">
+            <div
+              className="shrink-0 h-9 cursor-grab active:cursor-grabbing"
+              onMouseDown={() => getCurrentWindow().startDragging()}
+              onDoubleClick={async () => {
+                const win = getCurrentWindow()
+                const maximized = await win.isMaximized()
+                if (maximized) {
+                  await win.unmaximize()
+                } else {
+                  await win.maximize()
+                }
+              }}
+            />
+            <div className="flex-1 overflow-y-auto overscroll-none custom-scrollbar relative">
+              <div className="max-w-7xl mx-auto px-6 py-6">
+                {currentView === "settings" ? (
+                  <SettingsView
+                    displayCurrency={displayCurrency}
+                    onCurrencyClick={() => setCurrencyPickerOpen(true)}
+                    isPinEnabled={isPinEnabled}
+                    onPinStatusChange={setIsPinEnabled}
+                    onLock={handleLock}
+                    onResetAccount={() => setResetDialogOpen(true)}
+                    onRestoreBackup={handleRestoreBackup}
+                  />
+                ) : currentView === "dashboard" ? (
+                  <DashboardView
+                    netWorth={netWorth}
+                    netWorthUsd={netWorthUsd}
+                    displayCurrency={displayCurrency}
+                    categoryBadgeData={categoryBadgeData}
+                    vaultBadgeTotal={vaultBadgeTotal}
+                    accountCount={accounts.length}
+                    snapshots={snapshots}
+                    exchangeRates={exchangeRates}
+                    entities={entities}
+                    entityTotals={entityTotals}
+                    onSelectEntity={handleSelectEntity}
+                    monthlyTotals={globalMonthlyTotals}
+                    assets={assets}
+                    accounts={accounts}
+                    getAssetValue={getAssetValue}
+                    getAccountValue={getAccountValue}
+                    liquidTotal={liquidityTotals.liquid}
+                    illiquidTotal={liquidityTotals.illiquid}
+                  />
+                ) : (
+                  <EntityView
+                    entityName={
+                      entities.find((e) => e.id === entityCrud.selectedEntityId)?.name ?? ""
+                    }
+                    entityType={
+                      entities.find((e) => e.id === entityCrud.selectedEntityId)?.type ??
+                      "individual"
+                    }
+                    entityTotal={entityTotals[entityCrud.selectedEntityId] ?? 0}
+                    assets={filteredAssets}
+                    accounts={filteredAccounts}
+                    cashFlows={cashFlows}
+                    displayCurrency={displayCurrency}
+                    exchangeRates={exchangeRates}
+                    getAssetValue={getAssetValue}
+                    getAccountValue={getAccountValue}
+                    onAddAsset={() => assetCrud.setAssetFormOpen(true)}
+                    onEditAsset={assetCrud.handleEditAsset}
+                    onDeleteAsset={assetCrud.handleDeleteAsset}
+                    onQuantityChange={assetCrud.handleQuantityChange}
+                    onAddAccount={() => vaultCrud.setAccountFormOpen(true)}
+                    onEditAccount={vaultCrud.handleEditAccount}
+                    onDeleteAccountRequest={vaultCrud.handleDeleteAccountRequest}
+                    onEditCashFlow={vaultCrud.handleEditCashFlow}
+                    onDeleteCashFlow={vaultCrud.handleDeleteCashFlow}
+                    onToggleCashFlow={vaultCrud.handleToggleCashFlow}
+                    onAddFlow={vaultCrud.openAddFlow}
+                  />
+                )}
+
+                <AssetForm
+                  asset={assetCrud.editingAsset}
+                  open={assetCrud.assetFormOpen}
+                  onOpenChange={assetCrud.handleAssetFormClose}
+                  onSubmit={
+                    assetCrud.editingAsset ? assetCrud.handleUpdateAsset : assetCrud.handleAddAsset
+                  }
+                />
+
+                <AccountForm
+                  account={vaultCrud.editingAccount}
+                  open={vaultCrud.accountFormOpen}
+                  onOpenChange={vaultCrud.handleAccountFormClose}
+                  onSubmit={
+                    vaultCrud.editingAccount
+                      ? vaultCrud.handleUpdateAccount
+                      : vaultCrud.handleAddAccount
+                  }
+                />
+
+                <CashFlowForm
+                  cashFlow={vaultCrud.editingCashFlow}
+                  accountId={vaultCrud.cashFlowAccountId}
+                  accountCurrency={
+                    accounts.find((a) => a.id === vaultCrud.cashFlowAccountId)?.currency
+                  }
+                  defaultFlowType={vaultCrud.defaultFlowType}
+                  open={vaultCrud.cashFlowFormOpen}
+                  onOpenChange={vaultCrud.handleCashFlowFormClose}
+                  onSubmit={vaultCrud.handleAddCashFlow}
+                />
+
+                <EntityForm
+                  entity={entityCrud.editingEntity}
+                  open={entityCrud.entityFormOpen}
+                  onOpenChange={entityCrud.handleEntityFormClose}
+                  onSubmit={
+                    entityCrud.editingEntity
+                      ? entityCrud.handleUpdateEntity
+                      : entityCrud.handleAddCompany
+                  }
+                />
+
+                <DeleteEntityDialog
+                  open={entityCrud.deleteDialogOpen}
+                  onOpenChange={entityCrud.setDeleteDialogOpen}
+                  entity={entityCrud.entityToDelete}
+                  associatedAssetCount={
+                    entityCrud.entityToDelete
+                      ? assets.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
+                      : 0
+                  }
+                  associatedAccountCount={
+                    entityCrud.entityToDelete
+                      ? accounts.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
+                      : 0
+                  }
+                  onConfirm={entityCrud.handleConfirmDeleteEntity}
+                />
+
+                <DeleteAccountDialog
+                  open={vaultCrud.deleteAccountDialogOpen}
+                  onOpenChange={vaultCrud.setDeleteAccountDialogOpen}
+                  account={vaultCrud.accountToDelete}
+                  associatedCashFlowCount={
+                    vaultCrud.accountToDelete
+                      ? cashFlows.filter((f) => f.accountId === vaultCrud.accountToDelete!.id)
+                          .length
+                      : 0
+                  }
+                  onConfirm={vaultCrud.handleConfirmDeleteAccount}
+                />
+
+                <ResetAccountDialog
+                  open={resetDialogOpen}
+                  onOpenChange={setResetDialogOpen}
+                  onConfirm={handleResetAccount}
+                  pinEnabled={isPinEnabled}
+                />
+
+                <RestoreBackupDialog
+                  open={restoreDialogOpen}
+                  onOpenChange={(open) => {
+                    setRestoreDialogOpen(open)
+                    if (!open) setRestoreFilePath("")
+                  }}
+                  onConfirm={handleConfirmRestore}
+                  pinEnabled={isPinEnabled}
+                  selectedFile={restoreFilePath}
+                />
+              </div>
+            </div>
+          </main>
+
+          <UpdateNotification
+            status={updater.status}
+            version={updater.updateInfo?.version ?? null}
+            progress={updater.progress}
+            onDownload={updater.downloadAndInstall}
+            onDismiss={updater.dismiss}
+          />
+          <CurrencyPickerOverlay
+            open={currencyPickerOpen}
+            value={displayCurrency}
+            onSelect={handleCurrencyChange}
+            onClose={handleCloseCurrencyPicker}
+          />
+          <OnboardingOverlay
+            show={showOnboarding}
+            onComplete={() => {
+              localStorage.setItem("fortuna_onboarding_completed", "true")
+              setShowOnboarding(false)
             }}
           />
-          <div className="flex-1 overflow-y-auto overscroll-none custom-scrollbar relative">
-            <div className="max-w-7xl mx-auto px-6 py-6">
-              {currentView === "settings" ? (
-                <SettingsView
-                  displayCurrency={displayCurrency}
-                  onCurrencyClick={() => setCurrencyPickerOpen(true)}
-                  isPinEnabled={isPinEnabled}
-                  onPinStatusChange={setIsPinEnabled}
-                  onLock={handleLock}
-                  onResetAccount={() => setResetDialogOpen(true)}
-                  onRestoreBackup={handleRestoreBackup}
-                />
-              ) : currentView === "dashboard" ? (
-                <DashboardView
-                  netWorth={netWorth}
-                  netWorthUsd={netWorthUsd}
-                  displayCurrency={displayCurrency}
-                  categoryBadgeData={categoryBadgeData}
-                  vaultBadgeTotal={vaultBadgeTotal}
-                  accountCount={accounts.length}
-                  snapshots={snapshots}
-                  exchangeRates={exchangeRates}
-                  entities={entities}
-                  entityTotals={entityTotals}
-                  onSelectEntity={handleSelectEntity}
-                  monthlyTotals={globalMonthlyTotals}
-                  assets={assets}
-                  accounts={accounts}
-                  getAssetValue={getAssetValue}
-                  getAccountValue={getAccountValue}
-                  liquidTotal={liquidityTotals.liquid}
-                  illiquidTotal={liquidityTotals.illiquid}
-                />
-              ) : (
-                <EntityView
-                  entityName={
-                    entities.find((e) => e.id === entityCrud.selectedEntityId)?.name ?? ""
-                  }
-                  entityType={
-                    entities.find((e) => e.id === entityCrud.selectedEntityId)?.type ?? "individual"
-                  }
-                  entityTotal={entityTotals[entityCrud.selectedEntityId] ?? 0}
-                  assets={filteredAssets}
-                  accounts={filteredAccounts}
-                  cashFlows={cashFlows}
-                  displayCurrency={displayCurrency}
-                  exchangeRates={exchangeRates}
-                  getAssetValue={getAssetValue}
-                  getAccountValue={getAccountValue}
-                  onAddAsset={() => assetCrud.setAssetFormOpen(true)}
-                  onEditAsset={assetCrud.handleEditAsset}
-                  onDeleteAsset={assetCrud.handleDeleteAsset}
-                  onQuantityChange={assetCrud.handleQuantityChange}
-                  onAddAccount={() => vaultCrud.setAccountFormOpen(true)}
-                  onEditAccount={vaultCrud.handleEditAccount}
-                  onDeleteAccountRequest={vaultCrud.handleDeleteAccountRequest}
-                  onEditCashFlow={vaultCrud.handleEditCashFlow}
-                  onDeleteCashFlow={vaultCrud.handleDeleteCashFlow}
-                  onToggleCashFlow={vaultCrud.handleToggleCashFlow}
-                  onAddFlow={vaultCrud.openAddFlow}
-                />
-              )}
-
-              <AssetForm
-                asset={assetCrud.editingAsset}
-                open={assetCrud.assetFormOpen}
-                onOpenChange={assetCrud.handleAssetFormClose}
-                onSubmit={
-                  assetCrud.editingAsset ? assetCrud.handleUpdateAsset : assetCrud.handleAddAsset
-                }
-              />
-
-              <AccountForm
-                account={vaultCrud.editingAccount}
-                open={vaultCrud.accountFormOpen}
-                onOpenChange={vaultCrud.handleAccountFormClose}
-                onSubmit={
-                  vaultCrud.editingAccount
-                    ? vaultCrud.handleUpdateAccount
-                    : vaultCrud.handleAddAccount
-                }
-              />
-
-              <CashFlowForm
-                cashFlow={vaultCrud.editingCashFlow}
-                accountId={vaultCrud.cashFlowAccountId}
-                accountCurrency={
-                  accounts.find((a) => a.id === vaultCrud.cashFlowAccountId)?.currency
-                }
-                defaultFlowType={vaultCrud.defaultFlowType}
-                open={vaultCrud.cashFlowFormOpen}
-                onOpenChange={vaultCrud.handleCashFlowFormClose}
-                onSubmit={vaultCrud.handleAddCashFlow}
-              />
-
-              <EntityForm
-                entity={entityCrud.editingEntity}
-                open={entityCrud.entityFormOpen}
-                onOpenChange={entityCrud.handleEntityFormClose}
-                onSubmit={
-                  entityCrud.editingEntity
-                    ? entityCrud.handleUpdateEntity
-                    : entityCrud.handleAddCompany
-                }
-              />
-
-              <DeleteEntityDialog
-                open={entityCrud.deleteDialogOpen}
-                onOpenChange={entityCrud.setDeleteDialogOpen}
-                entity={entityCrud.entityToDelete}
-                associatedAssetCount={
-                  entityCrud.entityToDelete
-                    ? assets.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
-                    : 0
-                }
-                associatedAccountCount={
-                  entityCrud.entityToDelete
-                    ? accounts.filter((a) => a.entityId === entityCrud.entityToDelete!.id).length
-                    : 0
-                }
-                onConfirm={entityCrud.handleConfirmDeleteEntity}
-              />
-
-              <DeleteAccountDialog
-                open={vaultCrud.deleteAccountDialogOpen}
-                onOpenChange={vaultCrud.setDeleteAccountDialogOpen}
-                account={vaultCrud.accountToDelete}
-                associatedCashFlowCount={
-                  vaultCrud.accountToDelete
-                    ? cashFlows.filter((f) => f.accountId === vaultCrud.accountToDelete!.id).length
-                    : 0
-                }
-                onConfirm={vaultCrud.handleConfirmDeleteAccount}
-              />
-
-              <ResetAccountDialog
-                open={resetDialogOpen}
-                onOpenChange={setResetDialogOpen}
-                onConfirm={handleResetAccount}
-                pinEnabled={isPinEnabled}
-              />
-
-              <RestoreBackupDialog
-                open={restoreDialogOpen}
-                onOpenChange={(open) => {
-                  setRestoreDialogOpen(open)
-                  if (!open) setRestoreFilePath("")
-                }}
-                onConfirm={handleConfirmRestore}
-                pinEnabled={isPinEnabled}
-                selectedFile={restoreFilePath}
-              />
-            </div>
-          </div>
-        </main>
-
-        <UpdateNotification
-          status={updater.status}
-          version={updater.updateInfo?.version ?? null}
-          progress={updater.progress}
-          onDownload={updater.downloadAndInstall}
-          onDismiss={updater.dismiss}
-        />
-        <CurrencyPickerOverlay
-          open={currencyPickerOpen}
-          value={displayCurrency}
-          onSelect={handleCurrencyChange}
-          onClose={handleCloseCurrencyPicker}
-        />
-        <OnboardingOverlay
-          show={showOnboarding}
-          onComplete={() => {
-            localStorage.setItem("fortuna_onboarding_completed", "true")
-            setShowOnboarding(false)
-          }}
-        />
-      </div>
-    </PrivacyModeContext.Provider>
+        </div>
+      </PrivacyModeContext.Provider>
+    </ThemeModeContext.Provider>
   )
 }
