@@ -86,6 +86,8 @@
   "liquidity": "Liquidez",
   "liquid": "Liquido",
   "illiquid": "Iliquido",
+  "showAmounts": "Mostrar montos",
+  "hideAmounts": "Ocultar montos",
   "thirtyDayChange": "30d",
   "empty": {
     "entities": {
