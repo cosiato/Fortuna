@@ -137,6 +137,7 @@ src/
 |   |-- UpdateNotification.tsx   # App update notification (floating or inline variant)
 |   |-- NetWorthChart.tsx         # Net worth over time chart
 |   |-- PinInput.tsx              # 4-digit PIN input component
+|   |-- PrivacyToggle.tsx         # Eye icon toggle for hiding/showing amounts globally
 |   |-- PlaceholderFlowEdge.tsx   # Dashed edge for placeholder flow nodes
 |   |-- PlaceholderFlowNode.tsx   # "+Add inflow/outflow" placeholder node
 |   |-- VaultFlowDiagram.tsx      # React Flow diagram for vault cash flows (inline per vault)
@@ -156,6 +157,7 @@ src/
 |   |-- useLanguage.ts            # Language management hook (syncs i18n + SQLite)
 |   |-- useSnapshotRecorder.ts    # Debounced snapshot recording with 5-min backend coalescing
 |   |-- useSidebar.ts             # Sidebar collapse state with localStorage persistence + Cmd+B shortcut
+|   |-- usePrivacyMode.ts         # Privacy mode context, state hook, HIDDEN_VALUE constant
 |   |-- useUpdater.ts            # Auto-update check, download, install, and relaunch
 |   |-- useVaultCrud.ts           # Vault/account and cash flow CRUD operations and form state
 |-- lib/                          # Utility libraries
