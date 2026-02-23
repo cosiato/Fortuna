@@ -96,7 +96,7 @@ export default function CurrencyPickerOverlay({
             <h2 className="text-lg font-semibold text-foreground">{t("selectCurrency")}</h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-800/50 transition-colors"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
               aria-label={t("close")}
             >
               <Icon icon="solar:close-circle-linear" width={20} height={20} />
@@ -118,7 +118,7 @@ export default function CurrencyPickerOverlay({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("searchByCodeOrName")}
-                className="w-full pl-9 pr-4 py-2 rounded-md bg-slate-800/50 border border-slate-700/50 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 focus:border-accent/50"
+                className="w-full pl-9 pr-4 py-2 rounded-md bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 focus:border-accent/50"
               />
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function CurrencyPickerOverlay({
                             className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-colors ${
                               isSelected
                                 ? "border-accent/60 bg-accent/10 ring-1 ring-accent/30"
-                                : "border-slate-800/50 bg-slate-900/20 hover:bg-slate-800/40 hover:border-slate-700/50"
+                                : "border-border bg-card/20 hover:bg-muted/40 hover:border-muted-foreground/50"
                             }`}
                           >
                             <span className="leading-none shrink-0">

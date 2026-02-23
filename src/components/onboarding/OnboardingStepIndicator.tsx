@@ -25,7 +25,7 @@ export default function OnboardingStepIndicator({
                   ? "bg-accent border-accent text-accent-foreground"
                   : isActive
                     ? "bg-accent/20 border-accent text-accent"
-                    : "bg-transparent border-slate-700 text-muted-foreground"
+                    : "bg-transparent border-border text-muted-foreground"
               }`}
               animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
               transition={
@@ -38,7 +38,7 @@ export default function OnboardingStepIndicator({
             </motion.div>
 
             {step < totalSteps && (
-              <div className="w-12 h-0.5 bg-slate-700">
+              <div className="w-12 h-0.5 bg-muted">
                 <motion.div
                   className="h-full bg-accent"
                   initial={{ width: "0%" }}

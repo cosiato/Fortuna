@@ -55,7 +55,7 @@ export default function SettingsView({
 
   return (
     <div className="space-y-6 mb-8">
-      <h1 className="text-xl font-semibold text-white">{t("title")}</h1>
+      <h1 className="text-xl font-semibold text-foreground">{t("title")}</h1>
       <div className="flex">
         <SettingsSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
         <div className="flex-1 px-8 pr-32">

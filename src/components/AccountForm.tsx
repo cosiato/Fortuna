@@ -104,7 +104,7 @@ export default function AccountForm({ account, open, onOpenChange, onSubmit }: A
             <CountrySelector value={countryCode} onChange={setCountryCode} />
           </div>
 
-          <div className="flex items-center justify-between rounded-lg bg-white/5 p-3">
+          <div className="flex items-center justify-between rounded-lg bg-secondary p-3">
             <div className="space-y-0.5">
               <Label htmlFor="liquid-toggle">{t("liquidToggle")}</Label>
               <p className="text-xs text-muted-foreground">{t("liquidDescription")}</p>

@@ -78,7 +78,7 @@ export default function VaultProjectionChart({
 
   if (!hasFlows) {
     return (
-      <div className="flex items-center justify-center h-40 rounded-lg border border-dashed border-slate-700/50 bg-slate-900/20">
+      <div className="flex items-center justify-center h-40 rounded-lg border border-dashed border-border bg-card/20">
         <p className="text-sm text-muted-foreground">{t("projection.emptyState")}</p>
       </div>
     )
@@ -98,7 +98,7 @@ export default function VaultProjectionChart({
               className={`px-2 py-0.5 text-xs rounded-md transition-colors ${
                 months === opt.value
                   ? "bg-accent/20 text-accent border border-accent/30"
-                  : "bg-[rgba(23,20,43,0.4)] text-muted-foreground border border-slate-700/30 hover:bg-slate-700/40"
+                  : "bg-muted/20 text-muted-foreground border border-border hover:bg-muted/40"
               }`}
             >
               {opt.label}
@@ -107,7 +107,7 @@ export default function VaultProjectionChart({
         </div>
       </div>
 
-      <div className="h-48 rounded-lg border border-slate-800/50 bg-slate-900/20 p-2">
+      <div className="h-48 rounded-lg border border-border bg-card/20 p-2">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={[...data]} margin={{ top: 5, right: 10, left: 30, bottom: 5 }}>
             <defs>
@@ -116,17 +116,17 @@ export default function VaultProjectionChart({
                 <stop offset="100%" stopColor="#FFD700" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2D2D3D" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="date"
-              stroke="#6B7280"
+              stroke="hsl(var(--muted))"
               fontSize={11}
               tickFormatter={xAxisTickFormatter}
               interval={0}
             />
             <YAxis
               yAxisId="balance"
-              stroke="#6B7280"
+              stroke="hsl(var(--muted))"
               fontSize={11}
               tickFormatter={(value) =>
                 isPrivate
@@ -140,13 +140,13 @@ export default function VaultProjectionChart({
             <YAxis yAxisId="events" orientation="right" hide />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1E1E2E",
-                border: "1px solid #2D2D3D",
+                backgroundColor: "hsl(var(--popover))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "8px",
-                boxShadow: "0 4px 12px rgba(15, 15, 26, 0.3)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
                 fontSize: "12px",
               }}
-              labelStyle={{ color: "#6B7280" }}
+              labelStyle={{ color: "hsl(var(--muted-foreground))" }}
               formatter={(value, name) => {
                 const numValue = typeof value === "number" ? value : 0
                 if (numValue === 0 && name !== "balance") return [null, null]
@@ -161,7 +161,12 @@ export default function VaultProjectionChart({
               itemSorter={() => 0}
             />
             {hasNegative && (
-              <ReferenceLine yAxisId="balance" y={0} stroke="#6B7280" strokeDasharray="3 3" />
+              <ReferenceLine
+                yAxisId="balance"
+                y={0}
+                stroke="hsl(var(--muted))"
+                strokeDasharray="3 3"
+              />
             )}
             <Bar
               yAxisId="events"

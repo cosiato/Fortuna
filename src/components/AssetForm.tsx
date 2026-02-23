@@ -306,7 +306,7 @@ export default function AssetForm({ asset, open, onOpenChange, onSubmit }: Asset
           </div>
 
           {type === "crypto" && (
-            <div className="space-y-3 rounded-lg bg-white/5 p-3">
+            <div className="space-y-3 rounded-lg bg-secondary p-3">
               <div className="flex items-center justify-between">
                 <Label htmlFor="staking-toggle">{t("markAsStaked")}</Label>
                 <Switch

@@ -68,7 +68,7 @@ export default function UpdateNotification({
               <>
                 <p className="text-sm font-medium text-foreground">{t("downloadingUpdate")}</p>
                 <div className="mt-2 space-y-1">
-                  <div className="h-1.5 w-full rounded-full bg-slate-700/50 overflow-hidden">
+                  <div className="h-1.5 w-full rounded-full bg-muted/50 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-accent transition-all duration-300"
                       style={{ width: `${percentage}%` }}

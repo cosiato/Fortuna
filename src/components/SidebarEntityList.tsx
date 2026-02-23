@@ -178,7 +178,7 @@ export default function SidebarEntityList({
                       }}
                       className={`
                         absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded-md
-                        text-muted-foreground hover:text-foreground hover:bg-slate-700/50
+                        text-muted-foreground hover:text-foreground hover:bg-muted/50
                         transition-all duration-200
                         ${openPopoverId === entity.id ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"}
                       `}
@@ -190,7 +190,7 @@ export default function SidebarEntityList({
                   <PopoverContent
                     align="start"
                     side="right"
-                    className="w-36 p-1 bg-[rgba(23,20,43,0.4)] backdrop-blur-xl border-slate-800/50"
+                    className="w-36 p-1 bg-popover/90 backdrop-blur-xl border-border"
                   >
                     <button
                       onClick={(e) => {
@@ -198,7 +198,7 @@ export default function SidebarEntityList({
                         setOpenPopoverId(null)
                         onEditEntity?.(entity)
                       }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-slate-700/50 rounded-md transition-colors"
+                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-foreground hover:bg-muted/50 rounded-md transition-colors"
                     >
                       <Icon icon="solar:pen-linear" width={14} height={14} />
                       <span>{t("common:edit")}</span>

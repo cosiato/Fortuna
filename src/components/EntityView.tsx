@@ -109,7 +109,7 @@ export default function EntityView({
   return (
     <div className="space-y-6 mb-8">
       <div className="mb-2">
-        <h1 className="text-xl font-semibold text-white mb-1">{displayName}</h1>
+        <h1 className="text-xl font-semibold text-foreground mb-1">{displayName}</h1>
         <div className="flex items-center gap-2">
           {isPrivate ? (
             <span className="text-3xl font-bold text-accent font-serif">{HIDDEN_VALUE}</span>
@@ -156,7 +156,7 @@ export default function EntityView({
                     key={category.key}
                     value={category.key}
                     disabled={!hasAssets}
-                    className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-slate-700/30 data-[state=active]:text-foreground data-[state=active]:bg-slate-700/40 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                    className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-md text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-foreground hover:bg-muted/30 data-[state=active]:text-accent data-[state=active]:bg-accent/10 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                   >
                     <span className="text-current">{category.iconElement}</span>
                     <span>{category.label}</span>
@@ -274,9 +274,9 @@ export default function EntityView({
                 <AccordionItem
                   key={account.id}
                   value={account.id}
-                  className="border border-slate-800/50 rounded-lg bg-slate-900/20 overflow-hidden"
+                  className="border border-border rounded-lg bg-card/50 overflow-hidden"
                 >
-                  <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-[rgba(23,20,43,0.4)]">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-secondary">
                     <div className="flex flex-1 items-center justify-between mr-2">
                       <div className="flex items-center gap-2">
                         <CountryFlag code={account.countryCode} />
@@ -366,7 +366,7 @@ export default function EntityView({
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="text-muted-foreground cursor-default">
-                                  <Icon icon="solar:lock-linear" width={14} height={14} />
+                                  <Icon icon="solar:snowflake-linear" width={14} height={14} />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top">

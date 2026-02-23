@@ -77,7 +77,7 @@ export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeD
             e.stopPropagation()
             data.onToggle(data.flowId)
           }}
-          className="w-5 h-5 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center hover:bg-slate-600"
+          className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-muted-foreground/30"
           title={data.isActive ? t("vaults:pause") : t("vaults:resume")}
         >
           <Icon
@@ -92,7 +92,7 @@ export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeD
             e.stopPropagation()
             data.onEdit(data.flowId)
           }}
-          className="w-5 h-5 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center hover:bg-slate-600"
+          className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-muted-foreground/30"
           title={t("common:edit")}
         >
           <Icon icon="solar:pen-linear" width={10} height={10} className="text-foreground" />

@@ -267,7 +267,7 @@ export default function VaultFlowDiagram({
 
   return (
     <div
-      className="relative flex items-center justify-center rounded-lg border border-slate-800/50 bg-slate-900/20 overflow-hidden"
+      className="relative flex items-center justify-center rounded-lg border border-border bg-card/20 overflow-hidden"
       style={{ height: containerHeight }}
     >
       <div className="absolute top-2 right-2 z-10">

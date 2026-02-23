@@ -119,11 +119,9 @@ export default function PinInput({
           disabled={disabled}
           className={cn(
             "w-14 h-16 text-center text-2xl font-bold rounded-lg",
-            "bg-slate-800/60 border-2 transition-all duration-200",
+            "bg-secondary border-2 transition-all duration-200",
             "focus:outline-none focus:ring-2 focus:ring-accent/50",
-            error
-              ? "border-red-500 focus:border-red-500"
-              : "border-slate-600/50 focus:border-accent",
+            error ? "border-red-500 focus:border-red-500" : "border-border focus:border-accent",
             disabled && "opacity-50 cursor-not-allowed",
           )}
           aria-label={`PIN digit ${index + 1}`}

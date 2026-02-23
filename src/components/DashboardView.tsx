@@ -69,7 +69,7 @@ export default function DashboardView({
     <>
       <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
         <CardContent className="relative z-10 px-6 pt-6 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 mb-3">
             {isPrivate ? (
               <span className="text-4xl font-bold text-accent font-serif">{HIDDEN_VALUE}</span>
             ) : (
@@ -79,10 +79,8 @@ export default function DashboardView({
                 duration={700}
               />
             )}
-            <PrivacyToggle />
-          </div>
-          <div className="mt-1.5 mb-3">
             <NetWorthTrendBadge snapshots={snapshots} currentNetWorthUsd={netWorthUsd} />
+            <PrivacyToggle />
           </div>
           <div className="flex flex-wrap items-center gap-2 mb-8">
             {categoryBadgeData.map((cat) => {

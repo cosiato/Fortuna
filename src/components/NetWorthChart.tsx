@@ -84,10 +84,10 @@ export default function NetWorthChart({
             <stop offset="95%" stopColor="#FFD700" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#2D2D3D" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
         <XAxis dataKey="date" tick={false} axisLine={{ stroke: "#2D2D3D" }} tickLine={false} />
         <YAxis
-          stroke="#4B5563"
+          stroke="hsl(var(--muted))"
           fontSize={11}
           tickLine={false}
           axisLine={false}
@@ -107,13 +107,13 @@ export default function NetWorthChart({
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#1E1E2E",
-            border: "1px solid #2D2D3D",
+            backgroundColor: "hsl(var(--popover))",
+            border: "1px solid hsl(var(--border))",
             borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(15, 15, 26, 0.3)",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
             fontSize: "12px",
           }}
-          labelStyle={{ color: "#6B7280" }}
+          labelStyle={{ color: "hsl(var(--muted-foreground))" }}
           formatter={(value) => [
             maskValue(isPrivate, formatCurrency(value as number, displayCurrency)),
             t("netWorth"),

@@ -16,7 +16,7 @@ export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNod
   const { isPrivate } = usePrivacyMode()
 
   return (
-    <div className="relative px-5 py-4 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-slate-600/40 shadow-[0_0_12px_rgba(100,116,139,0.1)] min-w-[160px]">
+    <div className="relative px-5 py-4 rounded-xl bg-gradient-to-br from-secondary to-card border border-border shadow-card min-w-[160px]">
       <Handle
         type="target"
         position={Position.Left}

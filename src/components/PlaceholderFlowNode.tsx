@@ -19,7 +19,7 @@ export default function PlaceholderFlowNode({
         e.stopPropagation()
         data.onAdd()
       }}
-      className="group relative flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-dashed border-slate-700/60 bg-slate-900/30 min-w-[140px] transition-all hover:border-slate-500/60 hover:bg-slate-800/30 cursor-pointer"
+      className="group relative flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-dashed border-border bg-card/30 min-w-[140px] transition-all hover:border-muted-foreground/60 hover:bg-secondary/30 cursor-pointer"
     >
       {isInflow ? (
         <Handle

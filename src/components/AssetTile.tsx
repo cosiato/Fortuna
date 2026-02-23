@@ -48,7 +48,7 @@ function CryptoAvatar({ symbol }: { symbol: string }) {
 
   if (crypto?.logo) {
     return (
-      <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-slate-800">
+      <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-secondary">
         <img
           src={crypto.logo}
           alt={crypto.name}

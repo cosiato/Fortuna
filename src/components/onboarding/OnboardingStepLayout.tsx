@@ -32,7 +32,7 @@ export default function OnboardingStepLayout({
         <p className="text-[15px] text-foreground leading-relaxed">{description}</p>
       </div>
 
-      <div className="flex-1 min-w-0 aspect-video rounded-xl overflow-hidden border border-slate-700/40">
+      <div className="flex-1 min-w-0 aspect-video rounded-xl overflow-hidden border border-border">
         <img
           src={screenshotSrc}
           alt={screenshotAlt}
