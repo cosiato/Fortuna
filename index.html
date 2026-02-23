@@ -1,10 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fortuna</title>
+    <script>
+      ;(function () {
+        var p = "dark"
+        try {
+          p = localStorage.getItem("fortuna_theme_preference") || "dark"
+        } catch (e) {}
+        var dark =
+          p === "dark" ||
+          (p === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        if (dark) document.documentElement.classList.add("dark")
+        else document.documentElement.classList.remove("dark")
+      })()
+    </script>
     <link
       href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Exo:wght@400;500;600;700&display=swap"
       rel="stylesheet"
