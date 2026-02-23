@@ -45,7 +45,7 @@ export function usePrivacyModeState(): PrivacyModeContextValue {
       ) {
         return
       }
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "h") {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "h" || e.key === "H")) {
         e.preventDefault()
         togglePrivacy()
       }
