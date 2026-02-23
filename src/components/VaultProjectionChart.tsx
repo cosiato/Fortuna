@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next"
 import type { CashFlow } from "@/types/database"
 import { calculateProjection } from "@/lib/cashFlowProjection"
 import { formatCurrency, getIntlLocale, type SupportedCurrency } from "@/lib/currency"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface VaultProjectionChartProps {
   currentBalance: number
@@ -45,6 +46,7 @@ export default function VaultProjectionChart({
   exchangeRates,
 }: VaultProjectionChartProps) {
   const { t } = useTranslation("vaults")
+  const { isPrivate } = usePrivacyMode()
   const [months, setMonths] = useState<number>(6)
 
   const convertedCashFlows = useMemo(() => {
@@ -127,10 +129,12 @@ export default function VaultProjectionChart({
               stroke="#6B7280"
               fontSize={11}
               tickFormatter={(value) =>
-                new Intl.NumberFormat(getIntlLocale(), {
-                  notation: "compact",
-                  compactDisplay: "short",
-                }).format(value)
+                isPrivate
+                  ? ""
+                  : new Intl.NumberFormat(getIntlLocale(), {
+                      notation: "compact",
+                      compactDisplay: "short",
+                    }).format(value)
               }
             />
             <YAxis yAxisId="events" orientation="right" hide />
@@ -146,7 +150,7 @@ export default function VaultProjectionChart({
               formatter={(value, name) => {
                 const numValue = typeof value === "number" ? value : 0
                 if (numValue === 0 && name !== "balance") return [null, null]
-                const formatted = formatCurrency(numValue, displayCurrency)
+                const formatted = maskValue(isPrivate, formatCurrency(numValue, displayCurrency))
                 const labels: Record<string, string> = {
                   balance: t("projection.balance"),
                   inflow: t("projection.inflow"),

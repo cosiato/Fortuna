@@ -7,6 +7,7 @@ import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import SlotMachineNumber from "@/components/SlotMachineNumber"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { usePrivacyMode, HIDDEN_VALUE, maskValue } from "@/hooks/usePrivacyMode"
 
 interface SidebarEntityListProps {
   entities: Entity[]
@@ -46,6 +47,7 @@ export default function SidebarEntityList({
 }: SidebarEntityListProps) {
   const [openPopoverId, setOpenPopoverId] = useState<number | null>(null)
   const { t } = useTranslation(["entities", "common"])
+  const { isPrivate } = usePrivacyMode()
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -119,7 +121,7 @@ export default function SidebarEntityList({
                 <TooltipContent side="right">
                   <p className="font-medium">{label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatCurrency(total, displayCurrency)}
+                    {maskValue(isPrivate, formatCurrency(total, displayCurrency))}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -147,12 +149,20 @@ export default function SidebarEntityList({
                   <EntityIcon type={entity.type} />
                 </span>
                 <span className="relative font-medium text-sm truncate mt-0.5">{label}</span>
-                <SlotMachineNumber
-                  value={formatCurrency(total, displayCurrency)}
-                  className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
-                  duration={500}
-                  staggerMs={20}
-                />
+                {isPrivate ? (
+                  <span
+                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                  >
+                    {HIDDEN_VALUE}
+                  </span>
+                ) : (
+                  <SlotMachineNumber
+                    value={formatCurrency(total, displayCurrency)}
+                    className={`relative text-xs ml-auto flex-shrink-0 transition-transform duration-200 ${isCompany ? "group-hover:-translate-x-5" : ""} ${openPopoverId === entity.id ? "-translate-x-5" : ""} ${isSelected ? "text-accent/80" : "text-muted-foreground"}`}
+                    duration={500}
+                    staggerMs={20}
+                  />
+                )}
               </button>
 
               {isCompany && (

@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import { SupportedCurrency } from "@/lib/currency"
 import { formatCompactValue } from "@/lib/dashboardUtils"
 import EmptyStateCard from "@/components/EmptyStateCard"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface CategoryBadge {
   key: string
@@ -39,10 +40,12 @@ function CustomTooltip({
   active,
   payload,
   displayCurrency,
+  isPrivate,
 }: {
   active?: boolean
   payload?: Array<{ payload: SliceData }>
   displayCurrency: SupportedCurrency
+  isPrivate?: boolean
 }) {
   if (!active || !payload || payload.length === 0) return null
 
@@ -56,7 +59,8 @@ function CustomTooltip({
         <span className="text-xs font-medium text-foreground">{data.label}</span>
       </div>
       <div className="text-xs text-muted-foreground">
-        {formatCompactValue(total, displayCurrency)} - {data.count} item
+        {maskValue(isPrivate ?? false, formatCompactValue(total, displayCurrency))} - {data.count}{" "}
+        item
         {data.count !== 1 ? "s" : ""}
       </div>
     </div>
@@ -70,6 +74,7 @@ export default function AssetDiversityChart({
   displayCurrency,
 }: AssetDiversityChartProps) {
   const { t } = useTranslation(["common", "vaults"])
+  const { isPrivate } = usePrivacyMode()
 
   const slices = useMemo(() => {
     const result: SliceData[] = []
@@ -131,7 +136,9 @@ export default function AssetDiversityChart({
                   <Cell key={slice.key} fill={slice.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip displayCurrency={displayCurrency} />} />
+              <Tooltip
+                content={<CustomTooltip displayCurrency={displayCurrency} isPrivate={isPrivate} />}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>

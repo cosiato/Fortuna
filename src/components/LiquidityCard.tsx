@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import { SupportedCurrency } from "@/lib/currency"
 import { formatCompactValue } from "@/lib/dashboardUtils"
 import EmptyStateCard from "@/components/EmptyStateCard"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface LiquidityCardProps {
   liquidTotal: number
@@ -15,6 +16,7 @@ export default function LiquidityCard({
   displayCurrency,
 }: LiquidityCardProps) {
   const { t } = useTranslation("common")
+  const { isPrivate } = usePrivacyMode()
 
   const total = liquidTotal + illiquidTotal
   if (total <= 0)
@@ -53,7 +55,7 @@ export default function LiquidityCard({
             {t("liquid")} {liquidPct.toFixed(0)}%
           </span>
           <span className="font-semibold text-foreground">
-            {formatCompactValue(liquidTotal, displayCurrency)}
+            {maskValue(isPrivate, formatCompactValue(liquidTotal, displayCurrency))}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -62,7 +64,7 @@ export default function LiquidityCard({
             {t("illiquid")} {illiquidPct.toFixed(0)}%
           </span>
           <span className="font-semibold text-foreground">
-            {formatCompactValue(illiquidTotal, displayCurrency)}
+            {maskValue(isPrivate, formatCompactValue(illiquidTotal, displayCurrency))}
           </span>
         </div>
       </div>

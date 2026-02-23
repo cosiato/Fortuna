@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import type { CashFlowFrequency, CashFlowType, CashFlowCategory } from "@/types/database"
 import { CASH_FLOW_CATEGORIES } from "@/lib/cashFlowCategories"
 import { formatCurrency, type SupportedCurrency } from "@/lib/currency"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface CashFlowNodeData {
   flowId: string
@@ -21,6 +22,7 @@ interface CashFlowNodeData {
 
 export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeData }) {
   const { t } = useTranslation(["common", "vaults"])
+  const { isPrivate } = usePrivacyMode()
   const categoryInfo = CASH_FLOW_CATEGORIES[data.category]
   const isInflow = data.flowType === "inflow"
 
@@ -62,7 +64,7 @@ export default function CashFlowNode({ data }: NodeProps & { data: CashFlowNodeD
 
       <div className="flex items-baseline gap-1">
         <span className={`text-sm font-bold ${amountColor}`}>
-          {formatCurrency(data.amount, data.currency)}
+          {maskValue(isPrivate, formatCurrency(data.amount, data.currency))}
         </span>
         <span className="text-[10px] text-muted-foreground">
           {t(`common:frequencyShort.${data.frequency}`)}

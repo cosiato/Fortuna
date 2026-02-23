@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react"
 import type { Account, Asset, Entity } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import EmptyStateCard from "@/components/EmptyStateCard"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 const PAGE_SIZE = 3
 
@@ -72,6 +73,7 @@ export default function EntitySummaryGrid({
   getAccountValue,
 }: EntitySummaryGridProps) {
   const { t } = useTranslation(["entities", "common"])
+  const { isPrivate } = usePrivacyMode()
   const [page, setPage] = useState(0)
 
   const entityCategories = useMemo(() => {
@@ -175,7 +177,7 @@ export default function EntitySummaryGrid({
                   )}
                 </div>
                 <span className="text-sm text-muted-foreground shrink-0">
-                  {formatCurrency(total, displayCurrency)}
+                  {maskValue(isPrivate, formatCurrency(total, displayCurrency))}
                 </span>
               </div>
             </button>

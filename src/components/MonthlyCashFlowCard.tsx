@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import { Icon } from "@iconify/react"
 import { SupportedCurrency } from "@/lib/currency"
 import { formatCompactValue } from "@/lib/dashboardUtils"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface MonthlyCashFlowCardProps {
   totalInflow: number
@@ -23,6 +24,7 @@ export default function MonthlyCashFlowCard({
   displayCurrency,
 }: MonthlyCashFlowCardProps) {
   const { t } = useTranslation("common")
+  const { isPrivate } = usePrivacyMode()
 
   const savingsRate = totalInflow > 0 ? (net / totalInflow) * 100 : 0
   const clampedRate = Math.max(0, savingsRate)
@@ -52,7 +54,7 @@ export default function MonthlyCashFlowCard({
           <div>
             <p className="text-[11px] text-muted-foreground">{t("inflow")}</p>
             <p className="text-sm font-semibold text-emerald-400">
-              {formatCompactValue(totalInflow, displayCurrency)}
+              {maskValue(isPrivate, formatCompactValue(totalInflow, displayCurrency))}
             </p>
           </div>
         </div>
@@ -63,7 +65,7 @@ export default function MonthlyCashFlowCard({
           <div>
             <p className="text-[11px] text-muted-foreground">{t("outflow")}</p>
             <p className="text-sm font-semibold text-red-400">
-              {formatCompactValue(totalOutflow, displayCurrency)}
+              {maskValue(isPrivate, formatCompactValue(totalOutflow, displayCurrency))}
             </p>
           </div>
         </div>
@@ -85,7 +87,7 @@ export default function MonthlyCashFlowCard({
             <p
               className={`text-sm font-semibold ${net >= 0 ? "text-emerald-400" : "text-red-400"}`}
             >
-              {formatCompactValue(net, displayCurrency)}
+              {maskValue(isPrivate, formatCompactValue(net, displayCurrency))}
             </p>
           </div>
         </div>

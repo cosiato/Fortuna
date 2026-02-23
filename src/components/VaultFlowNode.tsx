@@ -1,6 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { formatCurrency, type SupportedCurrency } from "@/lib/currency"
 import CountryFlag from "@/components/CountryFlag"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface VaultFlowNodeData {
   name: string
@@ -12,6 +13,8 @@ interface VaultFlowNodeData {
 }
 
 export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNodeData }) {
+  const { isPrivate } = usePrivacyMode()
+
   return (
     <div className="relative px-5 py-4 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/60 border border-slate-600/40 shadow-[0_0_12px_rgba(100,116,139,0.1)] min-w-[160px]">
       <Handle
@@ -32,7 +35,7 @@ export default function VaultFlowNode({ data }: NodeProps & { data: VaultFlowNod
         </span>
       </div>
       <p className="text-base font-bold text-accent text-center">
-        {formatCurrency(data.displayBalance, data.displayCurrency)}
+        {maskValue(isPrivate, formatCurrency(data.displayBalance, data.displayCurrency))}
       </p>
     </div>
   )

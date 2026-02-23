@@ -10,6 +10,7 @@ import {
 import { useTranslation } from "react-i18next"
 import type { Snapshot } from "@/types/database"
 import { SupportedCurrency, formatCurrency, getIntlLocale } from "@/lib/currency"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 interface NetWorthChartProps {
   snapshots: Snapshot[]
@@ -47,6 +48,7 @@ export default function NetWorthChart({
   exchangeRates,
 }: NetWorthChartProps) {
   const { t } = useTranslation("common")
+  const { isPrivate } = usePrivacyMode()
   const latestPerDay = new Map<string, Snapshot>()
   for (const snapshot of snapshots) {
     const dayKey = new Date(snapshot.recordedAt).toLocaleDateString(getIntlLocale(), {
@@ -91,14 +93,16 @@ export default function NetWorthChart({
           axisLine={false}
           width={48}
           tickFormatter={(value) =>
-            displayCurrency === "BTC"
-              ? `B${value.toFixed(2)}`
-              : new Intl.NumberFormat(getIntlLocale(), {
-                  style: "currency",
-                  currency: displayCurrency,
-                  notation: "compact",
-                  maximumFractionDigits: 1,
-                }).format(value)
+            isPrivate
+              ? ""
+              : displayCurrency === "BTC"
+                ? `B${value.toFixed(2)}`
+                : new Intl.NumberFormat(getIntlLocale(), {
+                    style: "currency",
+                    currency: displayCurrency,
+                    notation: "compact",
+                    maximumFractionDigits: 1,
+                  }).format(value)
           }
         />
         <Tooltip
@@ -110,7 +114,10 @@ export default function NetWorthChart({
             fontSize: "12px",
           }}
           labelStyle={{ color: "#6B7280" }}
-          formatter={(value) => [formatCurrency(value as number, displayCurrency), t("netWorth")]}
+          formatter={(value) => [
+            maskValue(isPrivate, formatCurrency(value as number, displayCurrency)),
+            t("netWorth"),
+          ]}
         />
         <Area
           type="monotone"

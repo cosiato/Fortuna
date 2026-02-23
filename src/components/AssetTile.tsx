@@ -7,6 +7,7 @@ import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import SlotMachineNumber from "@/components/SlotMachineNumber"
 import { getCryptoBySymbol } from "@/lib/cryptocurrencies"
 import { Button } from "@/components/ui/button"
+import { usePrivacyMode, HIDDEN_VALUE } from "@/hooks/usePrivacyMode"
 
 interface CategoryStyle {
   gradient: string
@@ -77,6 +78,7 @@ export default function AssetTile({
 }: AssetTileProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const { t } = useTranslation(["assets", "common"])
+  const { isPrivate } = usePrivacyMode()
   const style = categoryStyle || CATEGORY_STYLES[asset.type] || CATEGORY_STYLES.other
   const showActions = onEdit || onDelete
 
@@ -238,7 +240,9 @@ export default function AssetTile({
                   {t("assets:value")}
                 </span>
                 <span className="text-sm font-bold text-accent">
-                  {displayValue > 0 ? (
+                  {isPrivate ? (
+                    HIDDEN_VALUE
+                  ) : displayValue > 0 ? (
                     <SlotMachineNumber
                       value={formatCurrency(displayValue, displayCurrency)}
                       duration={500}

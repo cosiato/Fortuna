@@ -8,10 +8,12 @@ import NetWorthTrendBadge from "@/components/NetWorthTrendBadge"
 import MonthlyCashFlowCard from "@/components/MonthlyCashFlowCard"
 import TopAssetsCard from "@/components/TopAssetsCard"
 import LiquidityCard from "@/components/LiquidityCard"
+import PrivacyToggle from "@/components/PrivacyToggle"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Account, Asset, Entity, Snapshot } from "@/types/database"
 import { SupportedCurrency, formatCurrency } from "@/lib/currency"
 import { CATEGORY_BADGE_CONFIG, formatCompactValue, type CategoryBadge } from "@/lib/dashboardUtils"
+import { usePrivacyMode, HIDDEN_VALUE, maskValue } from "@/hooks/usePrivacyMode"
 
 interface MonthlyTotals {
   totalInflow: number
@@ -61,16 +63,24 @@ export default function DashboardView({
   illiquidTotal,
 }: DashboardViewProps) {
   const { t } = useTranslation(["common", "vaults"])
+  const { isPrivate } = usePrivacyMode()
 
   return (
     <>
       <Card className="gradient-border-treasury mb-8 hover:shadow-glow-gold/30">
         <CardContent className="relative z-10 px-6 pt-6 pb-3">
-          <SlotMachineNumber
-            value={formatCurrency(netWorth, displayCurrency)}
-            className="text-4xl font-bold text-accent font-serif"
-            duration={700}
-          />
+          <div className="flex items-center gap-2">
+            {isPrivate ? (
+              <span className="text-4xl font-bold text-accent font-serif">{HIDDEN_VALUE}</span>
+            ) : (
+              <SlotMachineNumber
+                value={formatCurrency(netWorth, displayCurrency)}
+                className="text-4xl font-bold text-accent font-serif"
+                duration={700}
+              />
+            )}
+            <PrivacyToggle />
+          </div>
           <div className="mt-1.5 mb-3">
             <NetWorthTrendBadge snapshots={snapshots} currentNetWorthUsd={netWorthUsd} />
           </div>
@@ -87,7 +97,7 @@ export default function DashboardView({
                   <span className="text-xs text-muted-foreground/60">|</span>
                   <span className={`text-xs font-bold ${colors.text}`}>{cat.count}</span>
                   <span className="text-xs text-muted-foreground">
-                    {formatCompactValue(cat.total, displayCurrency)}
+                    {maskValue(isPrivate, formatCompactValue(cat.total, displayCurrency))}
                   </span>
                 </div>
               )
@@ -99,7 +109,7 @@ export default function DashboardView({
                 <span className="text-xs text-muted-foreground/60">|</span>
                 <span className="text-xs font-bold text-sky-400">{accountCount}</span>
                 <span className="text-xs text-muted-foreground">
-                  {formatCompactValue(vaultBadgeTotal, displayCurrency)}
+                  {maskValue(isPrivate, formatCompactValue(vaultBadgeTotal, displayCurrency))}
                 </span>
               </div>
             )}

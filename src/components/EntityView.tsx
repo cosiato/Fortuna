@@ -21,6 +21,8 @@ import VaultFlowDiagram from "@/components/VaultFlowDiagram"
 import VaultProjectionChart from "@/components/VaultProjectionChart"
 import { calculateMonthlyTotals, calculateProjection } from "@/lib/cashFlowProjection"
 import { toDisplayCurrency } from "@/lib/currencyConversion"
+import PrivacyToggle from "@/components/PrivacyToggle"
+import { usePrivacyMode, HIDDEN_VALUE, maskValue } from "@/hooks/usePrivacyMode"
 
 interface EntityViewProps {
   entityName: string
@@ -75,6 +77,7 @@ export default function EntityView({
   onAddFlow,
 }: EntityViewProps) {
   const { t } = useTranslation(["common", "assets", "vaults", "entities"])
+  const { isPrivate } = usePrivacyMode()
 
   const displayName = entityType === "individual" ? t("entities:personal") : entityName
 
@@ -107,11 +110,18 @@ export default function EntityView({
     <div className="space-y-6 mb-8">
       <div className="mb-2">
         <h1 className="text-xl font-semibold text-white mb-1">{displayName}</h1>
-        <SlotMachineNumber
-          value={formatCurrency(entityTotal, displayCurrency)}
-          className="text-3xl font-bold text-accent font-serif"
-          duration={700}
-        />
+        <div className="flex items-center gap-2">
+          {isPrivate ? (
+            <span className="text-3xl font-bold text-accent font-serif">{HIDDEN_VALUE}</span>
+          ) : (
+            <SlotMachineNumber
+              value={formatCurrency(entityTotal, displayCurrency)}
+              className="text-3xl font-bold text-accent font-serif"
+              duration={700}
+            />
+          )}
+          <PrivacyToggle />
+        </div>
       </div>
 
       <div className="rounded-xl bg-background border border-border p-5">
@@ -318,25 +328,33 @@ export default function EntityView({
                               <TooltipTrigger asChild>
                                 <span className="flex items-center gap-1.5 cursor-default">
                                   <span className={`text-xs font-medium ${netColorClass}`}>
-                                    {monthlyTotals.net >= 0 ? "+" : ""}
-                                    {formatCurrency(monthlyNetDisplay, displayCurrency)}
+                                    {isPrivate ? (
+                                      HIDDEN_VALUE
+                                    ) : (
+                                      <>
+                                        {monthlyTotals.net >= 0 ? "+" : ""}
+                                        {formatCurrency(monthlyNetDisplay, displayCurrency)}
+                                      </>
+                                    )}
                                     <span className="text-muted-foreground">
                                       {t("common:perMonth")}
                                     </span>
                                   </span>
-                                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
-                                    <Icon
-                                      icon={
-                                        projectedChange >= 0
-                                          ? "solar:arrow-up-linear"
-                                          : "solar:arrow-down-linear"
-                                      }
-                                      width={10}
-                                      height={10}
-                                    />
-                                    {projectedChange >= 0 ? "+" : ""}
-                                    {projectedChangePct.toFixed(1)}%
-                                  </span>
+                                  {!isPrivate && (
+                                    <span className="text-xs font-medium text-muted-foreground flex items-center gap-0.5">
+                                      <Icon
+                                        icon={
+                                          projectedChange >= 0
+                                            ? "solar:arrow-up-linear"
+                                            : "solar:arrow-down-linear"
+                                        }
+                                        width={10}
+                                        height={10}
+                                      />
+                                      {projectedChange >= 0 ? "+" : ""}
+                                      {projectedChangePct.toFixed(1)}%
+                                    </span>
+                                  )}
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top">
@@ -359,7 +377,10 @@ export default function EntityView({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="text-sm font-bold text-accent cursor-default mt-0.5">
-                                {formatCurrency(currentBalanceDisplay, displayCurrency)}
+                                {maskValue(
+                                  isPrivate,
+                                  formatCurrency(currentBalanceDisplay, displayCurrency),
+                                )}
                               </span>
                             </TooltipTrigger>
                             <TooltipContent side="top">

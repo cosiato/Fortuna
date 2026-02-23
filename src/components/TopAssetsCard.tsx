@@ -5,6 +5,7 @@ import { CATEGORY_BADGE_CONFIG, formatCompactValue } from "@/lib/dashboardUtils"
 import type { Asset } from "@/types/database"
 import { SupportedCurrency } from "@/lib/currency"
 import EmptyStateCard from "@/components/EmptyStateCard"
+import { usePrivacyMode, maskValue } from "@/hooks/usePrivacyMode"
 
 const PAGE_SIZE = 6
 
@@ -20,6 +21,7 @@ export default function TopAssetsCard({
   displayCurrency,
 }: TopAssetsCardProps) {
   const { t } = useTranslation("common")
+  const { isPrivate } = usePrivacyMode()
   const [page, setPage] = useState(0)
 
   const rankedAssets = useMemo(() => {
@@ -97,7 +99,7 @@ export default function TopAssetsCard({
                 {asset.name}
               </span>
               <span className="text-sm text-muted-foreground">
-                {formatCompactValue(value, displayCurrency)}
+                {maskValue(isPrivate, formatCompactValue(value, displayCurrency))}
               </span>
             </div>
           )
