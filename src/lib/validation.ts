@@ -37,6 +37,7 @@ export const createAccountSchema = () =>
       .string()
       .length(2, t("countryCodeLength"))
       .regex(/^[A-Z]{2}$/, t("countryCodeFormat")),
+    isLiquid: z.boolean().optional(),
   })
 
 export const createEntitySchema = () =>

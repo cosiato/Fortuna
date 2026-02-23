@@ -119,6 +119,7 @@ pub fn init_database(app: &AppHandle) -> Result<()> {
     ensure_individual_entity(&conn)?;
     migrate_cash_flow_frequencies(&conn)?;
     migrate_add_staking_fields(&conn)?;
+    migrate_add_account_liquidity(&conn)?;
 
     Ok(())
 }
@@ -196,6 +197,21 @@ fn migrate_add_staking_fields(conn: &Connection) -> Result<()> {
     if !columns.iter().any(|c| c == "withdrawal_cooldown_days") {
         conn.execute_batch(
             "ALTER TABLE assets ADD COLUMN withdrawal_cooldown_days INTEGER DEFAULT NULL;"
+        )?;
+    }
+
+    Ok(())
+}
+
+fn migrate_add_account_liquidity(conn: &Connection) -> Result<()> {
+    let columns: Vec<String> = conn
+        .prepare("PRAGMA table_info(accounts)")?
+        .query_map([], |row| row.get::<_, String>(1))?
+        .collect::<Result<Vec<_>, _>>()?;
+
+    if !columns.iter().any(|c| c == "is_liquid") {
+        conn.execute_batch(
+            "ALTER TABLE accounts ADD COLUMN is_liquid INTEGER NOT NULL DEFAULT 1;"
         )?;
     }
 

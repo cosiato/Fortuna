@@ -32,6 +32,7 @@ export interface Account {
   currency: string
   countryCode: string
   entityId: number
+  isLiquid: boolean
   createdAt: string
   updatedAt: string
 }
@@ -73,6 +74,7 @@ export interface CreateAccountInput {
   currency?: string
   countryCode: string
   entityId?: number
+  isLiquid?: boolean
 }
 
 export interface UpdateAccountInput {
@@ -81,6 +83,7 @@ export interface UpdateAccountInput {
   currency?: string
   countryCode?: string
   entityId?: number
+  isLiquid?: boolean
 }
 
 export type CashFlowType = "inflow" | "outflow"

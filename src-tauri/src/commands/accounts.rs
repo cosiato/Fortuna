@@ -16,6 +16,7 @@ pub struct Account {
     pub currency: String,
     pub country_code: String,
     pub entity_id: i64,
+    pub is_liquid: bool,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -28,6 +29,7 @@ pub struct CreateAccountInput {
     pub currency: Option<String>,
     pub country_code: String,
     pub entity_id: Option<i64>,
+    pub is_liquid: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -38,6 +40,7 @@ pub struct UpdateAccountInput {
     pub currency: Option<String>,
     pub country_code: Option<String>,
     pub entity_id: Option<i64>,
+    pub is_liquid: Option<bool>,
 }
 
 fn validate_country_code(code: &str) -> Result<(), String> {
@@ -56,13 +59,14 @@ pub fn get_all_accounts(db: State<DbConnection>) -> Result<Vec<Account>, String>
 
     let mut stmt = conn
         .prepare(
-            "SELECT id, name, balance, currency, country_code, entity_id, created_at, updated_at
+            "SELECT id, name, balance, currency, country_code, entity_id, is_liquid, created_at, updated_at
              FROM accounts ORDER BY created_at DESC",
         )
         .map_err(|e| e.to_string())?;
 
     let accounts = stmt
         .query_map([], |row| {
+            let is_liquid_int: i32 = row.get(6)?;
             Ok(Account {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -70,8 +74,9 @@ pub fn get_all_accounts(db: State<DbConnection>) -> Result<Vec<Account>, String>
                 currency: row.get(3)?,
                 country_code: row.get(4)?,
                 entity_id: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                is_liquid: is_liquid_int != 0,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
             })
         })
         .map_err(|e| e.to_string())?
@@ -100,19 +105,21 @@ pub fn create_account(
     let balance = input.balance.unwrap_or(0.0);
     let currency = input.currency.unwrap_or_else(|| "USD".to_string());
     let entity_id = input.entity_id.unwrap_or(0);
+    let is_liquid = input.is_liquid.unwrap_or(true);
 
     conn.execute(
-        "INSERT INTO accounts (id, name, balance, currency, country_code, entity_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
-        params![id, input.name, balance, currency, input.country_code, entity_id],
+        "INSERT INTO accounts (id, name, balance, currency, country_code, entity_id, is_liquid, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
+        params![id, input.name, balance, currency, input.country_code, entity_id, is_liquid],
     )
     .map_err(|e| e.to_string())?;
 
     conn.query_row(
-        "SELECT id, name, balance, currency, country_code, entity_id, created_at, updated_at
+        "SELECT id, name, balance, currency, country_code, entity_id, is_liquid, created_at, updated_at
          FROM accounts WHERE id = ?",
         [&id],
         |row| {
+            let is_liquid_int: i32 = row.get(6)?;
             Ok(Account {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -120,8 +127,9 @@ pub fn create_account(
                 currency: row.get(3)?,
                 country_code: row.get(4)?,
                 entity_id: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                is_liquid: is_liquid_int != 0,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
             })
         },
     )
@@ -176,6 +184,11 @@ pub fn update_account(
         params.push(Box::new(entity_id));
     }
 
+    if let Some(is_liquid) = input.is_liquid {
+        updates.push("is_liquid = ?");
+        params.push(Box::new(is_liquid));
+    }
+
     if updates.is_empty() {
         return Err("No fields to update".to_string());
     }
@@ -197,10 +210,11 @@ pub fn update_account(
     }
 
     conn.query_row(
-        "SELECT id, name, balance, currency, country_code, entity_id, created_at, updated_at
+        "SELECT id, name, balance, currency, country_code, entity_id, is_liquid, created_at, updated_at
          FROM accounts WHERE id = ?",
         [&id],
         |row| {
+            let is_liquid_int: i32 = row.get(6)?;
             Ok(Account {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -208,8 +222,9 @@ pub fn update_account(
                 currency: row.get(3)?,
                 country_code: row.get(4)?,
                 entity_id: row.get(5)?,
-                created_at: row.get(6)?,
-                updated_at: row.get(7)?,
+                is_liquid: is_liquid_int != 0,
+                created_at: row.get(7)?,
+                updated_at: row.get(8)?,
             })
         },
     )
