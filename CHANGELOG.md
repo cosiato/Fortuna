@@ -12,6 +12,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
 
+
+## [0.4.0] - 2026-02-23
+
+### Added
+
+- **vault**: add liquid/illiquid toggle to account model
+- **vault**: add liquid toggle UI and liquidity calculation
+- **i18n**: add vault liquidity translation keys
+- add privacy mode hook with context, state, and keyboard shortcut
+- add PrivacyToggle component with eye icon
+- **icons**: add eye-closed-linear icon for privacy toggle
+- **i18n**: add privacy toggle translation keys
+- integrate privacy mode across all views and components
+- **theme**: add theme preference Rust commands and API bindings
+- **theme**: add useThemeMode hook with tests
+- **i18n**: add theme setting translation keys
+- **theme**: integrate theme mode into app and settings UI
+- add frontend deployment step to trigger Vercel deployment
+
+### Fixed
+
+- **ui**: replace lock screen overlay with phase-based rendering
+- **updater**: show error toast instead of silent error status
+- **ui**: add re-lock cycle support and StrictMode guards
+- **updater**: use ref for translation function to avoid stale closures
+- **privacy**: accept uppercase H in privacy mode shortcut
+
+### Changed
+
+- **css**: remove unused animate-gentle-bounce class and keyframe
+- **sidebar**: add pill-style background to entity amount badges
+- replace hardcoded dark colors with CSS variable tokens
+- replace hardcoded dark colors in feature components
+- add flash-prevention script to index.html
+
 ## [0.3.1] - 2026-02-19
 
 ### Fixed
